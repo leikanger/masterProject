@@ -1,0 +1,139 @@
+%Før eg kan begynne med ANN, må eg beskrive det bioloiske neuronet. Seinare kjem synapse osv. Synapse kan være sterkt basert på rapporter fra NEVR300[1,3,4] 
+%Så kjem seinare ANN. Kan lese mykje fra rapport i NEVR3004.
+
+
+\section{Neural networks}
+%Before we can discuss neural networks, either biological neural networks or artificial neural networks, we need to know more about the basic building blocks of the network. 
+
+Neural networks are comprised of nodes called neurons and connections between the neurons called synapses. 
+Before we can discuss neural networks, we need to know more about the basic building blocks, the neuron and the synapse. 
+
+The arcitecture of the neuron is important to understand the directionality of of the graph. The mechanisms of the synapse is important later when we will discuss stability of learning. 
+Finally, important aspects of the network that cannot be un derstood from a single unit, will be described.
+
+%I will start by describing relevant information about the neuron before I prepare the reader for important aspects of synaptic plasticity by describing the synapse. Finally, important aspects of the network will be described.
+
+\subsection{The neuron}
+In mathematical terms from graph theory, a biological version of a neural network can be called a directed syclic graph. 
+In terms from neuroscience this meens that the network og neurons is recurrent (with feedback) and that the synapses (the connections between neurons) are directional (information flows in one direction). More on this later.
+
+%The majority of neurons in a biological being are so-called interneurons. This group of neurons have nervous input and give theire output to other neurons. 
+%The biological neuron is special kind of cell with the ability to assess incoming inforamion and transmit information. 
+
+The neuron is surrounded by the cell membrane. This membrane has low permeability to ions from the fluid surrounding the neuron to the intracellular fluid of the neuron.
+In addition we have different ionic pumps that pumps different ions from one side of the membrane to the other. This creates an ionic difference over the membrane, also called an electric potential.
+The membrane potential typically is around $-70mV$ at rest.
+
+%Maintaining this electrical potential is an energy demanding affair, and the brain uses about one fifth of the total $O_2$ use of the body. 
+
+When the neuron is exited (gets a exitatory transmission through one of its synapses), the neuron is said to become \emph{depolarized}. 
+
+When a synaptic transmission arrives at a synapse, neurotransmitters are released from the axon terminal of the presynaptic neuron into the synaptic cleft.
+On the postsynapsic membrane in the synapse are different receptors for different neurotransmitters\cite{PrinciplesOfNeuralScience4edKAP09}. 
+%The receptors are only activated by some neurotransmitters, and the change in postsynaptic postential varies with what ions the receptor channel is permeable to.
+Describing the different known kinds of receptors will be outside the scope of this report. We will limit the description to one class of receptors, called ``ligand--gated receptors''.
+
+Ligand--gated receptors are direcly connected to ion channels in the membrane. Opening of these ion specific channels enables some ions to flow throught (depending on what kind of channel the receptor is connected to). 
+Depending on which ions are let through, the neuron is either depolarized (towards zero polarization, less than its resting potential) of hyberpolarized (getting a more negative membrane potential) by the transmission.
+
+Then the polarization (also called the value of the neuron) becomes more positive than the firing threshold of the neuron, an action potential is initiated at the axon hillock near the cell body of the cell. 
+This is often referred to as ``firing an action potential''.
+
+Since depolarizing the neuron causes firing, the neurons potential is often referred to as the neurons depolarization in the litterature.
+
+
+
+\subsection{The axon}
+
+In order to give (approximately) the same output to different output sites (axon terminals) along the axon, the action potential is a self carrying--signal based on different voltage gated channels along the axon membrane. 
+Since the ion channels are voltage gated, and cause larger depolarization when open, the membrane potential diverges, and the channels are open until some timing mechanism causes them to close. 
+The exact mechanisms are not important in this context, but the boolean carracteristics of the action potential is. 
+
+To summarize the layout of the neuron related to information processing, on one side of the neuron we have the output. Boolean output signal from the neuron is mediated through the axon of the neuron that splits into collaterals along the axon with axon terminals at the end. The axon terminal has mechanisms for releasing neurotransmittors intro the synaptic cleft(the area between the presynaptic membrane and the membrane of the postsynaptic cell). 
+In the membrane on the oposite side of the synaptic cleft are neurotransmittor-receptors that alters the postsynaptic neurons depolarization. %skriv om litt: on the oposite side of the syn.c. til noke anna..
+
+%neste linje: meiner at synapsenes sted er ikkje så vel bestemt.. : Skriv om:
+%XXX The other aspect of information processing, recieving information, is not so defined. 
+Most, but not all incoming synapses are located in the dendrite, a specialized part of the neuron for recieving information. 
+%Some synapses are also located on the cell body and on the axon terminal.
+At the postsynaptic membrane are receptors. Most of these receptors are ligand-gated receptors, either exitatory (causes more depolarization of the neuron) or inhibitory (hyperpolarizes the neuron). 
+% Skriv om neste linje. 
+The combination of neurotransmitters released from the presynaptic terminal and postsynaptic receptors in one synapse typically makes the synapse either exitatory or inhibitory.
+%In one synapse you typically have a combination of neurotransmitter release and postsynaptic receptors that causes the whole synapse to either be exitatory or inhibitory.
+
+
+%TODO Skriv mindre, eller i det minstre mindre kraftige utsagn. Følgande er rett, men kanskje urelevant for denne oppgava?
+%It must be said that this is a simplification of the system allready. Neurons, synapses and each transmission varies with a lot of other varables as well. 
+%You also have modulatory synapses at the axon terminal, that does not contribute to the value of the neuron, only the amount of neurotransmitters released following the next incoming action potential. 
+%The modulatory synapse is but an example of the complexity of the simplifications that are neccesary in order to make an artificial neural network.
+%In addition we have different time delay for different synapses along the axon, diffuse modulatory systems it the brain with modulatory neurotransmittors, 
+%different states as the neurons use the oxigene and nutritients available, etc.
+
+
+
+%TODO SKRIV om 'temporal and spatial summation of postsynaptic potentials' XXX Viktig!
+%XXX 	og om leaky intetrator! VIKTIG.
+
+
+
+
+
+\subsection{The synapse}
+When the action potential reaches the axon terminal, the size of the signal is the same as when it first was generated at the axon hillock.
+This enshures that the distance the action potential has to travel does not affect the transmission at the synapses of the different axon terminals. \cite{?}
+
+This does not mean that the transmission for different synapses is the same. At each synapse the connection to the postsynaptic neuron is different. 
+There are many mechanisms behind this, but I will focus on the mechanisms within the neuron:
+\begin{itemize}
+	\item Presynaptically, different amount of neurotransmittors are released from the axon terminal following an action potential.
+	\item Postsynaptically the amount of receptors varies between different synapses. The amount also varies with time.% This is one mechanism of synaptic plasticity.
+\end{itemize}
+
+When the action potential reaches the axon terminal, it will open voltage--gated $Ca^{2+}$ channels in the active zone of the terminal, and $Ca^{2+}$ enters the cytosol of the axon terminal of the presynaptic neuron\cite{PrinciplesOfNeuralScience4edKAP10}.
+
+
+\subsubsection{Presynaptic mechanisms behind synaptic plasticity}
+$Ca^{2+}$ causes release of neurotransmittors from the presynaptic axon terminal into the synaptic cleft\cite{PrinciplesOfNeuralScience4edKAP10}. 
+Long--term potentiation (LTP) causes a lasting change of the tranmission through the synapse.% On the shorter time scale we have short--time potentiation, called fascilitation and short--time depression (decrease of transmission) called 
+
+The amount of $Ca^{2+}$ inflow, and thus the amount of neurotransmitter release can be modulated by socalled axoaxonic synapses\cite{NeuroscienceExploringTheBrain3edKAP5}, synapses that is connected directly to the presynaptic axon terminal. 
+A transmission here will cause a small increase in the axon terminals amount of $Ca^{2+}$ and ``prime'' the synapse for a transmission. 
+Multiple incoming action potentials in fast succession will have the same effect on the following action potentials and causes what is called \emph{potentiation}\cite{PrinciplesOfNeuralScience4edKAP14}. 
+%Variation of the $Ca^{2+}$ entering the presynaptic axon terminal, for example by ``priming'' the synapse for transmission by axon-synaptic synapses, is one potential mechanism for synaptic plasticity\cite{PrinciplesOfNeuralScience4edKAP14}.
+
+% XXX Ta vekk mykje av "Presynaptic mechanisms behind synaptic plasticity" om eg ikkje bruker desse effektene i implementasjonen!
+
+
+
+\subsubsection{Postsynaptic mechanisms behind synaptic plasticity}
+Glutamate is the main exitatory neurotransmittor in the CNS\cite{PrinciplesOfAnatomyAndPhysiology12edKAP12}. %s. 448
+There are two main groups of ligand--gated glutamate receptors, the N-methyl D-aspartate (NMDA) receptors and the non-NMDA receptors. 
+The non-NMDA receptors mainly consists of the $\alpha$-amino-3-hydroxy-5-methyl-4-isoxazolepropionic acid (AMPA) receptor.
+
+Most non-NMDA receptors are permeable to ions that changes the postsynaptic potensial without having lasting changes on the synaptic strength.%efficiancy. 
+The NMDA receptor is permeable to $Ca^{2+}$, which is important for lasting changes of the synaptic strength. %uttrykket 'synaptic strength' har ikkje blitt definert enda. Gjør det lenger oppe. XXX DO IT!
+
+An other important difference between the NMDA-R and the AMPA-R is that NMDA receptors have an additional condition for opening of its ion channel. 
+In the NMDA receptor there is a $Mg^{2+}$ ion blocking the channel. 
+When the potential across the membrane is sufficiently depolarized, the $Mg^{2+}$ will float more freely and the block is removed from the NMDA receptor.
+$Ca^{2+}$ diffuses into the cell following an action potential\cite{PrinciplesOfNeuralScience4edKAP12}.
+
+Also on the postsynaptic part of the synapse $ca^{2+}$ has an important role in synaptic plasticity. 
+$Ca^{2+}$ activates production of more non-NMDA receptors for the postsynaptic membrane, resulting in LTP\cite{AMPARtrafficingArtikkel}.%\cite{PrinciplesOfNeuralScience4edKAP12}.
+
+The NMDA-related synaptic plasticity is the background for what is called ``Spike Timing Dependent Plasticity'' that will be important in the rest of this text.
+
+
+
+
+
+%Because of the boolean nature of the action potential, the transmission of the action potential to the next neuron is desided by the strength of the synaptic connection.
+
+%The most studied neurotransmittor is glutamate. In most neurons glutamate is an exitatory 
+
+%Skriv om STDP (glutamate), om bakgrunnen for STDP: NMDA med mg²⁺ blokk, voltage dependent i tillegg til at utsida må være eksponert for glutamat, Ca²⁺ inflow fører til AMPA-syntese => synaptisk plastisitet! 
+
+
+%\subsection{nettverket}
+% - Med booleanske signal: korleis kan signalet inneholde så mykje informasjon?
+% 		- skriv om inter-spike period. Og kanskje om ANN-flyttals variablene som output fra neurona..

@@ -1,0 +1,60 @@
+\section{Tid}
+
+For å ikkje måtte oppdatere alle objekta i neuralnettet kvar tidsiterasjon, har eg laga konseptet: flytende tid.
+
+Grunnen til å ha tid i det heile tatt er:
+\begin{itemize}
+	\item at en del aspekter for objekta er tidsvarinte (funksjon av tid). Bl.a. 'refraction time' og lekkasje.
+	\item for å få rett kausalitet i det simulerte sytemet. --at  $b_2$ skjer ETTER $b_1$, men samtidig med $a$ om $a$ og $b_2$ skal skje samtidig. Får (simulert) samtidighet.
+\end{itemize}
+
+Dette med simulert samtidighet er også eit poeng. Vidare skal vi også få inn 'refraction time' for neurona. %XXX
+
+For å få til dette med tid, uten at alle objekta må skjekkes kva tidsiterasjon, vil eg bruke konseptet flytende tid. For å beskrive dette, må eg først beskrive systemets 'scheduler'.
+
+\subsection{'Scheduler'}
+For å få til kausalitet (at $a_2$ skal skje etter $a_1$, men ikkje etter $b$) har eg laga en 'scheduler'. 
+
+Se for deg ei lenka liste som inneholder alle jobbane, pNesteJobbArbeidsKoe. En (alltid nøyaktig en) av jobbane er en spesiell tybe jobb, kalla tid.doTask();. I tillegg har eg en (globalt tilgjengelig) variabel kalla ulTidsiterasjoner.
+
+Alle jobbane har muligheten for å skape nye jobber, som i såfall legges på på slutten av pNesteJobbArbeidsKoe.
+
+Når \emph{tid.doTask()} kalles, vil denne gjøre de aktiviteter som skal gjøres i alle tidsiterasjonane og iterere tid ( ulTidsiterasjoner++ ).
+I tillegg skal denne legge på en \emph{[this]} peiker på slutten av arbeidslista \emph{pNesteJobbArbeidsKoe}.
+
+Dette vil skape en lenka liste variant av at det er to arbeidskøer som altererer, med tidsiterator kvar gang ei av de er tom og vi skifter til andre arbeidslista.
+
+
+
+\subsection{Klassene}
+Alle som skal schedules skal arve fra class tidInterface. Alle klassene som skal ha timing (causalitet og tidsvariante funksjoner) skal arve fra tidInterface. 
+Dette er ei interface-klasse med \emph{virtal void doTask() =0;}
+
+I tillegg til alle klassene som har elementer som er funksjoner av tid (for eksempel lekkasjen i 'leaky integrator'), skal en spesialklasse \emph{class tid} arver fra tidInterface.
+
+\subsubsection{tid::pNesteJobbArbeidsKoe}
+\emph{tid::pNesteJobbArbeidsKoe} inneholder alle jobber som skal gjøres. Dersom denne er tom, slutter programmet å gjøre ting (i tillegg til at tid slutter --også \emph{tid} er eit element i arbeidslista).
+
+Dersom en jobb skaper nye jobber, legges desse til på slutten av lista.
+
+Ei klasse er heilt spesiell når det kommer til tid: i tillegg til å inneholde \emph{static list pNesteJobbArbeidsKoe}, fungerer tidsSkilleElement som eit skilleElement mellom to tidsiterasjoner. 
+Når \emph{tid.doTask()} kalles, skal alt som har med tidsprogresjonen gjøres. I tillegg tenker eg å putte funksjoner som går som bare en funksjon av tid inn her (alt som skal skje i kvar tidsiterasjon)..
+
+Men det viktigaste \emph{tid.doTask()} gjør, er å iterere tid.
+\emph{tid} har dermed ansvaret for å skille mellom to tidsiterasjoner.
+
+\subsection{implementasjon}
+Som sagt: alle klasser som har ei oppgave som skal gjøres (i den simulerte tida) puttes inn i \emph{pNesteJobbArbeidsKoe}. 
+
+Selve schedulinga skjer i 
+\begin{equation}
+	\text{void* schedulerFunskjon(void*)}
+\end{equation}
+Grunnen til formatet på funksjonen er muligheten for å starte tråder (konvensjoner i pthread--library).
+
+Denne funksjonen kaller pNesteJobbArbeidsKoe.front()->doTask(). Når pNesteJobbArbeidsKoe er av type [\emph{class tid}] vil tid itereres.
+
+I tillegg skal alt anna som skal skje kvar einaste iterasjon plasseres her. Eksempel kan være at nye synapser blir lagt i ei kø, og schedulerFunskjon går gjennom denne køa kvar gang den kalles. 
+Events kan kanskje også plasseres her?
+
+Eller eg kan gjøre desse andre tinga med egne tråder?

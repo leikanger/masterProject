@@ -1,0 +1,60 @@
+\documentclass[a4paper,9 pt]{article}
+
+\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+%\usepackage{babel}
+\usepackage{graphicx}
+
+\usepackage[font=small,format=plain,labelfont=bf,up,textfont=it,up]{caption}
+
+\usepackage{amsmath}
+\usepackage{listings}
+
+\author{Per R. Leikanger}
+                             
+\title{Dokumentasjon --Kva eg tenker mens eg koder det.}
+\date{\today}     
+
+\begin{document}   
+
+\maketitle
+
+\section{Introduction}
+I denne fila skal eg dokumentere kva eg tenker, etterkvart som eg koder. Bra for seinare, når eg skal skrive rapport om det...
+
+%Anngående globale variabler: Skriv i rapporten kvifor eg har brukt referanse-returnerande funksjoner i staden for globale variabler. Referer [Stroustrup, 2008] (3. edition, kap 9) Side 207, der han skriv at det er bra å minimalisere bruk av globale variabler. Referanse-returnerande funk er godt alternativ.
+%Sjå s 217.
+
+Kanskje eg skal bruke funksjonsobjekt (for for\_each() ) til bruk på arbeidsliste? Trur det i såfall blir mest for å brife med kunnskap / skrive i rapporten..
+
+Kan også brife med file--streams. Utskrift til matlab-fil for plotting. Dette er også relevant.
+
+
+%%%%%%%% NYTT. Skriv om i masteren. %%%%%%%%
+\include{NYEREadditions}
+\include{kontinuerligTid}
+
+%%%%%%%% FRA FDP: %%%%%%%%%%%%
+
+\include{dokumentasjon_tid}
+
+\include{klassene}
+\include{SANN}
+\include{KANN}
+
+\include{KANN-SANN_sammenligning.tex}
+
+\newpage
+\include{dendrite}
+\include{synapse}
+\newpage
+
+
+
+
+
+\bibliography{bibliografi}
+%\bibliographystyle{abbrvnat}
+\bibliographystyle{plain}
+\end{document}
+

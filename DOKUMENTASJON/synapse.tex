@@ -1,0 +1,50 @@
+
+\section{Synapse}
+
+\subsection{SANN}
+Synaptisk vekt skal være unsigned i staden for int!
+
+Ved kvar overføring skal synaptisk vekt legges til eller trekkes fra i postsyn. depol. (avhengig av synapse::bInhibEffekt). 
+
+%Veit ikkje om neste er gyldig lenger. Trur kanskje det. Gidd ikkje sjekke no.
+%Først sjekkes det om kor lenge det er siden syn.overføring.  (skjer i synapse::transmission() )
+%\begin{lstlisting}
+%if( (unsigned uTidSiden = ulTid - ulForrigeOppdatering) != 0) % eller kanskje heller: if(ulTid != ulForrigeOppdatering), og kjøre sammenligninga direkte i pow-funk i gjennomførLekkasje (unngår argumentkopiering..)
+%	gjennomførLekkasje(uTidSiden);
+%\end{lstlisting}
+%
+%og gjennomførLekkasje() :
+%\begin{lstlisting}
+%void gjennomførLekkasje(uTidSiden_arg){
+%	depol = lekkasjeFaktor ^ uTidSiden_arg		
+%}
+%\end{lstlisting}
+
+
+\subsection{KANN}
+KANN--synapsene skal regne ut synapsens innvirking på postsyn. auron. Dette er gitt av presyn. periode og synaptisk vekt. (her kan eg kanskje seinare også legge inn en temp-syn.vekt variabel for å lage short-term syn.p.)
+
+Det er ``synaptisk overføring'' kvar gang presyn. node endrer $\kappa$. 
+For at det skal være effektivt i postsyn. dendrite, regner synapsen ut \emph{endring} i synaptisk overføring og sender denne videre. 
+For å gjøre dette, trenger synapsen en variabel som holder styr på $\text{[presyn. periode]}^{-1}$, og når vi får synaptisk overføring regner synapsen ut differansen (deriverte) av endinga, og sender dette som argument til dendrite.
+
+\begin{lstlisting}
+void synapse::overfoering(){
+	unsigned nyPeriode_temp = pMeldemAvAuron->periode; 
+	//regnes ut ved A.P. i auronet.
+	
+	pPostsyn_Dendrite->nyttSignal( synOverfoeringDerivat );  
+	//synOverfoeringDerivat er medlemsvariabel (sjaa under)
+	
+	synOverfoeringDerivat = periode - nyPeriode_temp;
+	periode = nyPeriode_temp;
+}
+\end{lstlisting}
+
+Eller noke tilsvarende.. 
+
+Siden K\_dendrite::nyttSignal( derivat\_arg ) tar derivat som argument, kan vi i dendrite kjøre kallet $K_i += \text{[derivat\_arg]}$. 
+For å unngå integral--avvik bør vi kjøre en regelmessig sjekk som rekalkulerer $\kappa_i$ for neuron $i$.
+Dette kan gjøres ved å summere alle inn--synapsenes innvirkning (produkt av medlemsvariablane $\text{preSynPeriode]}^{-1}$ og $W_{ij}$.
+
+Kor ofte denne bør kjøres bør enten finnes eksperimentellt, eller gjøres dynamisk (type: dersom integral--avviket er for stort så minskes den regelmessige perioden..).

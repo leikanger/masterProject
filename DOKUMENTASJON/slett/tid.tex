@@ -1,0 +1,56 @@
+\section{ANN, mi implementering.}
+
+Før eg kan skrive om tid må eg skrive litt om mi implementering. Arbeidslister, osv. Først må eg lage dette...
+
+Kladd til kva eg må hugse (skrevet mens eg skriver neste avsnitt, tid):
+\begin{itemize}
+	\item Snakke en del om at mitt ANN er simulert asynkront.
+\end{itemize}
+
+
+
+\section{Time}
+
+Following the fact that the ANN will be simulated asynchronous, the computer resources will deside the size of the time iterations. The maximum size is desided by the real--time requirement of the task.
+
+To make the software general, the simulated time should therefore be unconnected to the world time outside the simulation. To achieve this, a scheduler has been devised for my simulation.
+
+
+In object oriented programming languages, we can make a linked list of elements. 
+If the data of the elements are pointers, the pointers can be pointers to any kind of data. Let the list be of type \emph{$std::list<father*> LIST$} and \emph{$father$} contain virtual fuctions. 
+
+When it is time for the scheduler-thread to start a new task, it calls \emph{LIST.front()$\rightarrow$doTask()}. 
+Since \emph{doTask()} is overloaded in the derived classes, we can have different tasks assigned to each class derived from \emph{$<father>$}.
+
+
+
+
+If we have a list of scheduled tasks $L = [a, b, c, T]$, all tasks derived from a common \emph{$<father>$}. 
+All tasks can generate new tasks according to the rules of the derived classes, and when a task is done it will be removed from the list.
+
+If we allways pick the first task, the next task to be executed will be task $a$. %All tasks can possibly generate new tasks.
+If a generates new tasks $x_{a_1}$, this new task will be added at the end of the list.
+
+\begin{equation}
+	L = [b, c, T, x_{a_1}]
+\end{equation}
+
+Lets say that $b$ does not generate any new tasks and $c$ gives us two new tasks $[x_{c_1}, x_{c_2}]$, we get the list:
+\begin{equation}
+	L = [T, x_{a_1}, x_{c_1}, x_{c_2} ]
+\end{equation}
+
+As the syntax implies, the element $T$ is a rather unique task. $T$ is a const--instance of the timeIterator--class.
+
+
+\emph{Skrevet dårlig herretter. Skrevet seint på kvelden:} %XXX XXX
+
+\emph{T$\rightarrow$ doTask()} will have the responsibility for any tasks that have anything with time to do. 
+
+First, it will the iterate the global time variable \emph{unsigned long timeIterations}.
+
+Finally it will append a \emph{self--pointer} to the end of the task list.
+\begin{equation}
+	L = [x_{a_1}, x_{c_1}, x_{c_2}, T ]
+\end{equation}
+

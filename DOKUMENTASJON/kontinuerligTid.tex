@@ -1,0 +1,51 @@
+% Notater (etter) H 2011
+
+\section{Kontinuerlig tid}
+\label{secKontinuerligTid}
+For flyt-baserte noder, kan vi oppnå nær-kontinuerlig tid for depol. forløpet.
+Vi kan beregne når neste fyring vil være, og seie at denne skal skje nøyaktig da. 
+Ved fyring vil eit nytt 'time window' initialiseres ved å sette $v_0 = 0$ og sette tid $t_0 = t^\'$.
+Vi vil dermed får eksakt depol. forløp også for starten av neste time window.
+
+	\subsection{'time window'}
+	Ved nytt input (endra $\kappa$ eller ved fyring) vil eit nytt 'time window' bli initialisert.
+	For å få til kontinuerlig tid (float--accuracy for tidspunkt), trenger vi float-tidspunkt for initialiseringen av det nye 'time window'.
+
+	Første vi må gjør er å la $t_0$ være gitt av en \emph{double} istaden for en \emph{unsigned long}.
+	Vi vil dermed prøve å definere \emph{double dStartOfTimeWindow} istadenfor \emph{unsigned long ulStartOfTimeWindow}.
+	
+		\subsubsection{fyring}
+		Dette er det letteste tilfellet. Ved fyring har vi allerede beregna eit eksakt fyringstidspunkt.
+		Fyringstidspunktet eg også definert som start--tid for neste 'time window', og  vi trenger bare lagre dette tidspunktet.
+
+		Første vi må gjøre er å definere \emph{double dEstimatedTaskTime} istadenfor \emph{unsigned long ulEstimatedTaskTime}.
+		I \emph{K_auron::doTask()} lagrer vi auronets \emph{dEstimatedTaskTime} til \emph{dStartOfTimeWindow}.
+		TRUR DETTE VIL GI OSS PERFEKT OPPLADING AV NEURONET!
+	
+% TODO 1) Lagre estimert tidspunkt i en double-variabel istadenfor en unsigned long: double dEstimatedTaskTime 			ikkje lenger ulEstimatedTaskTime.. 														TODO (1)
+% TODO 2) Lagre tidspunkt for start av 'time window' i en double istadenfor unsigned long: 	dStartOfTimeWindow 			ikkje lenger ulStartOfTimewindow.. 														TODO (2)
+%		 	2.1) Trenger å endre på getCalculateDepol() slik at denne kan kalkulere depol for eit float-tidspunkt. Argument!
+% 				Har innført getCalculateDepol(double). KOMMENTERT UT! Går for løyringa under: innfører variabel 		dNextStartOfTimeWindow
+% TODO  	2.2) Trenger å ha inn tidspunkt til doCalculations(): kanskje bedre å innføre variable dNextStartOfTimeWindow? (gjelder også den over..)
+% 			2.3) Har delt opp doCalculation() i [beregn ny kappa] og [estimer periode]. Estimering av periode skjer no i funksjonen protected inline void K_auron::estimatePeriod();
+		\subsubsection{input til neuronet}
+			Når neuronet får endret input, vil tidsspunkt for endring være viktig for å beholde eksakt løysing.
+			(I starten tenker eg å gjøre dette lett, og sette $t_0$ til enten starten av iterasjonen eller midten av iteraasjonen. (trur dette gir samme resultat i lange løp). 
+				Etterkvart må eg utvide dette til å være gitt av input. Input kan for eksempel ha ved en "phase", som gir når den er gyldig. 
+				Dersom vi lar postsyn. $t_0$ være gitt av overføringens $t_0$ skalert med inflytelsen til overføringen, kan vi få til dette målet. Jobb meir med dette seinare).
+
+		Foreløpig sjekker vi en sensor node(som sampler eit input, og ikkje har noko neuralt input).
+		Vi kan da definere at sampling skjer ved starten av kvar tidsiterasjon.
+		Dermed kan vi definere at 'time window' (float-tidspunkt) er det samme som tidsiterasjonens nummer (unsigned long-tidspunkt - sample nummer).
+
+% TODO 3) Lagre starten av 'time window', initialisert av en endret senset variabel, $\kappa$, ved å bare typekonvertere tidsiterasjonen: 			dStartOfTimeWindow = (double)ulTime; //(sett den til "no") 	TODO (3)
+
+	\subsection{Normalisert tid: mulighet for å endre tidsoppløysinga}
+	For å få samme transiente forløp for simuleringer med ulik tidsoppløsning, må vi ikkje bare referere til tid som tidsstegnummer. 
+	Vi må da skalere på basis av lengden på computational time step, $\Delta t$.
+	Dette kan vi gjøre ved å skalere med $\alpha$ (bare lekkasjen [OG OGSÅ MENGDEN INPUT] som er avhengig av lengden på eit tidssteg.
+	Finn ut om eg kan løse dette bare ved å endre $\alpha$!
+	%- Skaler både den nedskrevene tida (i log-filene) og tida som sendes inn i sensor-funksjon. Det viktigasete er det siste, men dei henger sammen..
+
+	%TODO Plasser all kode som har med å skriv til logg i mdl.funk. writeDepolToLog() -også for SANN: TODO
+	%TODO 	Så innfør skalering i denne funksjonen. (da blir alt slikt samla på samme sted i koden (KANN og SANN writeDepolToLog() kan ligge rett ved kvarandre!

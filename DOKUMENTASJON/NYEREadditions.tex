@@ -1,0 +1,57 @@
+\section{Notater: H.2011}
+	\subsection{Input}
+	For en SN er input gitt av inn-flyten gitt av frekvens og størrelse av overføringene (i kvart tidssteg).
+	Lekkasjen blir simulert eksplisitt, og er ikkje en del av ligningen.
+
+	For KN derimot, har vi fra utledinga av $v(t)$, at $\kappa = \frac{I}{\alpha}$. 
+	Dersom vi seier at sensinga for en sensornode påvirker aktivitetsnivået ($\kappa$) direkte, må flytte over $\alpha$ og får ligninga for synaptisk input i en sensornode:
+\begin{equation}
+	I = \kappa \alpha
+\end{equation}
+	% Sjå ALPA123@neuroElement.cpp for SN-variant, og
+
+	\subsection{Refraction Period}
+	Når man programmerer vil feil oppstå. 
+	'Refraction period' blir utregna heilt forskjellig for de to ANN modellane: SANN simulerer det og KANN bruker ligningene.
+	For å minimalisere antall potensielle feilkilder har eg tatt refraction period ut av simuleringene mine. 
+%	(Eg har tatt bort testen for om bBlockInput_refractionTime for SANN:  Sjå id: asdf21344@neuroElement.cpp)
+% 	(Eg har også tatt vekk refraction time ved å ikkje lenger legge til N på estimert periode, der N er refraction time. Før var det +1. No er det kommentert ut.)
+
+	\subsection{ANNET}
+	Har endret mekanismen som runder til rett tidssteg: Før lå denne på beregninga av dLastCalculatedPeriod. Nå ligger det på den plassen der dette blir omgjort til ulEstimatedTaskTime.	
+
+	Har tatt vekk recalkulateKappa for K_sensor_auron: Vi antar at sensor auronet ikkje kan motta annen neural input! sjå: asdf41412@neuroElement.cpp
+	%(NEI: så på K_sensor_auron::recalculateKappa(): Det einaste denne gjorde var 'return 0;̈́')
+
+	\subsection{FEIL med KANN}
+	- starter oppladnina av depol. samme iterasjon som den fyrer. Dette er feil i forhold til SANN: Skal starte iterasjonene etter (?)
+	(KVEN ER RETT?)
+	Siden vi ikkje har refraction period, skal den starte ved det 'time instant' som neuronet fyrer. Dette kan eg implementere ved å lagre fyringstidspunkt (og dermed 'start of time window' som en float). DO IT!
+
+	HOVEDPROBLEMET er at KANN later opp for fort. KVIFOR? Eksakt utregna første fyring for konst. kappa=1.1*Tau er tid:599.4  
+	SANN:600 	KANN: 591
+	Eg har dermed funnet at SANN fyrer for seint (som forutsett). Problemet er at KANN ikkje funker heilt. KVIFOR?
+	K_sensor_auron starta med K=sensed value. Oppdaterte første tidssteg til (sensedValue-0)*ALPHA. Dette gjorde at Kappa ble for høg resten av tida. DRITT!
+	Innførte at K_sensor_auron::K_sensor_auron() også lagra dLastSensedValue til å være Kappa, ved init av K_sensor_auron. No funker det for statisk sensorfunk!
+
+\section{Legg til task i presentTimeIteration}
+Har lagt til funksjonen time\_class::addTaskInPresentTimeIteration(K_auron* pK_auronArg) som kan legge til eit K\_auron til nåværende tidsiter.
+Dette for å unngå at depol. går langt over terskel.
+(Før brute-force'a eg eit AP dersom depol var over terskel. Trur dette blir unødvendig med dette nye tillegget!)
+
+FETT, trur det funker nå. Men er ikkje sikker fordi eg vil skrive artikkel istadenfor å utvikle meir.
+Pluss at eg har eksamen om ei veke :(
+
+
+
+\section{PLAN}
+	- innfør float-tid for KANN. (sjå \ref{secKontinuerligTid}).
+
+	- Skaler både den nedskrevene tida (i log-filene) og tida som sendes inn i sensor-funksjon. Det viktigasete er det siste, men dei henger sammen..
+
+\section{ROT!}
+Det er noko rot med alpha! Eg ganger med alpha for s\_dendrite::newInputSignal(). OG ingenting med K\_auron::changeKappa\_derived().
+
+Er dette rett, eller skal det være motsatt?
+
+MEN DET GIR VEL SAMME RESULTATET?
