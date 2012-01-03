@@ -209,6 +209,10 @@ K_auron::K_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartKappa_arg /*
 	dChangeInPeriodINVERSE = 0;
 	dPeriodINVERSE = 0;
 
+	// unngår at førte fyring skjer på tid: ulTime=1 (fordi dEstimatedTaskTime er satt til 0 (som er mindre enn 1))
+	dEstimatedTaskTime = 1000; //for eksempel..
+	
+
 	// Legger til auron* i std::list<i_auron*> pAllAurons;
 	pAllAurons.push_back( this );
 	pAllKappaAurons.push_back( this );
@@ -819,7 +823,7 @@ inline void s_synapse::doTask()
 	// Loggfører syn.weight
 	synTransmission_logFile 	<<"\t" <<time_class::getTid() <<"\t" <<(1-2*bInhibitoryEffect) * dSynapticWeight
 						<<" ;   \t#Synpaptic weight\n" ;
-	synTransmission_logFile.flush();
+//	synTransmission_logFile.flush();
 
 } //}2
 /* s_dendrite::doTask() : 		Simulerer delay for input ved dendrite */
@@ -834,14 +838,14 @@ inline void s_dendrite::doTask()
 /* K_auron::doTask() 	: 		Fyrer A.P. */
 inline void K_auron::doTask()
 { //{1 ** AURON
-
-//Utskrift til skjerm:
-#if DEBUG_UTSKRIFTS_NIVAA > 0
-cout<<"\tK K " <<sNavn <<" | K | " <<sNavn <<" | K | K | K | | " <<sNavn <<" | K | | " <<sNavn <<" | K | | " <<sNavn <<"| K | K | K | K |\t"
-	<<sNavn <<".doTask()\tFYRER neuron " <<sNavn <<".\t\t| K | |  [periode] = " <<dLastCalculatedPeriod/1000 <<"     | K | \tK | " <<time_class::getTid() <<" |\n"
-	<<"\t| | Kappa:" <<dAktivitetsVariabel <<"\tForrige periode:" <<dLastCalculatedPeriod <<"\tDepol før fyring:" <<dDepolAtStartOfTimeWindow <<"\n"
-	<<endl;
-#endif
+	
+	//Utskrift til skjerm:
+	#if DEBUG_UTSKRIFTS_NIVAA > 0
+	cout<<"\tK K " <<sNavn <<" | K | " <<sNavn <<" | K | K | K | | " <<sNavn <<" | K | | " <<sNavn <<" | K | | " <<sNavn <<"| K | K | K | K |\t"
+		<<sNavn <<".doTask()\tFYRER neuron " <<sNavn <<".\t\t| K | |  [periode] = " <<dLastCalculatedPeriod/1000 <<"     | K | \tK | " <<time_class::getTid() <<" |\n"
+		<<"\t| | Kappa:" <<dAktivitetsVariabel <<"\tForrige periode:" <<dLastCalculatedPeriod <<"\tDepol før fyring:" <<dDepolAtStartOfTimeWindow <<"\n"
+		<<endl;
+	#endif
 
 //{ GAMMELT (utkommentert!)
 //Axon hillock: send aksjonspotensial 	-- innkapsling gir at a xon skal ta hånd om all output. // bestiller at a xon skal fyre NESTE tidsiterasjon. Simulerer tidsdelay i a xonet.
@@ -849,41 +853,41 @@ cout<<"\tK K " <<sNavn <<" | K | " <<sNavn <<" | K | K | K | | " <<sNavn <<" | K
 // 		time_class::addTaskIn_pWorkTaskQue( p OutputAxon );
 //}
 
-// Viktig for å få fine depol-kurver!
-#if LOGG_DEPOL
-	#if GCC
-		// Sette precision for output: Funker bare med #include <iomanip>; , som ikkje funker for clang++-compiler..
-		depol_logFile.precision(11);
+	// Viktig for å få fine depol-kurver!
+	#if LOGG_DEPOL
+		#if GCC
+			// Sette precision for output: Funker bare med #include <iomanip>; , som ikkje funker for clang++-compiler..
+			depol_logFile.precision(11);
+		#endif
+	
+		// Skriver dDepolAtStartOfTimeWindow til logg: (Tid er gitt i prosent av heile kjøretid)
+		depol_logFile 	<<dEstimatedTaskTime <<"\t" <<FYRINGSTERSKEL <<"; \t #Action potential \t\tAPAPAP\n" ;
+		depol_logFile 	<<dEstimatedTaskTime <<"\t" <<0 			 <<"; \t #Action potential \t\tAPAPAP\n" ;
+	//	depol_logFile.flush();
 	#endif
 
-	// Skriver dDepolAtStartOfTimeWindow til logg: (Tid er gitt i prosent av heile kjøretid)
-	depol_logFile 	<<dEstimatedTaskTime <<"\t" <<FYRINGSTERSKEL <<"; \t #Action potential \t\tAPAPAP\n" ;
-	depol_logFile 	<<dEstimatedTaskTime <<"\t" <<0 			 <<"; \t #Action potential \t\tAPAPAP\n" ;
-	depol_logFile.flush();
-#endif
 
+	// Initialiserer nytt 'time window':
+		// (Setter depol. til 0)
+	dDepolAtStartOfTimeWindow = 0; 
+		// (Setter dStartOfTimeWindow til dNextStartOfTimeWindow -- estimert tidsspunkt for fyring..)
+	// XXX SUPERVIKTIG: bruk dEstimatedTaskTime istedenfor dNextStartOfTimeWindow! Ellers blir det heilt feil!
+	dStartOfTimeWindow = dEstimatedTaskTime;  //SPSIELLT FOR FYRING! Ellers brukes: dNextStartOfTimeWindow;
 
-// Initialiserer nytt 'time window':
-	// (Setter depol. til 0)
-dDepolAtStartOfTimeWindow = 0; 
-	// (Setter dStartOfTimeWindow til dNextStartOfTimeWindow -- estimert tidsspunkt for fyring..)
-// XXX SUPERVIKTIG: bruk dEstimatedTaskTime istedenfor dNextStartOfTimeWindow! Ellers blir det heilt feil!
-dStartOfTimeWindow = dEstimatedTaskTime;  //SPSIELLT FOR FYRING! Ellers brukes: dNextStartOfTimeWindow;
+	// Gjør kalkuleringer for å planlegge neste fyring.
+	// 	GAMMEL: doCalculation(); //XXX HER MÅ dNextStartOfTimeWindow være definert!
+	//estimatePeriod(); 		// NY. Gjør det som må gjøres etter fyring (estimerer neste fyringstid..)
+	// 	Kommenterer ut: la oss anta at vi har en rett periode (ble definert forrige iterasjon eller forrige gang kappa ble endret..)
 
-// Gjør kalkuleringer for å planlegge neste fyring.
-// 	GAMMEL: doCalculation(); //XXX HER MÅ dNextStartOfTimeWindow være definert!
-//estimatePeriod(); 		// NY. Gjør det som må gjøres etter fyring (estimerer neste fyringstid..)
-// 	Kommenterer ut: la oss anta at vi har en rett periode (ble definert forrige iterasjon eller forrige gang kappa ble endret..)
+	// Logger AP (vertikal strek)
+	writeAPtoLog();
+	
+	// Oppdaterer dEstimatedTaskTime til [no] + dLastCalculatedPeriod:
+	//dEstimatedTaskTime = dStartOfTimeWindow + dLastCalculatedPeriod; DETTE BLIR ekvivalent med:
+	dEstimatedTaskTime += dLastCalculatedPeriod;
 
-// Logger AP (vertikal strek)
-writeAPtoLog();
-
-// Oppdaterer dEstimatedTaskTime til [no] + dLastCalculatedPeriod:
-//dEstimatedTaskTime = dStartOfTimeWindow + dLastCalculatedPeriod; DETTE BLIR ekvivalent med:
-dEstimatedTaskTime += dLastCalculatedPeriod;
-
-// Pga. nye mekansimen som gjør det mulig å fyre denne iter:
-doCalculation(); //For å sjekke om den kommer til å fyre igjen!
+	// Pga. nye mekansimen som gjør det mulig å fyre denne iter:
+	doCalculation(); //For å sjekke om den kommer til å fyre igjen!
 } //}1
 /* K_synapse::doTask() 	: 		Simulerer overføring i synapsen */
 inline void K_synapse::doTask()
@@ -905,7 +909,7 @@ inline void K_synapse::doTask()
 		<<time_class::getTid() <<"  \t"
 		<<(1-2*bInhibitoryEffect) * dSynapticWeight * dPresynDeltaPeriodeINVERSE_temp
 		<<" ; \n";
-	synTransmission_logFile.flush();
+//	synTransmission_logFile.flush();
 } //}1
 
 // TODO SKAL VEKK: 
@@ -931,8 +935,36 @@ void time_class::doTask()
 		return;
 	}
 
+
+
 	// gjennomfører planlagte kalkulasjoner:
 	doCalculation();
+
+
+	// Kaller loggeFunk for å teste K_auron. 
+	K_auron::loggeFunk_K_auron();
+
+
+
+	/*************************************************
+	* Flytter planlagde oppgaver over i pWorkTaskQue *
+	*************************************************/
+	for( std::list<timeInterface*>::iterator pPE_iter = pPeriodicElements.begin() ; pPE_iter != pPeriodicElements.end() ; pPE_iter++ )
+	{
+		// Typekonverderer dEstimatedTaskTime til unsigned long, og sjekker om elementet er planlagt å gjennomføre noe neste iter (legger til 0.5 for å få rett avrunding):
+		if( (unsigned long)( (*pPE_iter)->dEstimatedTaskTime +0.5) == ulTime+1 )
+		{
+			addTaskIn_pWorkTaskQue( (*pPE_iter) );
+			// Dette fører til eit kall til eit tidsElements doTask(). Teller antall kall (til rapporten):
+			#if DEBUG_UTSKRIFTS_NIVAA > 2
+			cout<<"Telte kall til " <<(*pPE_iter)->sClassName <<".doTask()\n";
+			#endif
+		}
+ 	}
+
+
+
+
 
 	//itererer time:
 	ulTime++;
@@ -965,7 +997,7 @@ void time_class::doTask()
 	s_sensor_auron::updateAllSensorAurons();
 	#endif
 
-	
+#if 0 // Præver å sette dette før tid blir iterert (over)	
 	/*************************************************
 	* Flytter planlagde oppgaver over i pWorkTaskQue *
 	*************************************************/
@@ -981,10 +1013,8 @@ void time_class::doTask()
 			#endif
 		}
  	}
+#endif
 
-
-	// Kaller loggeFunk for å teste K_auron. 
-	K_auron::loggeFunk_K_auron();
 
 	
 	// TESTER å initiere nytt time window umiddelbart (før resten av time_class* elementa i pWorkTaskQue gjøres, denne iter)
@@ -1024,15 +1054,17 @@ void K_auron::doCalculation()
 	#endif
 
 
+/*	Trur ikkje denne er så lur..
 	// BRUTE-force feilfiks:
-	if(dEstimatedTaskTime<time_class::getTid()){
+	if(dEstimatedTaskTime<time_class::getTid()+1){
 		//dDepolAtStartOfTimeWindow = 0;
 		//write APtoLog();
-		doTask(); 
-		cout<<"BRUTE-force'er en fyring. Dårlig stil, men funker! \tTid:  " <<time_class::getTid() <<"\n";
+		// NEI NEI: doTask(); 
+		time_class::addTaskIn_pWorkTaskQue( this );
+		cout<<"BRUTE-force'er en fyring. Dårlig stil, men funker! \tTid:  " <<time_class::getTid() <<", dEstimatedTaskTime: " <<(unsigned)dEstimatedTaskTime <<"\n";
 	//	dStartOfTimeWindow = dNextStartOfTimeWindow;
 	}
-
+*/
 
 	// Viktig å kalkulere depol med GAMMEL Kappa! Ellers får vi hopp i depol!
 	// Lagrer v_0 og t_0 for neste 'time window':
@@ -1048,12 +1080,12 @@ void K_auron::doCalculation()
 	// Beregner periode og estimert fyringstid for neste spike:
 	estimatePeriod();
 
-#if 1 // TODO TODO NYYTTT! Litt->Utesta! TODO TEST!
-	// Sjekker om den skal fyre denne iter:
+	// XXX Dette er nytt!
+	// FETT! Dette gjør at størrelsen på comp. time step bare gir kor ofte kappa skal oppdateres. Fyring, og init av time window kan skje heilt separat fra dette!
+	// Sjekker om den skal fyre denne iter: (før neste iter)
 	if( dEstimatedTaskTime<time_class::getTid()+1 ){
 		time_class::addTaskInPresentTimeIteration( this );
 	}
-#endif
 }
 
 inline void K_auron::estimatePeriod()

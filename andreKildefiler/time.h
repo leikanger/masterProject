@@ -85,6 +85,7 @@ class time_class : public timeInterface {
 		*** Gjennomføre kalkulering på alle kalkuleringsoppgaver (pCalculatationTaskQue) 	***
 		**************************************************************************************/
 
+		// TODO TODO TA VEKK (redundant test..)
 		if( pCalculatationTaskQue.empty() ) return;
 
 		// Organiserer liste slik at kvar oppføring er unik:

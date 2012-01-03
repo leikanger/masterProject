@@ -63,7 +63,7 @@ extern unsigned long ulTotalNumberOfIterations;
 #define RECALC_c4 0.5
 
 
-#define LOGG_DEPOL false 	// Denne gir om implementasjonen skal skrive til depol-logg.
+#define LOGG_DEPOL true 	// Denne gir om implementasjonen skal skrive til depol-logg.
 #define LOGG_KAPPA true 	// ...samma for kappa
 
 //#define T 						(double)0.01 					//[ms]: tidsiterasjoner
