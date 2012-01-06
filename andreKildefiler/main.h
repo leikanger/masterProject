@@ -43,6 +43,7 @@
 extern unsigned long ulTemporalAccuracyPerSensoryFunctionOscillation;
 extern int nNumberOfSensorFunctionOscillations;
 extern unsigned long ulTotalNumberOfIterations;
+extern unsigned uNumberOfIterationsBetweenWriteToLog;
 
 
 //Defines:
@@ -64,7 +65,8 @@ extern unsigned long ulTotalNumberOfIterations;
 
 
 #define LOGG_DEPOL true 	// Denne gir om implementasjonen skal skrive til depol-logg.
-#define LOGG_KAPPA true 	// ...samma for kappa
+#define LOGG_KAPPA false 	// ...samma for kappa
+#define LOGG_OPPLOYSING 100000
 
 //#define T 						(double)0.01 					//[ms]: tidsiterasjoner
 //#define ALPHA   				(double)1  //[verdi]: Lekkkasje per tidsiterasjon = [lengde på tidsiter]*[lekkasjefaktor]

@@ -1,4 +1,4 @@
-CFLAGS=-g3 -O3 -Wall -I/usr/include/c++/4.5 -I/usr/include/c++/4.5/x86_64-linux-gnu #-pthread
+CFLAGS=-g3 -O1 -Wall -I/usr/include/c++/4.5 -I/usr/include/c++/4.5/x86_64-linux-gnu #-pthread
 CPP=clang++
 #CPP=g++
 CPPFLAGS=${CFLAGS} 

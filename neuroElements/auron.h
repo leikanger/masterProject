@@ -238,6 +238,19 @@ class s_auron : public i_auron
 
 		// Plasserer all kode som har med å skrive depol til logg.
 		#if LOGG_DEPOL  // Kan sette om depol. skal skrives til logg i main.h
+			// Handle accuracy for the depol-logfile:
+			static unsigned long uIterationsSinceLastWrite = 0;
+			uIterationsSinceLastWrite++;
+
+			// Unless it is time for writing to log, return.
+			if( uIterationsSinceLastWrite < uNumberOfIterationsBetweenWriteToLog ){
+				return;
+			}else{
+				// Reset counter
+				uIterationsSinceLastWrite = 0;
+			}
+
+
 			depol_logFile 	<<time_class::getTid() <<"\t" <<dAktivitetsVariabel <<"; \t #Depolarization\n" ;
 			//depol_logFile.flush();
 		#endif
@@ -366,7 +379,14 @@ class K_auron : public i_auron
 		// GAMMEL: return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-(double)LEKKASJE_KONST  * (time_class::getTid() - ulStartOfTimewindow )) + dAktivitetsVariabel ;
 
 		// Går over til bedre tidssoppløysing: double-precition float number accuracy!
-		return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dNextStartOfTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+		if( (unsigned long)(dStartOfTimeWindow+0.5) <= time_class::getTid() ){
+//			/*TEMPORÆRT:*/ double dDepolSLETT = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dNextStartOfTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ;
+//			cout<<"her: [dStartOfTimeWindow, time]= [" <<dStartOfTimeWindow <<", " <<time_class::getTid() <<"]\t\tdepol: " <<dDepolSLETT <<"\n";
+			return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dNextStartOfTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+		}else{
+			cerr<<"HHH\t[dStartOfTimeWindow, tid] = [" <<dStartOfTimeWindow <<", " <<time_class::getTid() <<"]\n";
+			return 0;
+		}
 	}
 	#if 0 
 	inline const double getCalculateDepol(double dTidspunktArg)
@@ -384,6 +404,20 @@ class K_auron : public i_auron
 				depol_logFile.precision(11);
 			#endif
 	
+			// Handle accuracy for the depol-logfile:
+			static unsigned long uIterationsSinceLastWrite = 0;
+			uIterationsSinceLastWrite++;
+
+			// Unless it is time for writing to log, return.
+			if( uIterationsSinceLastWrite < uNumberOfIterationsBetweenWriteToLog ){
+				return;
+			}else{
+				// Reset counter
+				uIterationsSinceLastWrite = 0;
+			}
+
+
+
 			// Skriver dDepolAtStartOfTimeWindow til logg: (Tid er gitt i prosent av heile kjøretid)
 			depol_logFile 	<<(unsigned long)time_class::getTid() <<"\t" <<getCalculateDepol() <<"; \t #Depol\n" ;
 			//depol_logFile.flush();
@@ -392,6 +426,19 @@ class K_auron : public i_auron
 	const inline void writeKappaToLog()
 	{
 		#if LOGG_KAPPA
+
+			// Handle accuracy for the depol-logfile:
+			static unsigned long uIterationsSinceLastWrite = 0;
+			uIterationsSinceLastWrite++;
+
+			// Unless it is time for writing to log, return.
+			if( uIterationsSinceLastWrite < uNumberOfIterationsBetweenWriteToLog ){
+				return;
+			}else{
+				// Reset counter
+				uIterationsSinceLastWrite = 0;
+			}
+
 			// Skriver dDepolAtStartOfTimeWindow til logg:
 			kappa_logFile 	<<time_class::getTid() <<"\t" <<dAktivitetsVariabel <<"; \t #Kappa\n" ;
 			//kappa_logFile.flush();

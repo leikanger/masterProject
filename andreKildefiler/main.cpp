@@ -60,6 +60,7 @@ extern unsigned long time_class::ulTime;
 unsigned long ulTemporalAccuracyPerSensoryFunctionOscillation = 	DEFAULT_ANTALL_TIDSITERASJONER;
 float fNumberOfSensorFunctionOscillations = 						DEFAULT_NUMBER_OF_SENSOR_FUNKTION_OSCILLATIONS;
 unsigned long ulTotalNumberOfIterations = 						ulTemporalAccuracyPerSensoryFunctionOscillation*fNumberOfSensorFunctionOscillations;
+unsigned uNumberOfIterationsBetweenWriteToLog; // Declared in main.h, initialized in 
 
 
 std::ostream & operator<<(std::ostream& ut, i_auron* pAuronArg );
@@ -90,6 +91,9 @@ int nResolutionInLogLogErrorPlot;
 int main(int argc, char *argv[])
 {
 // TODO DETTE ER BARE ROT! TODO FIKS argument-greiene!
+
+
+
 
 	//Leser inn argumenter: 
 	if(argc > 1 ) //{1 	  //	 (argc>1 betyr at det står meir enn bare programkall)
@@ -124,8 +128,8 @@ int main(int argc, char *argv[])
 						exit(-1);
 						//continue;
 					}
+
 			}else if( 	argv[innArgumentPos][1] == 'n' ){
-// TODO Det funker ikkje å sende inn float, ved denne måten. Splitter på '.'! Helvette!
 					if( 		(fNumberOfSensorFunctionOscillations = atof( &argv[innArgumentPos][2])) ) 	
 						// Sjekker om antall oscillasjoner er i samme argument (uten mellomrom):
 						cout<<"Number of forcing function oscillations set to be " <<fNumberOfSensorFunctionOscillations <<"\n";
@@ -185,6 +189,14 @@ int main(int argc, char *argv[])
 	// Setter totalt antall iterasjoner:
 	ulTotalNumberOfIterations = fNumberOfSensorFunctionOscillations * ulTemporalAccuracyPerSensoryFunctionOscillation;
 
+	// Set uNumberOfIterationsBetweenWriteToLog (to restrict number of points in log file)
+	if(ulTemporalAccuracyPerSensoryFunctionOscillation > LOGG_OPPLOYSING){
+		uNumberOfIterationsBetweenWriteToLog = (int)(((float)ulTemporalAccuracyPerSensoryFunctionOscillation / (float)LOGG_OPPLOYSING)+0.5);
+		cout<<"Restricting number of entries in log file: Write log every " <<uNumberOfIterationsBetweenWriteToLog <<" iteration.\n";
+	}else{
+		cout<<"No nead to restrict number of log entries due to few iterations.\n\n";
+	}
+
 	//}1
 	
 
@@ -192,13 +204,14 @@ int main(int argc, char *argv[])
 
 
 
-
+	cout<<endl;
 
 	// Returverdien på systemkallet returnerer -1 (eller andre feilmeldinger) ved feil og 0 når det går bra.
 	// Dersom ./datafiles_for_evaluation/ ikkje finnes, lages den. Dersm den finnes gjør ikkje kallet noke:
 	if( system("mkdir datafiles_for_evaluation") != 0 ){
-		cout<<"Could not make directory for log files [./datafiles_for_evaluation/]. Directory probably already exist."
-			<<"\n\tIn case this directory does not exist, please make this directory manually in the current directory.\n\n"; 
+		cout<<"Could not make directory for log files [./datafiles_for_evaluation/]."
+			<<"\n\tIn case this directory does not exist, please make this directory"
+		   <<"\n\tmanually in the current directory.\n\n"; 
 	}
 	//Renser opp i ./datafiles_for_evaluation/
 	if( system("rm ./datafiles_for_evaluation/log_*.oct") != 0)
@@ -265,7 +278,7 @@ int main(int argc, char *argv[])
 	// Blanda:
 
 		//STATISK
-		#if 0
+		#if 1
 			new K_sensor_auron("_sKN", &statiskSensorFunk);
 			new s_sensor_auron("_sSN", &statiskSensorFunk);
 		#endif
