@@ -291,7 +291,7 @@ class K_auron : public i_auron
 
 	double dDepolAtStartOfTimeWindow;
 	double dStartOfTimeWindow; 		// Start-tidspunkt for dette time window.
-	// Flytta til protected (@asdf1515): double dNextStartOfTimeWindow; 	// Start-tidspunkt for neste time window (brukes til å finne start-depol. for neste time window).
+	// Flytta til protected (@asdf1515): double dStartOfNextTimeWindow; 	// Start-tidspunkt for neste time window (brukes til å finne start-depol. for neste time window).
 
 	double dLastCalculatedPeriod;
 	double dPeriodINVERSE;
@@ -352,7 +352,7 @@ class K_auron : public i_auron
 	inline void changeKappa_absArg(double);
 
 	// Sjå @asdf1515
-	double dNextStartOfTimeWindow; 	// Start-tidspunkt for neste time window (brukes til å finne start-depol. for neste time window).
+	double dStartOfNextTimeWindow; 	// Start-tidspunkt for neste time window (brukes til å finne start-depol. for neste time window).
 
 	// Rekalkulering av kappa, for å unngå 'truncation error':
 	inline virtual double recalculateKappa();
@@ -379,11 +379,11 @@ class K_auron : public i_auron
 		// GAMMEL: return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-(double)LEKKASJE_KONST  * (time_class::getTid() - ulStartOfTimewindow )) + dAktivitetsVariabel ;
 
 		// Går over til bedre tidssoppløysing: double-precition float number accuracy!
-		if( (unsigned long)(dStartOfTimeWindow+0.5) <= time_class::getTid() ){
-//			/*TEMPORÆRT:*/ double dDepolSLETT = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dNextStartOfTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ;
+		if( (unsigned long)(dStartOfTimeWindow) <= time_class::getTid() ){
+//			/*TEMPORÆRT:*/ double dDepolSLETT = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dStartOfNextTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ;
 //			cout<<"her: [dStartOfTimeWindow, time]= [" <<dStartOfTimeWindow <<", " <<time_class::getTid() <<"]\t\tdepol: " <<dDepolSLETT <<"\n";
-			return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dNextStartOfTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
-		}else{
+			return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dStartOfNextTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+		}else{ //ErrorDetection and handeling
 			cerr<<"HHH\t[dStartOfTimeWindow, tid] = [" <<dStartOfTimeWindow <<", " <<time_class::getTid() <<"]\n";
 			return 0;
 		}

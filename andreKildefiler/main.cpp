@@ -90,7 +90,6 @@ int nResolutionInLogLogErrorPlot;
 
 int main(int argc, char *argv[])
 {
-// TODO DETTE ER BARE ROT! TODO FIKS argument-greiene!
 
 
 
@@ -98,69 +97,90 @@ int main(int argc, char *argv[])
 	//Leser inn argumenter: 
 	if(argc > 1 ) //{1 	  //	 (argc>1 betyr at det står meir enn bare programkall)
 	{
-		int innArgumentPos = 1;
+		int innArgumentPos = 0;
+		bool bWriteOutCallingConventions = false;
 
-		while(argv[innArgumentPos][0] == '-')
-		{
-			cout<<"argv[" <<innArgumentPos <<"]: " <<argv[innArgumentPos] <<endl;
+		while( ++innArgumentPos < argc ){
+			
+			if(argv[innArgumentPos][0] == '-'){
 
-			if( 		argv[innArgumentPos][1] == 'L' ){
-					bLogLogExecution = true;
-					if( (nResolutionInLogLogErrorPlot =  atoi( &argv[innArgumentPos][2])) ){
-						cout<<"log/log error plot with " <<nResolutionInLogLogErrorPlot <<" entries.\n"; 
-					}else{
-						cout<<"Can not read argument. Please follow the conventions:" <<endl;
+				cerr<<"argv[" <<innArgumentPos <<"] == " <<argv[innArgumentPos] <<endl;
+				switch( argv[innArgumentPos][1] ){
+					case 'h':
 						skrivUtArgumentKonvensjoner(argv[0]);
-						exit(-1);
-						//continue;
-					}
-			}else if( 	argv[innArgumentPos][1] == 'r' ){
-					// Sjekker om antall iterasjoner er i samme argument (uten mellomrom):
-					if( 		(ulTemporalAccuracyPerSensoryFunctionOscillation = atoi( &argv[innArgumentPos][2])) ) 	
-						cout<<"Simulation length set to " <<ulTemporalAccuracyPerSensoryFunctionOscillation <<" time steps\n";
-					// Ellers: sjekker om det er på neste argument (med mellomrom):
-					else if( 	(ulTemporalAccuracyPerSensoryFunctionOscillation = atoi( argv[innArgumentPos+1]) ) ){
-						++innArgumentPos;
-						cout<<"Anntall tidsiterasjoner er satt til " <<ulTemporalAccuracyPerSensoryFunctionOscillation <<" per sensor funtion oscillation\n";
-					}else{
-						cout<<"Can not read argument. Please follow the conventions:" <<endl;
-						skrivUtArgumentKonvensjoner(argv[0]);
-						exit(-1);
-						//continue;
-					}
-
-			}else if( 	argv[innArgumentPos][1] == 'n' ){
-					if( 		(fNumberOfSensorFunctionOscillations = atof( &argv[innArgumentPos][2])) ) 	
-						// Sjekker om antall oscillasjoner er i samme argument (uten mellomrom):
-						cout<<"Number of forcing function oscillations set to be " <<fNumberOfSensorFunctionOscillations <<"\n";
+						exit(0);
+						break;
+					case 'L':
+						bLogLogExecution = true;
+						if( (nResolutionInLogLogErrorPlot =  atoi( &argv[innArgumentPos][2])) ){
+							cout<<"log/log error plot with " <<nResolutionInLogLogErrorPlot <<" entries.\n"; 
+							cerr<<"NOT IMPLEMENTED YET.\n";
+						}else{
+							cout<<"Can not read argument. Please follow the conventions:" <<endl;
+							bWriteOutCallingConventions = true;
+							//skrivUtArgumentKonvensjoner(argv[0]);
+							//exit(-1);
+						}
+						break;
+					case 'r':
+						// Sjekker om antall iterasjoner er i samme argument (uten mellomrom):
+						if( 		(ulTemporalAccuracyPerSensoryFunctionOscillation = atoi( &argv[innArgumentPos][2])) ) 	
+							cout<<"Simulation length set to " <<ulTemporalAccuracyPerSensoryFunctionOscillation <<" time steps\n";
 						// Ellers: sjekker om det er på neste argument (med mellomrom):
-					else if( 	(fNumberOfSensorFunctionOscillations = atof( argv[innArgumentPos+1]) ) ){
-						++innArgumentPos;
-						cout<<"Number of forcing function oscillations set to be " <<fNumberOfSensorFunctionOscillations <<"\n";
-					}else{
-						cout<<"Can not read argument. Please follow the conventions:" <<endl;
-						skrivUtArgumentKonvensjoner(argv[0]);
-						exit(-1);
-						//continue;
-					}
+						else if( 	(ulTemporalAccuracyPerSensoryFunctionOscillation = atoi( argv[innArgumentPos+1]) ) ){
+							++innArgumentPos;
+							cout<<"Anntall tidsiterasjoner er satt til " <<ulTemporalAccuracyPerSensoryFunctionOscillation <<" per sensor funtion oscillation\n";
+						}else{
+							cout<<"Can not read argument. Please follow the conventions:" <<endl;
+							bWriteOutCallingConventions = true;
+							//skrivUtArgumentKonvensjoner(argv[0]);
+							exit(-1);
+							//continue;
+						}
+						break;
+					case 'n':
+						if( 		(fNumberOfSensorFunctionOscillations = atof( &argv[innArgumentPos][2])) ) 	
+							// Sjekker om antall oscillasjoner er i samme argument (uten mellomrom):
+							cout<<"Number of forcing function oscillations set to be " <<fNumberOfSensorFunctionOscillations <<"\n";
+							// Ellers: sjekker om det er på neste argument (med mellomrom):
+						else if( 	(fNumberOfSensorFunctionOscillations = atof( argv[innArgumentPos+1]) ) ){
+							++innArgumentPos;
+							cout<<"Number of forcing function oscillations set to be " <<fNumberOfSensorFunctionOscillations <<"\n";
+						}else{
+							cout<<"Can not read argument. Please follow the conventions:" <<endl;
+							//skrivUtArgumentKonvensjoner(argv[0]);
+							bWriteOutCallingConventions = true;
+							exit(-1);
+							//continue;
+						}
 
-					if( fNumberOfSensorFunctionOscillations < 0){
-						cout<<"Number of sensory function oscillations set to an invalid number (" <<fNumberOfSensorFunctionOscillations <<"). Try again.\n";
-						exit(-1);
-					}
-					
+						if( fNumberOfSensorFunctionOscillations < 0){
+							cout<<"Number of sensory function oscillations set to an invalid number (" <<fNumberOfSensorFunctionOscillations <<"). Try again.\n";
+							exit(-1);
+						}
+						
+						break;
+					default:
+						cout<<"\nFEIL INPUT\n\n";
+						break;
+				}
 			}else{
-				cout<<"Unknown argument: " <<argv[innArgumentPos] <<"\tUnable to complete request. Try again." <<endl;
-				skrivUtArgumentKonvensjoner(argv[0]);
-				exit(-1);
-			} 
-
-			// Går vidare til neste argument.
-			if( argv[innArgumentPos+1] ) 
-				++innArgumentPos;
-			else // dersom det ikkje finnes fleire argument å lese: break.
-				break;
+				cout<<"Argument " <<innArgumentPos+1 <<" unrecognized: " <<argv[innArgumentPos] <<".\n";
+				cout<<"Please follow calling convenctions: \n\n";
+				//skrivUtArgumentKonvensjoner(argv[0]);
+				bWriteOutCallingConventions=true;
+			}
 		}
+				
+
+		//skrivUtArgumentKonvensjoner(argv[0]); skriver ut en slags hjelpe-tekst: kva som er lov å skrive som argument..
+		if( bWriteOutCallingConventions ){
+			skrivUtArgumentKonvensjoner(argv[0]);
+		}
+
+
+		cout<<"\n";
+
 // TODO Denne skal vekk!
 /*		// ser på siste argument. Dersom dette er en int skal antall iterasjoner settes til dette:
 		if( innArgumentPos == argc-1 && ulTemporalAccuracyPerSensoryFunctionOscillation != 0 )
@@ -178,14 +198,14 @@ int main(int argc, char *argv[])
 			}
 		}
 */
-		cout<<"\n";
+//}
 	}else{ //  if(argc > 1) : else
 		cout<<"No arguments listed. Continue with default values:\tNumber of iterations: " <<DEFAULT_ANTALL_TIDSITERASJONER <<endl;
 		ulTemporalAccuracyPerSensoryFunctionOscillation = DEFAULT_ANTALL_TIDSITERASJONER;
 
 		skrivUtArgumentKonvensjoner(argv[0]);
 	} 
-	
+
 	// Setter totalt antall iterasjoner:
 	ulTotalNumberOfIterations = fNumberOfSensorFunctionOscillations * ulTemporalAccuracyPerSensoryFunctionOscillation;
 
@@ -199,11 +219,6 @@ int main(int argc, char *argv[])
 
 	//}1
 	
-
-
-
-
-
 	cout<<endl;
 
 	// Returverdien på systemkallet returnerer -1 (eller andre feilmeldinger) ved feil og 0 når det går bra.
