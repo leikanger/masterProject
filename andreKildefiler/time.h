@@ -129,10 +129,13 @@ class time_class : public timeInterface {
 */		 
 		
 		// Foreløpig legger eg den bare til først i denne iter: (etter nåværande elem.)
-		if( pWorkTaskQue.size() > 1 ){
+		if( pWorkTaskQue.size() > 0 ){
 			std::list<timeInterface*>::iterator iter = pWorkTaskQue.begin();
 			++iter;
 			pWorkTaskQue.insert(iter, pTimeClassArg ); 
+		}else{
+			cerr<<"FEIL: asdf529@time.h\n\nTERMINERER\n";
+			exit(9);
 		}
 	}
 #endif

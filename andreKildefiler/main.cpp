@@ -131,11 +131,10 @@ int main(int argc, char *argv[])
 							++innArgumentPos;
 							cout<<"Anntall tidsiterasjoner er satt til " <<ulTemporalAccuracyPerSensoryFunctionOscillation <<" per sensor funtion oscillation\n";
 						}else{
-							cout<<"Can not read argument. Please follow the conventions:" <<endl;
+							cout<<"Can not read argument. Please follow the conventions!\tIgnores argument." <<endl;
 							bWriteOutCallingConventions = true;
 							//skrivUtArgumentKonvensjoner(argv[0]);
-							exit(-1);
-							//continue;
+							//exit(-1);
 						}
 						break;
 					case 'n':
@@ -147,10 +146,10 @@ int main(int argc, char *argv[])
 							++innArgumentPos;
 							cout<<"Number of forcing function oscillations set to be " <<fNumberOfSensorFunctionOscillations <<"\n";
 						}else{
-							cout<<"Can not read argument. Please follow the conventions:" <<endl;
+							cout<<"Can not read argument. Please follow the conventions! \tIgnores argument." <<endl;
 							//skrivUtArgumentKonvensjoner(argv[0]);
 							bWriteOutCallingConventions = true;
-							exit(-1);
+							//exit(-1);
 							//continue;
 						}
 
@@ -211,12 +210,11 @@ int main(int argc, char *argv[])
 
 	// Set uNumberOfIterationsBetweenWriteToLog (to restrict number of points in log file)
 	if(ulTemporalAccuracyPerSensoryFunctionOscillation > LOGG_OPPLOYSING){
-		uNumberOfIterationsBetweenWriteToLog = (int)(((float)ulTemporalAccuracyPerSensoryFunctionOscillation / (float)LOGG_OPPLOYSING)+0.5);
+		uNumberOfIterationsBetweenWriteToLog = (int)(((float)ulTemporalAccuracyPerSensoryFunctionOscillation / (float)LOGG_OPPLOYSING) +0.5);
 		cout<<"Restricting number of entries in log file: Write log every " <<uNumberOfIterationsBetweenWriteToLog <<" iteration.\n";
 	}else{
 		cout<<"No nead to restrict number of log entries due to few iterations.\n\n";
 	}
-
 	//}1
 	
 	cout<<endl;

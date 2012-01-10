@@ -68,6 +68,8 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 #define LOGG_KAPPA false 	// ...samma for kappa
 #define LOGG_OPPLOYSING 100000
 
+#define UTSKRIFT_AV_TID 1
+#define UTSKRIFT_AV_TID_KVAR_Nte_ITER 50000
 //#define T 						(double)0.01 					//[ms]: tidsiterasjoner
 //#define ALPHA   				(double)1  //[verdi]: Lekkkasje per tidsiterasjon = [lengde på tidsiter]*[lekkasjefaktor]
 
@@ -82,8 +84,6 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 
 
 
-#define UTSKRIFT_AV_TID 1
-#define UTSKRIFT_AV_TID_KVAR_Nte_ITER 100000
 
 #define DOT_ENTER_UTSKRIFT_AV_TID 	0 // Betyr enter kvar n'te iter. (der n er tall som blir def.). Definer til 0 eller false for å slå av.
 #define DEBUG_UTSKRIFTS_NIVAA 		0

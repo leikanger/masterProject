@@ -240,19 +240,16 @@ class s_auron : public i_auron
 		#if LOGG_DEPOL  // Kan sette om depol. skal skrives til logg i main.h
 			// Handle accuracy for the depol-logfile:
 			static unsigned long uIterationsSinceLastWrite = 0;
-			uIterationsSinceLastWrite++;
 
 			// Unless it is time for writing to log, return.
-			if( uIterationsSinceLastWrite < uNumberOfIterationsBetweenWriteToLog ){
-				return;
-			}else{
+			if( (++uIterationsSinceLastWrite > uNumberOfIterationsBetweenWriteToLog) ){
+				depol_logFile 	<<time_class::getTid() <<"\t" <<dAktivitetsVariabel <<"; \t #Depolarization\n" ;
 				// Reset counter
 				uIterationsSinceLastWrite = 0;
+			}else{
+				return;
 			}
-
-
-			depol_logFile 	<<time_class::getTid() <<"\t" <<dAktivitetsVariabel <<"; \t #Depolarization\n" ;
-			//depol_logFile.flush();
+	
 		#endif
 	}
 //{friend

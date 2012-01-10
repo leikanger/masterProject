@@ -13,7 +13,7 @@ altI_en: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroElem
 	${CPP} ${CFLAGS} andreKildefiler/main.cpp neuroElements/neuroElement.cpp -o auroNett.out 
 
 kjoerOgPlott: altI_en
-	make c && sh kjør.sh -r100 -n1.5 && octave sammenligningKmedFileneFraDatafilesForEvaluation.m
+	make c && sh kjør.sh -r100 -n1.5 && octave -q sammenligningKmedFileneFraDatafilesForEvaluation.m
 
 altI_enGCC: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroElements/*.h
 	echo "\n\n\n\nmake altI_en: i GCC\n\n"
