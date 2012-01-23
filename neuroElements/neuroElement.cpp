@@ -1140,7 +1140,7 @@ inline void K_auron::estimatePeriod()
 	}else{
 		if(time_class::getTid() == 0){return;}
 		cout<<"SLUTTER (dette er bare feilsjekk): asdf23r4\n";
-		exit(0);
+		//exit(0);
 		// TODO TODO TODO SJå ned..
 
 		// setter planlagt task time til no, slik at den aldri vil fyre pga. dEstimatedTaskTime. (når den sjekker nest gang, så vil [no] være i fortida..)

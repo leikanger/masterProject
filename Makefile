@@ -7,21 +7,34 @@ CPPFLAGS=${CFLAGS}
 #all: andreKildefiler/main.cpp andreKildefiler/main.h andreKildefiler/tid.cpp andreKildefiler/time.h neuroElements/axon.h neuroElements/dendrite.h neuroElements/synapse.h neuroElements/neuroElement.cpp
 #	clear; echo "make all:\n\n"; g++ ${CFLAGS} andreKildefiler/main.cpp neuroElements/neuroElement.cpp -o auroNett.out
 
+all: auroNett.out
+	make auroNett.out
+
+run: auroNett.out
+	make auroNett.out && sh kjør.sh
+
+kjoerOgPlott: auroNett.out 
+	make auroNett.out && sh kjør.sh -r100 -n1.5 && octave -q sammenligningKmedFileneFraDatafilesForEvaluation.m
+
+
 
 altI_en: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroElements/*.h
 	echo "\n\n\n\nmake altI_en:\n\n"
 	${CPP} ${CFLAGS} andreKildefiler/main.cpp neuroElements/neuroElement.cpp -o auroNett.out 
 
-kjoerOgPlott: altI_en
-	make c && sh kjør.sh -r100 -n1.5 && octave -q sammenligningKmedFileneFraDatafilesForEvaluation.m
-
 altI_enGCC: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroElements/*.h
 	echo "\n\n\n\nmake altI_en: i GCC\n\n"
 	g++ ${CFLAGS} andreKildefiler/main.cpp neuroElements/neuroElement.cpp -o auroNett.out 
 
-auroNett.out: main.o neuroElement.o
+
+
+
+
+
+
+auroNett.out: ANN.o main.o neuroElement.o
 	echo "\n\n\n\nmake auroNett.out:\n\n"
-	${CPP} ${CFLAGS} main.o neuroElement.o -o auroNett.out
+	${CPP} ${CFLAGS} ANN.o main.o neuroElement.o -o auroNett.out
 
 neuroElement.o: andreKildefiler/time.h neuroElements/axon.h neuroElements/dendrite.h neuroElements/synapse.h neuroElements/neuroElement.cpp
 	${CPP} ${CFLAGS} -c neuroElements/neuroElement.cpp -o neuroElement.o
@@ -29,6 +42,9 @@ neuroElement.o: andreKildefiler/time.h neuroElements/axon.h neuroElements/dendri
 main.o: andreKildefiler/main.cpp andreKildefiler/main.h andreKildefiler/time.h
 	${CPP} ${CFLAGS} -c andreKildefiler/main.cpp 
 
+ANN.o: andreKildefiler/ANN.cpp andreKildefiler/ANN.h
+	${CPP} ${CFLAGS} -c andreKildefiler/ANN.cpp 
+	
 
 
 c:

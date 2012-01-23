@@ -228,7 +228,7 @@ class s_auron : public i_auron
  	s_dendrite* pInputDendrite;  	// Samme for pInputDendrite.
 
 	public:
-	s_auron(std::string sNavn_Arg ="unnamed", int nStartDepol = 0); 
+	s_auron(std::string sNavn_Arg ="s_auron", int nStartDepol = 0); 
 	~s_auron();
 
 	inline const double getCalculateDepol();
@@ -365,8 +365,12 @@ class K_auron : public i_auron
 	inline void estimatePeriod();
 
 	public:
-	K_auron(std::string sNavn_Arg ="unnamed", double dStartKappa_arg = 0, unsigned uStartDepol_prosent =0); 	
+	K_auron(std::string sNavn_Arg ="K_auron", double dStartKappa_arg = 0, unsigned uStartDepol_prosent =0); 	
 	~K_auron();
+
+
+
+
 
 	// TODO TODO TODO 
 	// Sjekk: Kvifor bare lagre det i en temp-variabel? Er vel bedre å lagre det direkte i en medl.var. for K_auron. Da kan det brukes om igjen..
@@ -458,7 +462,12 @@ class K_auron : public i_auron
 	}
 
 
-//{2 friend
+
+	const std::list<K_synapse*> getUtSynapserP(){ return pUtSynapser; }
+
+
+
+
 	friend class i_auron;
 	friend class K_axon;
 	friend class K_synapse;
@@ -475,8 +484,9 @@ class K_auron : public i_auron
 	//friend void loggeFunk_K_auron();// SAMME (har flytta den inn i klassen..)
 
 	friend void* taskSchedulerFunction(void* );
-//}1
 
+
+	
 }; // }
 
 class s_sensor_auron : public s_auron{

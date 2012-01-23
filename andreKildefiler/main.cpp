@@ -40,6 +40,7 @@
 
 #include <sstream> 
 
+#include "../andreKildefiler/ANN.h"
 
 void initialiserArbeidsKoe();
 void skrivUtArgumentKonvensjoner(std::string);
@@ -94,8 +95,8 @@ int main(int argc, char *argv[])
 
 
 
-	//Leser inn argumenter: 
-	if(argc > 1 ) //{1 	  //	 (argc>1 betyr at det står meir enn bare programkall)
+	//Leser inn argumenter:  //{1
+	if(argc > 1 ) //{ 	  //	 (argc>1 betyr at det står meir enn bare programkall)
 	{
 		int innArgumentPos = 0;
 		bool bWriteOutCallingConventions = false;
@@ -169,7 +170,7 @@ int main(int argc, char *argv[])
 				//skrivUtArgumentKonvensjoner(argv[0]);
 				bWriteOutCallingConventions=true;
 			}
-		}
+		} //}
 				
 
 		//skrivUtArgumentKonvensjoner(argv[0]); skriver ut en slags hjelpe-tekst: kva som er lov å skrive som argument..
@@ -180,24 +181,6 @@ int main(int argc, char *argv[])
 
 		cout<<"\n";
 
-// TODO Denne skal vekk!
-/*		// ser på siste argument. Dersom dette er en int skal antall iterasjoner settes til dette:
-		if( innArgumentPos == argc-1 && ulTemporalAccuracyPerSensoryFunctionOscillation != 0 )
-		{
-			int nInnInt;
-			//innArgumentPos er på siste argumentet for programkallet.
-			if( ( (nInnInt = atoi( argv[innArgumentPos]))) ) //Skal eg sette øvre grense også?
-			{
-				if(nInnInt <= 0){
-					cout<<"Number of iterations must be a positive number.\nUse default: " <<DEFAULT_ANTALL_TIDSITERASJONER <<endl;
-				}else{
-					cout<<"Argument gives number of iterations to be: \t\t" <<nInnInt <<endl;
-					ulTemporalAccuracyPerSensoryFunctionOscillation=nInnInt;
-				}
-			}
-		}
-*/
-//}
 	}else{ //  if(argc > 1) : else
 		cout<<"No arguments listed. Continue with default values:\tNumber of iterations: " <<DEFAULT_ANTALL_TIDSITERASJONER <<endl;
 		ulTemporalAccuracyPerSensoryFunctionOscillation = DEFAULT_ANTALL_TIDSITERASJONER;
@@ -215,9 +198,10 @@ int main(int argc, char *argv[])
 	}else{
 		cout<<"No nead to restrict number of log entries due to few iterations.\n\n";
 	}
-	//}1
-	
 	cout<<endl;
+	//}1
+	// Ferdig med å lese inn argumenter
+	
 
 	// Returverdien på systemkallet returnerer -1 (eller andre feilmeldinger) ved feil og 0 når det går bra.
 	// Dersom ./datafiles_for_evaluation/ ikkje finnes, lages den. Dersm den finnes gjør ikkje kallet noke:
@@ -290,6 +274,8 @@ int main(int argc, char *argv[])
 		// Testoppsett:
 	// Blanda:
 
+
+	#if 0 //Setter opp test for å teste einskild neuron:
 		//STATISK
 		#if 1
 			new K_sensor_auron("_sKN", &statiskSensorFunk);
@@ -307,7 +293,32 @@ int main(int argc, char *argv[])
 			new K_sensor_auron("_dKN", &dynamiskSensorFunk);
 			new s_sensor_auron("_dSN", &dynamiskSensorFunk);
 		#endif
+	#else
 
+		// Tester class ANN:
+		cout<<"TESTER ANN\n";
+
+
+		QuadraticMatrix<double> A(5,"A");
+	
+		A(1,3)= 3.14;
+		A(1,4)= 4.44;
+		A(3,2) = 1; 	
+		A(1,1)=99;
+		A(4,1)=66;
+		cout<<"Lager ANN med kantmatrise:\n\n";
+		A.skrivUt();
+
+		cout<<"Lager ANN\n";
+		ANN<K_auron> Ktest(A);
+
+	 	cout<<"Skriv ut matrise\n";
+		//Ktest.skrivUtKantMatrise();
+
+	cout<<"Win!\n";
+	exit(0);
+	
+	#endif
 
 //{ KOMMENTERT UT
 //  BARE KAPPA:
@@ -389,6 +400,9 @@ int main(int argc, char *argv[])
 
 
 
+
+
+
 		cout<<"******************************************\n*** BEGYNNER KJØRING AV ANN: ***\n******************************************\n\n";
 
 //		K_sensor_auron::updateAllSensorAurons();
@@ -399,10 +413,10 @@ int main(int argc, char *argv[])
 
 
 		cout<<"\n\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nAvslutter.\n\n\n";
+
 		#if GCC	
 			cout.precision(20);
 		#endif
-		
 		//cout<<"siste depol. for [SN, KN]: \t[" <<Sd->dAktivitetsVariabel <<", " <<Kd->getCalculateDepol() <<"]\n\n";
 
 	
@@ -423,6 +437,7 @@ int main(int argc, char *argv[])
 		i_auron::callDestructorForAllAurons();
 
 	} // if( bLogLogExecution == false ){ .. }
+
 
 	cout<<"\n\nWIN!\n\n\n";
 	return 0;

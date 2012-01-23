@@ -116,6 +116,10 @@ class K_synapse : public i_synapse{
 	~K_synapse();
 	
 	inline void skrivUt();
+	
+	K_dendrite* getPostNodeDendrite(){
+		return pPostNodeDendrite;
+	}
 
 	friend class K_dendrite;
 	friend class K_auron;

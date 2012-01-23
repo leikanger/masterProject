@@ -133,6 +133,8 @@ class K_dendrite : public i_dendrite{
 	K_dendrite( K_auron* );
 	~K_dendrite();
 
+	K_auron* getElementOfAuron(){ return pElementOfAuron; }
+
 	friend class K_synapse;
 	friend class K_auron;
 };
