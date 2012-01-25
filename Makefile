@@ -20,7 +20,7 @@ kjoerOgPlott: auroNett.out
 
 altI_en: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroElements/*.h
 	echo "\n\n\n\nmake altI_en:\n\n"
-	${CPP} ${CFLAGS} andreKildefiler/main.cpp neuroElements/neuroElement.cpp -o auroNett.out 
+	${CPP} ${CFLAGS} neuroElements/neuroElement.cpp andreKildefiler/ANN.cpp andreKildefiler/main.cpp -o auroNett.out 
 
 altI_enGCC: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroElements/*.h
 	echo "\n\n\n\nmake altI_en: i GCC\n\n"
@@ -32,14 +32,14 @@ altI_enGCC: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroE
 
 
 
-auroNett.out: ANN.o main.o neuroElement.o
+auroNett.out: ANN.o main.o neuroElement.o andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*cpp neuroElements/*.h
 	echo "\n\n\n\nmake auroNett.out:\n\n"
 	${CPP} ${CFLAGS} ANN.o main.o neuroElement.o -o auroNett.out
 
 neuroElement.o: andreKildefiler/time.h neuroElements/axon.h neuroElements/dendrite.h neuroElements/synapse.h neuroElements/neuroElement.cpp
 	${CPP} ${CFLAGS} -c neuroElements/neuroElement.cpp -o neuroElement.o
 
-main.o: andreKildefiler/main.cpp andreKildefiler/main.h andreKildefiler/time.h
+main.o: andreKildefiler/main.cpp andreKildefiler/main.h andreKildefiler/time.h andreKildefiler/ANN.cpp andreKildefiler/ANN.h
 	${CPP} ${CFLAGS} -c andreKildefiler/main.cpp 
 
 ANN.o: andreKildefiler/ANN.cpp andreKildefiler/ANN.h

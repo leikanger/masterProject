@@ -115,7 +115,7 @@ class K_synapse : public i_synapse{
 	//K_synapse(K_auron*, K_auron*, double dSynVekt_Arg =1, bool bInhibEffekt_Arg =false) ;
 	~K_synapse();
 	
-	inline void skrivUt();
+	inline void print();
 	
 	K_dendrite* getPostNodeDendrite(){
 		return pPostNodeDendrite;

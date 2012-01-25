@@ -38,7 +38,6 @@
 #include "time.h"
 #include "sensorFunk.h"
 
-#include <sstream> 
 
 #include "../andreKildefiler/ANN.h"
 
@@ -126,7 +125,7 @@ int main(int argc, char *argv[])
 					case 'r':
 						// Sjekker om antall iterasjoner er i samme argument (uten mellomrom):
 						if( 		(ulTemporalAccuracyPerSensoryFunctionOscillation = atoi( &argv[innArgumentPos][2])) ) 	
-							cout<<"Simulation length set to " <<ulTemporalAccuracyPerSensoryFunctionOscillation <<" time steps\n";
+							cout<<"Temporal resolution set to " <<ulTemporalAccuracyPerSensoryFunctionOscillation <<" (time steps per sensory function period).\n";
 						// Ellers: sjekker om det er på neste argument (med mellomrom):
 						else if( 	(ulTemporalAccuracyPerSensoryFunctionOscillation = atoi( argv[innArgumentPos+1]) ) ){
 							++innArgumentPos;
@@ -295,30 +294,65 @@ int main(int argc, char *argv[])
 		#endif
 	#else
 
+
+
+	#if 0
 		// Tester class ANN:
 		cout<<"TESTER ANN\n";
 
 
-		QuadraticMatrix<double> A(5,"A");
+		QuadraticMatrix<double> A(2,"A");
 	
-		A(1,3)= 3.14;
-		A(1,4)= 4.44;
-		A(3,2) = 1; 	
-		A(1,1)=99;
-		A(4,1)=66;
-		cout<<"Lager ANN med kantmatrise:\n\n";
-		A.skrivUt();
+		A(0,1)= 0.5;
+		cout<<"Lager kantmatrise:\n\n";
+		A.printMatrix();
 
 		cout<<"Lager ANN\n";
 		ANN<K_auron> Ktest(A);
 
-	 	cout<<"Skriv ut matrise\n";
-		//Ktest.skrivUtKantMatrise();
+	 	cout<<"SKRIVER UT omega-matrise\n";
+		Ktest.printEdgeMatrix();
 
 	cout<<"Win!\n";
-	exit(0);
-	
+cout<<"\n\nSLUTTER asdf1235@maion.cpp\n\n";
+//exit(0);
 	#endif
+
+
+#if 1
+	cout<<"\n\n\n\tFORTSETTER\n\n";
+
+
+	cout<<"Try to construct ANN with K_auron-matrix:\n";
+
+		// TRENGER IKKJE MATRISE: bruk heller std::vector<K_auron*>
+	cout<<"\tInitialize K_auron*-vector:\n";
+		std::vector<K_auron*> AlleAuron(3);
+		//AlleAuron[0] = new K_sensor_auron("Ksensor1",statiskSensorFunkMedHoegAktivitet);
+		AlleAuron[0] = new K_sensor_auron("K0Sensor", dynamiskSensorFunk);
+		AlleAuron[2] = new K_sensor_auron("K2Sensor", dynamiskSensorFunk2);
+	
+		QuadraticMatrix<double> KMat(3);
+		KMat(0,1) = 50;
+		KMat(2,1) = -50;
+
+	cout<<"\tInitialize ANN from K_auron*-vector and dEdgeMatrix:\n";
+		ANN<K_auron> Ktest2(KMat, AlleAuron);
+
+	cerr<<"\n\nSkriver ut kant-matrise:\n";
+		Ktest2.printEdgeMatrix();
+
+	cerr<<"OK\n";
+#else
+	cout<<"TESTER\n"; 
+	K_sensor_auron 	DKs1("_dKsN", &statiskSensorFunkMedHoegAktivitet);
+	K_auron 		DK1("_dKN");
+	new K_synapse(&DKs1, &DK1, 1);
+//exit(0); // OK_ Dette funker ikkje. Da er det ikkje matrise-shitten iverftall!!
+#endif	
+
+	
+	#endif //Avslutter #if som starter over 1-aurons-testen (dette over er else..)
 
 //{ KOMMENTERT UT
 //  BARE KAPPA:
@@ -449,7 +483,7 @@ void skrivUtArgumentKonvensjoner(std::string programKall)
 	cout <<"\n\nConventions for executing auron.out: \n"
 		 <<"\t"<<programKall <<"[-options] [number of iterations]\n"
 		 <<"\t\tOptions: \n\t\t\t-r [n] \t number of iterations per sensor function oscillation."
-		 <<"\t\t\n           \t\t-n [n] \t number of half-oscillations for sensor function - one oscillation given by -n2."
+		 <<"\t\t\n           \t\t-n [n] \t number of periods for sensor function - one half oscillation given by -n0.5"
 		 <<"\t\t\n           \t\t-L [n] \t make log/log plot of error for [100:100*2^[n]] time iterations."
 		 <<"\n\n\n\n\n";
 } //}
@@ -563,7 +597,10 @@ void* taskSchedulerFunction(void* )
 ***************************/
 std::ostream & operator<< (std::ostream & ut, i_auron* pAuronArg )
 { //{
-	ut<<"| " <<pAuronArg->getNavn() <<"  | verdi: " <<pAuronArg->getAktivityVar();// <<" \t|\tMed utsynapser:\n";
+	// For now: Print the adress in the i_auron pointer:
+	ut<<(void*)pAuronArg;
+
+//	ut<<"| " <<pAuronArg->getNavn() <<"  | verdi: " <<pAuronArg->getAktivityVar();// <<" \t|\tMed utsynapser:\n";
 	
 	// Innsynapser:
 	//for( std::vector<synapse*>::iterator iter = neuroArg.pInnSynapser.begin(); iter != neuroArg.pInnSynapser.end(); iter++ ){

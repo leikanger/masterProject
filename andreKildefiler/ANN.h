@@ -9,6 +9,20 @@ using std::string;
 #define MAX_NEURON 256
 
 
+
+/************************
+** MERK: Både QuadraticMatrix og ANN er 1-indeksert!!!
+** XXX XXX XXX XXX XXX XXX
+**************************/
+
+
+
+
+
+
+
+
+
 template <class C> class QuadraticMatrix{
 // ALLTERNATIVT med TEMPLATE: template <class C, unsigned uDim> class QuadraticMatrix{   FUNKER ENDA BEDRE!
 	unsigned uDim;
@@ -29,9 +43,11 @@ template <class C> class QuadraticMatrix{
 		// Dette funker: kalles f.eks. ved QM(1,2) - n=1,m=2!
 		C& operator()(unsigned uN, unsigned uM)
 		{
-			// Først: gjøre indeks 1-indeksert:
-			uN --;
-			uM --;
+//  /// ///// KOMMENTERT UT: Matrisen er nå 0-indeksert!
+//			// Først: gjøre indeks 1-indeksert:
+//			uN --;
+//			uM --;
+
 			// Look for Out-Of-Bounds-Error
 			if(uN >= uDim || uM >= uDim){
 				cout<<"\n\nasdf163@ANN.h: matrix-out-of-bounds-ERROR\n"
@@ -51,9 +67,10 @@ template <class C> class QuadraticMatrix{
 		const unsigned getDim(){
 			return uDim;
 		}
-		const void skrivUt(){
+		const void printMatrix(){
+			cout<<"PrintMatrix:\n";
 			for(int i=0; i<uDim; i++){
-				if(i == uDim/2){
+				if(i == (uDim)/2){
 					cout<<sNavn 	<<" =";
 				}
 
@@ -62,6 +79,7 @@ template <class C> class QuadraticMatrix{
 				}
 				cout<<"\n";
 			}
+			cout<<"\n";
 		}
 };
 
@@ -87,10 +105,18 @@ template <class C> class ANN{
 	}
 #endif
 public:
-	// TODO Skriv ny, med matrise-arg: ANN(matrise) 
-	ANN(QuadraticMatrix<double>& rEdgeMatrix);
+	/******** Constructor  ***********
+	**
+	** 	ANN(QuadraticMatrix<double> rEdgeMatrix) 											: 	lager tomme neuron med koblinger som gitt i rEdgeMatrix
+	** 	ANN(QuadraticMatrix<K_auron*> rAuronMatrix. QuadraticMatrix<double> rEdgeMatrix) 	: 	lager ANN med aurona peiket til i rAuronMatrix med koblinger som i rEdgeMatrix
+	** 																							(dersom rAuronMatrix inneholder 0-pekere, skal nytt K_auron initieres!)
+	*********************************/
+	//ANN(QuadraticMatrix<double> rEdgeMatrix); //TODO Ta vekk referanse-arg.!
+	//ANN(std::vector<C*> pAuronVector, QuadraticMatrix<double> dEdgeMatrix);
+	ANN(QuadraticMatrix<double> dEdgeMatrix, std::vector<C*> pAuronVector =std::vector<C*>(0)  );
 
-	const void skrivUtKantMatrise();
+
+	const void printEdgeMatrix();
 
 
 
@@ -102,3 +128,5 @@ public:
 	*/	
 
 };
+
+// vim:fdm=marker:fmr=//{,//}

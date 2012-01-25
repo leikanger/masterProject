@@ -4,7 +4,7 @@
 \label{secKontinuerligTid}
 For flyt-baserte noder, kan vi oppnå nær-kontinuerlig tid for depol. forløpet.
 Vi kan beregne når neste fyring vil være, og seie at denne skal skje nøyaktig da. 
-Ved fyring vil eit nytt 'time window' initialiseres ved å sette $v_0 = 0$ og sette tid $t_0 = t^\'$.
+Ved fyring vil eit nytt 'time window' initialiseres ved å sette $v_0 = 0$ og tid $t_0=t^*$.
 Vi vil dermed får eksakt depol. forløp også for starten av neste time window.
 
 	\subsection{'time window'}
@@ -19,7 +19,7 @@ Vi vil dermed får eksakt depol. forløp også for starten av neste time window.
 		Fyringstidspunktet eg også definert som start--tid for neste 'time window', og  vi trenger bare lagre dette tidspunktet.
 
 		Første vi må gjøre er å definere \emph{double dEstimatedTaskTime} istadenfor \emph{unsigned long ulEstimatedTaskTime}.
-		I \emph{K_auron::doTask()} lagrer vi auronets \emph{dEstimatedTaskTime} til \emph{dStartOfTimeWindow}.
+		I \emph{K\_auron::doTask()} lagrer vi auronets \emph{dEstimatedTaskTime} til \emph{dStartOfTimeWindow}.
 		TRUR DETTE VIL GI OSS PERFEKT OPPLADING AV NEURONET!
 	
 % TODO 1) Lagre estimert tidspunkt i en double-variabel istadenfor en unsigned long: double dEstimatedTaskTime 			ikkje lenger ulEstimatedTaskTime.. 														TODO (1)

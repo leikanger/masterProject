@@ -1,1 +1,1 @@
-vim -p andreKildefiler/main.cpp andreKildefiler/sensorFunk.h andreKildefiler/main.h andreKildefiler/ANN.cpp andreKildefiler/ANN.h andreKildefiler/time.h neuroElements/neuroElement.cpp neuroElements/auron.h neuroElements/axon.h neuroElements/dendrite.h neuroElements/synapse.h PLAN NOTATER
+vim -p andreKildefiler/main.cpp andreKildefiler/ANN.cpp andreKildefiler/ANN.h andreKildefiler/main.h andreKildefiler/sensorFunk.h andreKildefiler/time.h neuroElements/neuroElement.cpp neuroElements/auron.h neuroElements/synapse.h PLAN NOTATER

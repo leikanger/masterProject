@@ -344,6 +344,14 @@ class K_auron : public i_auron
 	}
 
 
+
+	// Making copy constructor private to disable copying:
+	K_auron(const K_auron& arg);
+	// Same with assignment:
+	K_auron& operator=(const K_auron& arg);
+
+
+
 	protected:
 	inline void changeKappa_derivedArg( double );
 	inline void changeKappa_absArg(double);
@@ -520,6 +528,14 @@ class K_sensor_auron : public K_auron{
 
 	void updateSensorValue();
 	static void updateAllSensorAurons();
+
+
+	// Making copy constructor private to disable copying:
+	K_sensor_auron(const K_sensor_auron& arg);
+	// Same with assignment:
+	K_sensor_auron& operator=(const K_sensor_auron& arg);
+
+
 	
 	protected:
 	inline double recalculateKappa();

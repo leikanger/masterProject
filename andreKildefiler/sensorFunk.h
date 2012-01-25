@@ -21,6 +21,9 @@ inline double statiskSensorFunk()
 	//return 1.5000000*FYRINGSTERSKEL;
 }
 
+inline double statiskSensorFunkMedHoegAktivitet(){
+	return 3.0*(double)FYRINGSTERSKEL;
+}
 // GAMMELT:
 inline double sensorFunk1()
 {
@@ -35,14 +38,14 @@ inline double sensorFunk1a()
 	return ( 1.1 * FYRINGSTERSKEL*( (2 + sin( 2 * 3.14*(float)time_class::getTid()/1000 ))) );
 }
 
-inline double sensorFunk2()
+inline double dynamiskSensorFunk2()
 {
 	// Brukt i plotta: return (  FYRINGSTERSKEL * 0.50 * (1 - sin( 3* 3.14*(float)time_class::getTid()/1000 )) );
 	if( time_class::getTid() < 2000)
-		return (  FYRINGSTERSKEL * 0.50 * (1 - sin( 10* 3.14*(float)time_class::getTid()/1000 )) );
+		return (  FYRINGSTERSKEL * 1.50 * (1 - sin( 10* 3.14*(float)time_class::getTid()/1000 )) );
 	else // tid er mellom 3000 og 3500
 	{
-		return  (FYRINGSTERSKEL * 2 * 0.5 * (1 - cos( 1*3.14*(float)time_class::getTid()/1000 )) );
+		return  (FYRINGSTERSKEL * 2 * 1.5 * (1 - cos( 1*3.14*(float)time_class::getTid()/1000 )) );
 	}
 }
 

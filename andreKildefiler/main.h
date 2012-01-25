@@ -37,7 +37,8 @@
 //include <algorithm> 	- for_each()
 //include <fstream> 	- file streams
 
-
+// For string-strems (to convert int, float, etc to string..)
+#include <sstream> 
 
 
 extern unsigned long ulTemporalAccuracyPerSensoryFunctionOscillation;
@@ -65,7 +66,7 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 
 
 #define LOGG_DEPOL true 	// Denne gir om implementasjonen skal skrive til depol-logg.
-#define LOGG_KAPPA false 	// ...samma for kappa
+#define LOGG_KAPPA true 	// ...samma for kappa
 #define LOGG_OPPLOYSING 100000
 
 #define UTSKRIFT_AV_TID 1

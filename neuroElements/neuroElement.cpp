@@ -337,7 +337,7 @@ s_sensor_auron::s_sensor_auron( std::string sNavn_Arg , double (*pFunk_arg)(void
 //{2 i_synapse
 i_synapse::i_synapse(double dSynVekt_Arg, bool bInhibEffekt_Arg, std::string sKlasseNavn /*="synapse"*/ ) : timeInterface(sKlasseNavn), bInhibitoryEffect(bInhibEffekt_Arg)
 {
-	dSynapticWeight = dSynVekt_Arg;
+	dSynapticWeight = abs(dSynVekt_Arg);
 	dSynapticWeightChange = 0;
 	
 	#if DEBUG_SKRIV_UT_CONSTRUCTOR
@@ -640,7 +640,7 @@ inline void K_dendrite::newInputSignal( double dNewSignal_arg )
 { //{2
 	// TODO Legg inn spatiotemporal differensiering for ulike synapser. Dette gjør at eg må gjøre om heile strukturen til dette opplegget.
 
-	// TODO TODO TODO ESTIMER Tidspunk for overføring. No setter eg bare oppdateringstidsspunkt for kappa til midten av tidsiterasjonen.. TODO TODO TODO
+	// TODO TODO TODO ESTIMER Tidspunk for overføring. No setter eg bare oppdateringstidsspunkt for kappa til starten av tidsiterasjonen.. TODO TODO TODO
 	pElementOfAuron->dStartOfNextTimeWindow = (double)time_class::getTid();
 	pElementOfAuron->changeKappa_derivedArg( dNewSignal_arg );
 } //}2
@@ -1139,13 +1139,14 @@ inline void K_auron::estimatePeriod()
 
 	}else{
 		if(time_class::getTid() == 0){return;}
-		cout<<"SLUTTER (dette er bare feilsjekk): asdf23r4\n";
-		//exit(0);
+		cout<<"estimatePeriod() når \tK < T   (id: asdf23r4)\t" <<sNavn <<"\n";
+
+//		exit(0);
 		// TODO TODO TODO SJå ned..
 
 		// setter planlagt task time til no, slik at den aldri vil fyre pga. dEstimatedTaskTime. (når den sjekker nest gang, så vil [no] være i fortida..)
 		// TODO TODO TODO TODO TODO TODO UTESTET, men å sette den til null(som før) vil ikkje gå bra!
-		dEstimatedTaskTime = 1E99; //(double)time_class::getTid();
+//		dEstimatedTaskTime = 1E99; //(double)time_class::getTid();
 		
 		// Setter dLastCalculatedPeriod, dChangeInPeriodINVERSE, dPeriodINVERSE.
 		dLastCalculatedPeriod = 0; 	// Er dette greit?    SKUMMELT! (men funker).
@@ -1367,7 +1368,7 @@ const double K_synapse::getTotalTransmission()
 	return (1-2*bInhibitoryEffect)*(pPreNodeAuron->dPeriodINVERSE)*dSynapticWeight;
 }
 
-inline void K_synapse::skrivUt()
+inline void K_synapse::print()
 { //{
  	cout<<"Synapse mellom " <<pPreNodeAuron->sNavn <<" og " <<(pPostNodeDendrite->pElementOfAuron)->sNavn 
 		<<" med W_ij = " <<dSynapticWeight 
