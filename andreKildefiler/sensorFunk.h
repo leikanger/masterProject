@@ -10,10 +10,7 @@ inline double linearilyIncreasingDepolVelocity()
 
 inline double dynamiskSensorFunk()
 {
-	//return (2.1+sin((double)time_class::getTid() * (double)LEKKASJE_KONST))*(double)FYRINGSTERSKEL;
-	//return (2.1+sin((double)time_class::getTid() * (double)T)) * (double)FYRINGSTERSKEL;
 	return (2.1+sin( 2*PI * ( (double)time_class::getTid() / ((double)ulTemporalAccuracyPerSensoryFunctionOscillation) ))   )* (double)FYRINGSTERSKEL;
-	//return (2.1+sin((double)time_class::getTid() / (double)ulTemporalAccuracyPerSensoryFunctionOscillation*2*PI*NUMBER_OF_SENSOR_FUNKTION_OSCILLATIONS)) * (double)FYRINGSTERSKEL;
 }
 inline double statiskSensorFunk()
 {

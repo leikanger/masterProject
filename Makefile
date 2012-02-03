@@ -24,7 +24,7 @@ altI_en: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroElem
 
 altI_enGCC: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroElements/*.h
 	echo "\n\n\n\nmake altI_en: i GCC\n\n"
-	g++ ${CFLAGS} andreKildefiler/main.cpp neuroElements/neuroElement.cpp -o auroNett.out 
+	g++ ${CFLAGS} neuroElements/neuroElement.cpp andreKildefiler/ANN.cpp andreKildefiler/main.cpp -o auroNett.out 
 
 
 

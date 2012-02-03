@@ -274,9 +274,9 @@ int main(int argc, char *argv[])
 	// Blanda:
 
 
-	#if 0 //Setter opp test for å teste einskild neuron:
+	#if 1 //Setter opp test for å teste einskild neuron:
 		//STATISK
-		#if 1
+		#if 0
 			new K_sensor_auron("_sKN", &statiskSensorFunk);
 			new s_sensor_auron("_sSN", &statiskSensorFunk);
 		#endif
@@ -295,31 +295,8 @@ int main(int argc, char *argv[])
 	#else
 
 
-
-	#if 0
-		// Tester class ANN:
-		cout<<"TESTER ANN\n";
-
-
-		QuadraticMatrix<double> A(2,"A");
-	
-		A(0,1)= 0.5;
-		cout<<"Lager kantmatrise:\n\n";
-		A.printMatrix();
-
-		cout<<"Lager ANN\n";
-		ANN<K_auron> Ktest(A);
-
-	 	cout<<"SKRIVER UT omega-matrise\n";
-		Ktest.printEdgeMatrix();
-
-	cout<<"Win!\n";
-cout<<"\n\nSLUTTER asdf1235@maion.cpp\n\n";
-//exit(0);
-	#endif
-
-
-#if 1
+// Lage ANN fra ei kant-matrise, og evt. send inn en vektor med vilkårlig antall auron (mindre enn dim(matrisa)). Kan også sende inn null auron. Vektoren med auron-peikere brukes for å la nokre auron være sensor-auron!
+#if 0
 	cout<<"\n\n\n\tFORTSETTER\n\n";
 
 
@@ -343,12 +320,6 @@ cout<<"\n\nSLUTTER asdf1235@maion.cpp\n\n";
 		Ktest2.printEdgeMatrix();
 
 	cerr<<"OK\n";
-#else
-	cout<<"TESTER\n"; 
-	K_sensor_auron 	DKs1("_dKsN", &statiskSensorFunkMedHoegAktivitet);
-	K_auron 		DK1("_dKN");
-	new K_synapse(&DKs1, &DK1, 1);
-//exit(0); // OK_ Dette funker ikkje. Da er det ikkje matrise-shitten iverftall!!
 #endif	
 
 	

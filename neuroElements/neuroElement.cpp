@@ -1040,24 +1040,12 @@ void K_auron::doCalculation()
 	#endif
 
 
-/*	Trur ikkje denne er så lur..
-	// BRUTE-force feilfiks:
-	if(dEstimatedTaskTime<time_class::getTid()+1){
-		//dDepolAtStartOfTimeWindow = 0;
-		//write APtoLog();
-		// NEI NEI: doTask(); 
-		time_class::addTaskIn_pWorkTaskQue( this );
-		cout<<"BRUTE-force'er en fyring. Dårlig stil, men funker! \tTid:  " <<time_class::getTid() <<", dEstimatedTaskTime: " <<(unsigned)dEstimatedTaskTime <<"\n";
-	//	dStartOfTimeWindow = dStartOfNextTimeWindow;
-	}
-*/
-
 	if( (unsigned)dStartOfTimeWindow < time_class::getTid()+1 ){
 		// Viktig å kalkulere depol med GAMMEL Kappa! Ellers får vi hopp i depol!
 		// Lagrer v_0 og t_0 for neste 'time window':
 		dDepolAtStartOfTimeWindow = getCalculateDepol();
 		// TODO Dette må endres når eg begynner med synaptisk input for nodene! Da blir det litt annaleis ?
-		dStartOfTimeWindow = dStartOfNextTimeWindow; //GAMMEL LØYSING VAR: time_class::getTid();
+		dStartOfTimeWindow = dStartOfNextTimeWindow; 
 	}else{
 		// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 		// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
@@ -1070,6 +1058,11 @@ void K_auron::doCalculation()
 	}
 	
 
+	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+	// DEPRECATED!
+	// Linja under, dAktivitetsVariabel += dChangeInKappa_this_iter SKAL VEKK!
+	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+
 	// Oppdaterer Kappa
 	dAktivitetsVariabel += dChangeInKappa_this_iter;
 	dChangeInKappa_this_iter = 0;
@@ -1081,8 +1074,11 @@ void K_auron::doCalculation()
 	// FETT! Dette gjør at størrelsen på comp. time step bare gir kor ofte kappa skal oppdateres. Fyring, og init av time window kan skje heilt separat fra dette!
 	// Sjekker om den skal fyre denne iter: (før neste iter)
 	// dEstimatedTaskTime RUNDES ALLTID NED!! Skal ikkje sjekke om den er over eller under halvegs, bare kva steg den har starta på..
-	if( (unsigned)(dEstimatedTaskTime) < time_class::getTid()+1 ){ //TODO
-cerr<<"LEGG TIL task i denne iter: TID, dEstimatedTaskTime :\t" <<time_class::getTid() <<", " <<dEstimatedTaskTime <<"\n";
+	if( (unsigned)(dEstimatedTaskTime) <= time_class::getTid() ){ //TODO
+cerr<<"TEST: LEGG TIL task i denne iter: TID, dEstimatedTaskTime :\t" <<time_class::getTid() <<" >= (unsigned)" <<dEstimatedTaskTime <<"\n";
+	}
+	if( (unsigned)(dEstimatedTaskTime+0.5) < time_class::getTid()+1 ){ //TODO
+cerr<<"LEGG TIL task i denne iter: TID, dEstimatedTaskTime+0.5 :\t" <<time_class::getTid() <<"+1 > " <<(unsigned)(dEstimatedTaskTime+0.5) <<"\n";
 		time_class::addTaskInPresentTimeIteration( this );
 	}
 }
@@ -1141,8 +1137,6 @@ inline void K_auron::estimatePeriod()
 		if(time_class::getTid() == 0){return;}
 		cout<<"estimatePeriod() når \tK < T   (id: asdf23r4)\t" <<sNavn <<"\n";
 
-//		exit(0);
-		// TODO TODO TODO SJå ned..
 
 		// setter planlagt task time til no, slik at den aldri vil fyre pga. dEstimatedTaskTime. (når den sjekker nest gang, så vil [no] være i fortida..)
 		// TODO TODO TODO TODO TODO TODO UTESTET, men å sette den til null(som før) vil ikkje gå bra!
@@ -1202,12 +1196,11 @@ inline void K_sensor_auron::updateSensorValue()
 	//if( dSensedValue != dLastSensedValue){
 		//changeKappa_absArg( dSensedValue ); FARLIG! IKKJE BRUK changeKappa_absArg() !
 		//
-		// Lagre tidspunkt for oppdatering av kappa som starten av iterasjonen (definer dette som samplingstidspunkt av sensa variabel).
-		dStartOfNextTimeWindow = (double)time_class::getTid(); // Setter den til [no], før eg beregner resultatet av denne oppdateringa i changeKappa_derivedArg( .. );
-		// Setter at neste time window skal starte i starten av denne iterasjonen (dette er tidspunktet sensor-neuronet oppdaterer sensinga si).
-			// Dersom denne settes til noke anna, får vi større feil.
-		changeKappa_derivedArg(   (dSensedValue-dLastSensedValue) );  
-		// SKRIV MYKJE OM: [Finn ut om denne er gange LEKKASJE_KONST.]
+	// Lagre tidspunkt for oppdatering av kappa som starten av iterasjonen (definer dette som samplingstidspunkt av sensa variabel).
+	dStartOfNextTimeWindow = (double)time_class::getTid(); // Setter den til [no], før eg beregner resultatet av denne oppdateringa i changeKappa_derivedArg( .. );
+	// Setter at neste time window skal starte i starten av denne iterasjonen (dette er tidspunktet sensor-neuronet oppdaterer sensinga si).
+		// Dersom denne settes til noke anna, får vi større feil.
+	changeKappa_derivedArg(   (dSensedValue-dLastSensedValue) );  
 
 	#if DEBUG_UTSKRIFTS_NIVAA > 3
 	cout<<"Kappa for K_sensor_auron: " <<dAktivitetsVariabel <<"\n\n";
@@ -1341,7 +1334,7 @@ inline double K_dendrite::recalculateKappa()
 inline void K_auron::doTransmission()
 {
 	#if DEBUG_UTSKRIFTS_NIVAA > 3
- 	cout<<"K_auron::doTransmission()\tLegger inn alle outputsynapser i arbeidskø. Mdl. av auron: " <<pElementOfAuron->sNavn <<" - - - - - - - - - - - - - - - \n";
+ 	cout<<"K_auron::doTransmission()\tLegger inn alle outputsynapser i arbeidskø. Auron: " <<sNavn <<" - - - - - - - - - - - - - - - \n";
 	#endif
 
 
