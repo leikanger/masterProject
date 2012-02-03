@@ -1075,11 +1075,11 @@ void K_auron::doCalculation()
 	// Sjekker om den skal fyre denne iter: (før neste iter)
 	// dEstimatedTaskTime RUNDES ALLTID NED!! Skal ikkje sjekke om den er over eller under halvegs, bare kva steg den har starta på..
 	if( (unsigned)(dEstimatedTaskTime) <= time_class::getTid() ){ //TODO
-cerr<<"TEST: LEGG TIL task i denne iter: TID, dEstimatedTaskTime :\t" <<time_class::getTid() <<" >= (unsigned)" <<dEstimatedTaskTime <<"\n";
+cerr<<"GYLDIG: LEGG TIL task i denne iter: TID, dEstimatedTaskTime :\t" <<time_class::getTid() <<" >= (unsigned)" <<dEstimatedTaskTime <<"\n";
+		time_class::addTaskInPresentTimeIteration( this );
 	}
 	if( (unsigned)(dEstimatedTaskTime+0.5) < time_class::getTid()+1 ){ //TODO
-cerr<<"LEGG TIL task i denne iter: TID, dEstimatedTaskTime+0.5 :\t" <<time_class::getTid() <<"+1 > " <<(unsigned)(dEstimatedTaskTime+0.5) <<"\n";
-		time_class::addTaskInPresentTimeIteration( this );
+cerr<<"UGYLDIG: LEGG TIL task i denne iter: TID, dEstimatedTaskTime+0.5 :\t" <<time_class::getTid() <<"+1 > " <<(unsigned)(dEstimatedTaskTime+0.5) <<"\n";
 	}
 }
 
