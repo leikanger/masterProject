@@ -393,7 +393,7 @@ class K_auron : public i_auron
 //			cout<<"her: [dStartOfTimeWindow, time]= [" <<dStartOfTimeWindow <<", " <<time_class::getTid() <<"]\t\tdepol: " <<dDepolSLETT <<"\n";
 			return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dStartOfNextTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
 		}else{ //ErrorDetection and handeling
-			cerr<<"HHH\t[dStartOfTimeWindow, tid] = [" <<dStartOfTimeWindow <<", " <<time_class::getTid() <<"]\n";
+			cerr<<"ERROR\tasdf1414@auron.h\t[dStartOfTimeWindow, tid] = [" <<dStartOfTimeWindow <<", " <<time_class::getTid() <<"]\n";
 			return 0;
 		}
 	}

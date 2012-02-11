@@ -30,6 +30,8 @@
 //#include "main.h"
 #include "../neuroElements/auron.h"
 
+#include <typeinfo> //For å bryke typeid..
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -85,7 +87,7 @@ class time_class : public timeInterface {
 		*** Gjennomføre kalkulering på alle kalkuleringsoppgaver (pCalculatationTaskQue) 	***
 		**************************************************************************************/
 
-		// TODO TODO TA VEKK (redundant test..)
+		//  TA VEKK (redundant test?)
 		if( pCalculatationTaskQue.empty() ) return;
 
 		// Organiserer liste slik at kvar oppføring er unik:
@@ -109,36 +111,30 @@ class time_class : public timeInterface {
 		while( !pCalculatationTaskQue.empty() ){
 			// Kaller pCalculatationTaskQue.front()->pCalculatationTaskQue();
 			pCalculatationTaskQue.front()->doCalculation();
+
+// BARE PISS TODO Men kan være nyttig kode..
+#if 0
+			// Legger til task i neste iterasjon, dersom dette er dEstimatedTaskTime:
+			if( (unsigned)(pCalculatationTaskQue.front()->dEstimatedTaskTime) < ulTime+2 ){ // Dersom den er før [nå+2], kan vi legge den til i pWorkTaskQue (da er den mest sansynligvis til neste iter(Dette er jo siste ting som skjer!)
+								//															// (doCalculation() er siste som skjer før elem. flyttes over i pWorkTaskQue (i time_class::doTask() kalles doCalc() rett før flytting av elem)
+				// FUNKER IKKJE: 	doTask(); (fører til at den bruker veldig lang tid (venter lenge..)
+				cout<<"\e[1;33mOK:\t\e[0m dEsmatedTaskTime < ulTime+1: \e[31m" <<(pCalculatationTaskQue.front())->dEstimatedTaskTime <<"\e[0m < \e[33m" <<ulTime <<"+1\e[0m]\n";	
+			}else{
+				cout<<"\e[1;31mFEIL:\t\e[0m dEsmatedTaskTime !< ulTime+1: \e[31m" <<(pCalculatationTaskQue.front())->dEstimatedTaskTime <<"\e[0m !< \e[33m" <<ulTime <<"+1\e[0m]\n";	
+			}
+#endif
+	
+			// Går videre (popper første elementet)
 			pCalculatationTaskQue.pop_front();
 		}
+
+
+
 	} //}
 
 
-#if 1
-	static inline void addTaskInPresentTimeIteration(timeInterface* pTimeClassArg)
-	{
-// 		// XXX Dette er bra, men eg skal gjøre det for alle K_auron når eg går inn i en tidsiter. 
-// 			// Da kan eg også gjøre det her!
-/*		for( std::list<time_class*>::iterator iter = pWorkTaskQue.begin(); iter != pWorkTaskQue.end(); iter++ )
-		{
-	 		if( typeid(*iter) == typeid(K_auron*) )
-			{
-	 			
-			}
-		}
-*/		 
-		
-		// Foreløpig legger eg den bare til først i denne iter: (etter nåværande elem.)
-		if( pWorkTaskQue.size() > 0 ){
-			std::list<timeInterface*>::iterator iter = pWorkTaskQue.begin();
-			++iter;
-			pWorkTaskQue.insert(iter, pTimeClassArg ); 
-		}else{
-			cerr<<"FEIL: asdf529@time.h\n\nTERMINERER\n";
-			exit(9);
-		}
-	}
-#endif
+	static inline void addTaskInPresentTimeIteration(timeInterface* pTimeClassArg_withTask);
+
 
 	static inline void addCalculationIn_pCalculatationTaskQue( timeInterface* pObject_arg)
 	{
@@ -153,7 +149,7 @@ class time_class : public timeInterface {
 		// itererer gjennom ytre liste:
 		for(std::list<timeInterface*>::iterator l_iter = pWorkTaskQue.begin(); 	l_iter != pWorkTaskQue.end() ; 	l_iter++ )
 		{
-			cout<<nIter <<"\t" <<(*l_iter)->sClassName <<endl;
+			cout<<nIter <<"\t" <<typeid(*(*l_iter)).name() <<"\t(" <<(*l_iter)->sClassName <<"\n";
 			nIter++;
 		}
 		cout<<"\n\n";

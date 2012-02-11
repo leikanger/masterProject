@@ -24,6 +24,30 @@
  ***************************************************************************/
 //}
 
+
+
+
+
+
+// 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	
+//   Det kan skape feil å legge til eit neuron til neste iter. Dersom den får null input neste iter, blir vil den ikkje fyre neste iter, selv om den er estimert til f.eks. ?.5 (altså midt i iter).
+// 		Løsninga er å kun legge til fyring i gjeldende iter. KUN bruke den nye egenskapen til KANN!
+// 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 
+// a	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 
+// 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 
+// a	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 
+// 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 
+
+
+
+
+
+
+
+
+
+
+
 /*
  * main.cpp
  *
@@ -90,7 +114,7 @@ int nResolutionInLogLogErrorPlot;
 
 int main(int argc, char *argv[])
 {
-
+	cout<<"Set default print style: \e[0;39m Weak text, default terminal colour.\n\n";
 
 
 
@@ -549,6 +573,18 @@ void* taskSchedulerFunction(void* )
 	while( bContinueExecution )
 	{
 
+		// Poppe første element før utførelse, for å holde list pWorkTaskQue fri fra dette elementet før utførelse kvar iterasjon.
+		static timeInterface* pConsideredElementForThisIteration;
+		pConsideredElementForThisIteration = time_class::pWorkTaskQue.front();
+
+		// Tar vekk jobben fra pWorkTaskQue:
+		time_class::pWorkTaskQue.pop_front();
+
+		// Kjør task:
+		pConsideredElementForThisIteration->doTask();
+
+#if 0 //GAMMEL (til 10.02.1012)
+
 		// Setter igang utføring av neste jobb i lista:
 		time_class::pWorkTaskQue.front() ->doTask(); 		//Dette er i orden, siden pWorkTaskQue er av type list<timeInterface*> og alle arvinger av timeInterface har overlagra funksjonen doTask().
 
@@ -556,6 +592,7 @@ void* taskSchedulerFunction(void* )
 		time_class::pWorkTaskQue.pop_front();
 			
 		//Evt annet som skal gjøres kvart timessteg. Type sjekke etter andre events, legge til fleire synapser, etc.
+#endif
 	}
 
 	return 0;
