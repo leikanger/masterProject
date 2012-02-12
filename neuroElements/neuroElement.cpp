@@ -144,8 +144,8 @@ i_auron::~i_auron()
 						<<"plot( data([1:end],1), data([1:end],2), \".;Depolarization;\");\n"
 						<<"title \"Depolarization for auron " <<sNavn <<"\"\n"
 						<<"xlabel Time\n" <<"ylabel \"Activity variable\"\n"
-						//<<"axis([0, " <<time_class::getTid() <<", 0, " <<FYRINGSTERSKEL*1.3 <<"]);\n"
-						//<<"axis([0, " <<time_class::getTid() <<", 0, " <<FYRINGSTERSKEL*1.3 <<"]);\n"
+						//<<"axis([0, " <<time_class::getTime() <<", 0, " <<FYRINGSTERSKEL*1.3 <<"]);\n"
+						//<<"axis([0, " <<time_class::getTime() <<", 0, " <<FYRINGSTERSKEL*1.3 <<"]);\n"
 						<<"akser=([0 data(end,1) 0 1400 ]);\n"
 		//				<<"print(\'./eps/eps_auron" <<sNavn <<"-depol.eps\', \'-deps\');\n"
 						<<"sleep(" <<OCTAVE_SLEEP_ETTER_PLOTTA <<"); "
@@ -175,8 +175,8 @@ s_auron::s_auron(std::string sNavn_Arg /*="unnamed"*/, int nStartDepol /*=0*/) :
 	// for debugging
 	sClassName = "s_auron";
 
-	ulTimestampForrigeFyring = time_class::getTid();
-	ulTimestampLastInput  = time_class::getTid();
+	ulTimestampForrigeFyring = time_class::getTime();
+	ulTimestampLastInput  = time_class::getTime();
 
 	// Setter initial-tilstant:
 	dAktivitetsVariabel = nStartDepol;
@@ -208,7 +208,7 @@ K_auron::K_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartKappa_arg /*
 	// for debugging
 	sClassName = "K_auron";
 
-	ulTimestampForrigeFyring = time_class::getTid();
+	ulTimestampForrigeFyring = time_class::getTime();
 
 	// Initierer andre medlemsvariabler:
 	dChangeInKappa_this_iter = 0;
@@ -238,7 +238,7 @@ K_auron::K_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartKappa_arg /*
 	changeKappa_derivedArg( dStartKappa_arg );
 
 	// Initierer første 'time window':
-	dStartOfTimeWindow = (double)time_class::getTid();
+	dStartOfTimeWindow = (double)time_class::getTime();
 // XXX XXX HAR TATT VEKK DENNE FUNKSJONALITETEN! XXX XXX
 //		dDepolAtStartOfTimeWindow = uStartDepol_prosent * FYRINGSTERSKEL;
 
@@ -250,7 +250,7 @@ K_auron::K_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartKappa_arg /*
 
 		// trenger c-style string for open():
 		kappa_logFile.open( tempStr.c_str() );
-		kappa_logFile<<"data=[" <<time_class::getTid() <<"\t" <<dAktivitetsVariabel <<";\n";
+		kappa_logFile<<"data=[" <<time_class::getTime() <<"\t" <<dAktivitetsVariabel <<";\n";
 		kappa_logFile.flush();
 	#endif
 
@@ -294,8 +294,8 @@ K_auron::~K_auron()
 
 	// Rett slutt på utskriftsfil-logg:
 	#if LOGG_KAPPA
-		kappa_logFile<<time_class::getTid() <<"\t" <<dAktivitetsVariabel <<"];\n"
-						<<"axis([0," <<time_class::getTid() <<"])\n"
+		kappa_logFile<<time_class::getTime() <<"\t" <<dAktivitetsVariabel <<"];\n"
+						<<"axis([0," <<time_class::getTime() <<"])\n"
 						<<"plot( data([1:end],1), data([1:end],2), \".;Kappa;\");\n"
 
 						<<"title \"Activity variable for K-auron " <<sNavn <<"\"\n"
@@ -647,7 +647,7 @@ inline void K_dendrite::newInputSignal( double dNewSignal_arg )
 	// TODO Legg inn spatiotemporal differensiering for ulike synapser. Dette gjør at eg må gjøre om heile strukturen til dette opplegget.
 
 	// TODO TODO TODO ESTIMER Tidspunk for overføring. No setter eg bare oppdateringstidsspunkt for kappa til starten av tidsiterasjonen.. TODO TODO TODO
-	pElementOfAuron->dStartOfTimeWindow = (double)time_class::getTid();
+	pElementOfAuron->dStartOfTimeWindow = (double)time_class::getTime();
 	pElementOfAuron->changeKappa_derivedArg( dNewSignal_arg );
 } //}2
 
@@ -665,9 +665,9 @@ inline void K_auron::changeKappa_derivedArg( double dInputDerived_arg)//int deri
 
 
 //TODO TODO TODO Her er en debug-sak, som ikkje har innvirkning på resten av programmet:
-	if( getCalculateDepol() > FYRINGSTERSKEL ){
-		cerr<<"K_auron::changeKappa_derivedArg()\tFEIL: v(t)>Tau :\tv(t)=" <<getCalculateDepol() <<endl ;
-	}
+//	if( getCalculateDepol() > FYRINGSTERSKEL ){
+//		cerr<<"K_auron::changeKappa_derivedArg()\tFEIL: v(t)>Tau :\tv(t)=" <<getCalculateDepol() <<endl ;
+//	}
 //TODO TODO TODO ... til hit.
 
 
@@ -677,7 +677,7 @@ inline void K_auron::changeKappa_derivedArg( double dInputDerived_arg)//int deri
 	#endif
 
 	#if DEBUG_UTSKRIFTS_NIVAA > 3
-	cout<<sNavn <<"\t:\tTid:\t" <<time_class::getTid() <<" ,\tKappa :\t" <<dAktivitetsVariabel <<endl;
+	cout<<sNavn <<"\t:\tTid:\t" <<time_class::getTime() <<" ,\tKappa :\t" <<dAktivitetsVariabel <<endl;
 	#endif
 }
 
@@ -724,10 +724,10 @@ inline void s_dendrite::newInputSignal( double dNewSignal_arg )
 										// TODO TODO TODO FIKS DETTE: SJå asdf1235 (over)
 
 	#if DEBUG_UTSKRIFTS_NIVAA > 2
-	cout<<time_class::getTid() <<"\ts_dendrite::newInputSignal( " <<dNewSignal_arg <<" ); \t\tgir depol. :  " <<pElementOfAuron->dAktivitetsVariabel <<"\n";
+	cout<<time_class::getTime() <<"\ts_dendrite::newInputSignal( " <<dNewSignal_arg <<" ); \t\tgir depol. :  " <<pElementOfAuron->dAktivitetsVariabel <<"\n";
 	#endif
 	
-	pElementOfAuron->ulTimestampLastInput = time_class::getTid();
+	pElementOfAuron->ulTimestampLastInput = time_class::getTime();
 
 
 	// Dersom auron går over fyringsterskel: fyr A.P.
@@ -748,13 +748,13 @@ inline void s_dendrite::newInputSignal( double dNewSignal_arg )
 inline void s_dendrite::calculateLeakage()
 { //{2 /** Bare for SANN:  ***/
 
-	if( pElementOfAuron->ulTimestampLastInput != time_class::getTid() )
+	if( pElementOfAuron->ulTimestampLastInput != time_class::getTime() )
 	{
 		// regner ut, og trekker fra lekkasje av depol til postsyn neuron.
-	 	pElementOfAuron->dAktivitetsVariabel *= pow( (double)(1-LEKKASJE_KONST), (double)(time_class::getTid() - pElementOfAuron->ulTimestampLastInput) );
+	 	pElementOfAuron->dAktivitetsVariabel *= pow( (double)(1-LEKKASJE_KONST), (double)(time_class::getTime() - pElementOfAuron->ulTimestampLastInput) );
 	
 		// Gjøres i s_dendrite::newInputSignal(): 
-		//ulTimestampLastInput = time_class::getTid(); 
+		//ulTimestampLastInput = time_class::getTime(); 
 	}
 } //}2
 
@@ -774,7 +774,7 @@ inline void s_dendrite::calculateLeakage()
 inline void s_auron::doTask()
 { //{ ** AURON
 
-	if( ulTimestampForrigeFyring == time_class::getTid() )
+	if( ulTimestampForrigeFyring == time_class::getTime() )
 	{
 		#if DEBUG_UTSKRIFTS_NIVAA > 1
 		cout<<"\n\n************************\nFeil?\nTo fyringer på en iterasjon? \nFeilmelding au#103 @ auron.h\n************************\n\n";
@@ -785,7 +785,7 @@ inline void s_auron::doTask()
 	// FYRER A.P.:
 	#if DEBUG_UTSKRIFTS_NIVAA > 1
 		cout<<"\tS S " <<sNavn <<" | S | " <<sNavn <<" | S | S | S | | " <<sNavn <<" | S | | " <<sNavn <<" | S | | " <<sNavn <<"| S | S | S | S |\t"
-			<<sNavn <<".doTask()\tFYRER neuron " <<sNavn <<".\t\t| S S | \t  | S |  \t  | S |\t\tS | " <<time_class::getTid() <<" |\n"
+			<<sNavn <<".doTask()\tFYRER neuron " <<sNavn <<".\t\t| S S | \t  | S |  \t  | S |\t\tS | " <<time_class::getTime() <<" |\n"
 			<<endl;
 	#endif
 
@@ -795,7 +795,7 @@ inline void s_auron::doTask()
 
 
 	// Registrerer fyringstid (for feisjekk (over) osv.) 
-	ulTimestampForrigeFyring = time_class::getTid();
+	ulTimestampForrigeFyring = time_class::getTime();
 
 
 	//Resetter depol.verdi 
@@ -835,7 +835,7 @@ inline void s_synapse::doTask()
 	// XXX Kalkulere syn.p.?
 
 	// Loggfører syn.weight
-	synTransmission_logFile 	<<"\t" <<time_class::getTid() <<"\t" <<(1-2*bInhibitoryEffect) * dSynapticWeight
+	synTransmission_logFile 	<<"\t" <<time_class::getTime() <<"\t" <<(1-2*bInhibitoryEffect) * dSynapticWeight
 						<<" ;   \t#Synpaptic weight\n" ;
 //	synTransmission_logFile.flush();
 
@@ -852,27 +852,25 @@ inline void s_dendrite::doTask()
 /* K_auron::doTask() 	: 		Fyrer A.P. */
 inline void K_auron::doTask()
 { //{1 ** AURON
+cerr<<"getCalculateDepol(dEstimatedTaskTime): " <<getCalculateDepol(dEstimatedTaskTime) <<"\n\n";
 	
-	if( dEstimatedTaskTime < time_class::getTid() ) //Dersom dEstimatedTaskTime er mindre enn nå-tid: at den skulle fyre forrige iter..
+	if( dEstimatedTaskTime < time_class::getTime() ) //Dersom dEstimatedTaskTime er mindre enn nå-tid: at den skulle fyre forrige iter..
 	{
-		cout<<"\t* * *\t\e[4;32mFYRE\e[31mFEIL\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t\t[tid, est.tid] = [\e[1;33m" <<time_class::getTid() <<"\e[0m,\e[1;31m " <<dEstimatedTaskTime <<"\e[0m]\n";
-	//	cout 	<<"FEIL: estimert tid er tidligere enn nå-tid:\t[t, estTt]=[\e[1;33m"<<time_class::getTid() <<"\e[0m, \e[32m" 
-	// 			<<dEstimatedTaskTime <<"\e[0m]\tv(t_n)="<<getCalculateDepol() <<"\t | K=" <<dAktivitetsVariabel  <<"\tSiste v_0:" <<dDepolAtStartOfTimeWindow 	<<"\n\n";
-	}else if( dEstimatedTaskTime > time_class::getTid()+1 ) //Dersom dEstimatedTaskTime er mindre enn nå-tid: at den skulle fyre forrige iter..
+		cout<<"\t* * *\t\e[4;32mFYRE\e[31mFEIL\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t[tid > (int)est.tid]: [\e[1;33m" <<time_class::getTime() <<"\e[0m>\e[1;31m " <<dEstimatedTaskTime <<"\e[0m]\n";
+	}else if( dEstimatedTaskTime > time_class::getTime()+1 ) //Dersom dEstimatedTaskTime er mindre enn nå-tid: at den skulle fyre forrige iter..
 	{
-		cout<<"\t* * *\t\e[4;32mFYRE\e[31mFEIL\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t\t[tid, est.tid] = [\e[1;33m" <<time_class::getTid() <<"\e[0m,\e[1;31m " <<dEstimatedTaskTime <<"\e[0m]\n";
-	//	cout 	<<"FEIL: estimert tid er tidligere enn nå-tid:\t[t, estTt]=[\e[1;33m"<<time_class::getTid() <<"\e[0m, \e[32m" 
-	// 			<<dEstimatedTaskTime <<"\e[0m]\tv(t_n)="<<getCalculateDepol() <<"\t | K=" <<dAktivitetsVariabel  <<"\tSiste v_0:" <<dDepolAtStartOfTimeWindow 	<<"\n\n";
+		cout<<"\t* * *\t\e[4;32mFYRE\e[31mFEIL\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t[tid+1, (int)est.tid] = [\e[1;33m" <<time_class::getTime() <<"+1\e[0m<\e[1;31m " <<dEstimatedTaskTime <<"]\e[33m  RETURN.\e[0m\n";
+		return; // XXX Returnerer uten å gjøre noe.
 	}else{
 		//Ingen fyringsfeil:
-		cout<<"\t* * *\t\e[4;32mFYRER\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t\t[tid, est.tid] = [\e[1;33m" <<time_class::getTid() <<"\e[0m,\e[32m " <<dEstimatedTaskTime <<"\e[0m]\n";
+		cout<<"\t* * *\t\e[4;32mFYRER\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t\t[tid, est.tid] = [\e[1;33m" <<time_class::getTime() <<"\e[0m,\e[32m " <<dEstimatedTaskTime <<"\e[0m]\n";
 
 	}
 
 	//Utskrift til skjerm:
 	#if DEBUG_UTSKRIFTS_NIVAA > 0
 	//{
-		cout<<"[t="<<time_class::getTid() <<" est.tt:" <<dEstimatedTaskTime <<"]\tv(t_n)="<<getCalculateDepol() <<"\t" <<sNavn <<".doTask()\t  [periode/1000]=" <<dLastCalculatedPeriod/1000
+		cout<<"[t="<<time_class::getTime() <<" est.tt:" <<dEstimatedTaskTime <<"]\tv(t_n)=" <<getCalculateDepol(dEstimatedTaskTime) <<"\t" <<sNavn <<".doTask()\t  [periode/1000]=" <<dLastCalculatedPeriod/1000
 			<<"\t | K=" <<dAktivitetsVariabel  <<"\tSiste v_0:" <<dDepolAtStartOfTimeWindow 
 			<<"\n\n";
 	//}
@@ -892,7 +890,7 @@ inline void K_auron::doTask()
 	//	depol_logFile.flush();
 	#endif
 
-//cerr<<"FYRER!\t\t[\tulTime\tdEstimatedTaskTime]\t=\t["  <<time_class::getTid() <<" , \t" <<dEstimatedTaskTime <<"]\n";
+//cerr<<"FYRER!\t\t[\tulTime\tdEstimatedTaskTime]\t=\t["  <<time_class::getTime() <<" , \t" <<dEstimatedTaskTime <<"]\n";
 
 
 	// Initialize new 'time window':
@@ -900,6 +898,8 @@ inline void K_auron::doTask()
 	dDepolAtStartOfTimeWindow = 0; 
 	dStartOfTimeWindow = dEstimatedTaskTime; // IMPORTANT: use dEstimatedTaskTime instead of dStartOfNextTimeWindow for firing. Firing is a special situation for initiation of a new time window!
 
+	// Save time of firing: When the period is recalculated, the exact start of time window is imporant. Cannot use ulTime because it is always less than the exact firing time: ln(-X) -> \infty
+	dLastFiringTime = dEstimatedTaskTime;
 
 	// It is important that the esimatedPeriod is computed after dEstimatedTaskTime += dLastCalculatedPeriod !
 	// 	If I run estimatePeriod() or doCalculation() before, a large error is the result.
@@ -914,6 +914,10 @@ inline void K_auron::doTask()
 	// Pga. nye mekansimen som gjør det mulig å fyre denne iter:
 	//doCalculation(); //For å sjekke om den kommer til å fyre igjen! 	ELLER estimatePeriod();
 	estimatePeriod();
+
+	// Sjekker om den skal fyre igjen denne iter:
+	if( dEstimatedTaskTime < time_class::getTime()+1 )
+		time_class::addTaskInPresentTimeIteration(this);
 } //}1
 /* K_synapse::doTask() 	: 		Simulerer overføring i synapsen */
 inline void K_synapse::doTask()
@@ -932,7 +936,7 @@ inline void K_synapse::doTask()
 	#endif
 
 	synTransmission_logFile
-		<<time_class::getTid() <<"  \t"
+		<<time_class::getTime() <<"  \t"
 		<<(1-2*bInhibitoryEffect) * dSynapticWeight * dPresynDeltaPeriodeINVERSE_temp
 		<<" ; \n";
 //	synTransmission_logFile.flush();
@@ -954,6 +958,20 @@ inline void K_dendrite::doTask()
 void time_class::doTask()
 { 	//{1 
 
+	#if UTSKRIFT_AV_TID
+	if(ulTime % UTSKRIFT_AV_TID_KVAR_Nte_ITER  == 0)		
+		cout<<"\n\t* * *\tTID: \t * * * * * * * Inne i time_class::doTask() - Øker fra:   * * * * * * * * * * = \e[4;39m"	<<ulTime <<"->" <<ulTime+1 <<"\e[0m :\n";
+	#endif
+
+	/*cout<<"FØØR \e[33mNY ITER\e[0m, nye muligheiter:\t\tSkriver ut alle auron: \n";
+	for( std::list<K_auron*>::iterator iter = K_auron::pAllKappaAurons.begin() ;  iter != K_auron::pAllKappaAurons.end() ;  iter++ )
+	{
+		cout<<"\t[ " <<(*iter)->sNavn <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<(*iter)->dEstimatedTaskTime 
+			<<"\n\n";
+	}*/
+
+
+
 	// Sjekker om den har kjørt ferdig:
 	if( ulTime >= ulTotalNumberOfIterations )   //ulTemporalAccuracyPerSensoryFunctionOscillation * NUMBER_OF_SENSOR_FUNKTION_OSCILLATIONS )
 	{
@@ -965,12 +983,11 @@ void time_class::doTask()
 	// Legger til egenpeiker på slutt av pWorkTaskQue
 	pWorkTaskQue.push_back(this);	
 
+	//itererer time:
+	ulTime++;
 
 	// gjennomfører planlagte kalkulasjoner:
 	doCalculation();
-
-	//itererer time:
-	ulTime++;
 
 
 
@@ -994,6 +1011,8 @@ void time_class::doTask()
 	/*************************************************
 	* Flytter planlagde oppgaver over i pWorkTaskQue *
 	*************************************************/
+// XXX Trur dette er deprecated! Kommenterer ut!
+#if 0 
 	for( std::list<timeInterface*>::iterator pPE_iter = pPeriodicElements.begin() ; pPE_iter != pPeriodicElements.end() ; pPE_iter++ )
 	{
 		// Typekonverderer dEstimatedTaskTime til unsigned long, og sjekker om elementet er planlagt å gjennomføre noe neste iter (legger til 0.5 for å få rett avrunding):
@@ -1006,7 +1025,7 @@ void time_class::doTask()
 			//Skal difor heller bruke addTaskInPresentTimeIteration() TODO Da må eg også flytte pWorkTaskQue.push_back(this) til toppen (heilt i toppen?)
 		}
  	}
-
+#endif
 
 
 
@@ -1025,6 +1044,8 @@ void time_class::doTask()
 	s_sensor_auron::updateAllSensorAurons();
 	#endif
 
+
+
 }//}1
 
 
@@ -1040,33 +1061,37 @@ void time_class::doTask()
 void K_auron::doCalculation()
 { //{
 	#if DEBUG_UTSKRIFTS_NIVAA > 3
- 	cout<<"K_auron " <<sNavn <<".doCalculation()\t\t" <<sNavn <<".doCalculation()\t\tTid: " <<time_class::getTid() <<"\n";
+ 	cout<<"K_auron " <<sNavn <<".doCalculation()\t\t" <<sNavn <<".doCalculation()\t\tTid: " <<time_class::getTime() <<"\n";
 	#endif
 
 	#if DEBUG_UTSKRIFTS_NIVAA > 3
  	cout<<"[K, T] = " <<dAktivitetsVariabel <<", " <<FYRINGSTERSKEL <<endl;
 	#endif
 
+	// Lagrer v_0 og t_0 for neste 'time window':
+	dDepolAtStartOfTimeWindow = getCalculateDepol(time_class::getTime());
+	dStartOfTimeWindow = time_class::getTime();
 
+#if 0 //{
 	// Skal gjøre slik at dette er redundant test: DEFINERER AT ALLE AURON OPPDATERES KVAR ITER! TODO TODO
-	if( (unsigned)dStartOfTimeWindow < time_class::getTid()+1 ){
+	if( (unsigned)dStartOfTimeWindow < time_class::getTime()+1 ){
 		// Viktig å kalkulere depol med GAMMEL Kappa! Ellers får vi hopp i depol!
 		// Lagrer v_0 og t_0 for neste 'time window':
 		dDepolAtStartOfTimeWindow = getCalculateDepol();
 		// TODO Dette må endres når eg begynner med synaptisk input for nodene! Da blir det litt annaleis ?
 		//dStartOfTimeWindow = dStartOfNextTimeWindow; 
-		dStartOfTimeWindow = time_class::getTid();
+		dStartOfTimeWindow = time_class::getTime();
 	}else{
 		// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 		// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 		
 		// Tar bort feilene fra 0'te iter:
-		if( time_class::getTid() > 0){
-			cerr<<"ELSE: dStartOfTimeWindow > TID :\t" <<dStartOfTimeWindow <<" > " <<time_class::getTid() <<"\t\tDette skal aldri skje!\tsleep(5) asdf235@neuroElement.cpp\n";
+		if( time_class::getTime() > 0){
+			cerr<<"ELSE: dStartOfTimeWindow > TID :\t" <<dStartOfTimeWindow <<" > " <<time_class::getTime() <<"\t\tDette skal aldri skje!\tsleep(5) asdf235@neuroElement.cpp\n";
 			sleep(5);
 		}
 	}
-	
+#endif	//}
 
 	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 	// DEPRECATED!
@@ -1084,12 +1109,13 @@ void K_auron::doCalculation()
 	// FETT! Dette gjør at størrelsen på comp. time step bare gir kor ofte kappa skal oppdateres. Fyring, og init av time window kan skje heilt separat fra dette!
 	// Sjekker om den skal fyre denne iter: (før neste iter)
 	// dEstimatedTaskTime RUNDES ALLTID NED!! Skal ikkje sjekke om den er over eller under halvegs, bare kva steg den har starta på..
-	if( (unsigned)(dEstimatedTaskTime) <= time_class::getTid() ){ //TODO
-		cerr<<"Legg til task i denne iter: [TID, dEstimatedTaskTime] :\t[" <<time_class::getTid() <<", " <<dEstimatedTaskTime <<"]\n";
+	if( (unsigned)(dEstimatedTaskTime) <= time_class::getTime() ){ //TODO
+		cerr<<"K_auron::doCalc()\tLegg til task i denne iter: [TID, dEstimatedTaskTime] :\t[" <<time_class::getTime() <<", " <<dEstimatedTaskTime <<"]\n";
 		time_class::addTaskInPresentTimeIteration( this );
+		time_class::skrivUt_pWorkTaskQue();
 	}
-//	if( (unsigned)(dEstimatedTaskTime+0.5) < time_class::getTid()+1 ){ //TODO
-//cerr<<"UGYLDIG: LEGG TIL task i denne iter: TID, dEstimatedTaskTime+0.5 :\t" <<time_class::getTid() <<"+1 > " <<(unsigned)(dEstimatedTaskTime+0.5) <<"\n";
+//	if( (unsigned)(dEstimatedTaskTime+0.5) < time_class::getTime()+1 ){ //TODO
+//cerr<<"UGYLDIG: LEGG TIL task i denne iter: TID, dEstimatedTaskTime+0.5 :\t" <<time_class::getTime() <<"+1 > " <<(unsigned)(dEstimatedTaskTime+0.5) <<"\n";
 //	}
 }
 
@@ -1109,20 +1135,21 @@ inline void K_auron::estimatePeriod()
 		dChangeInPeriodINVERSE = dPeriodInverse_static_local - dPeriodINVERSE;
 		dPeriodINVERSE = dPeriodInverse_static_local;
 
+double tempDouble = getCalculateDepol(time_class::getTime());
+cout<<"estimatedPeriod(): \t[t_0, K, v_0]: \t[" <<dStartOfTimeWindow <<", " <<dAktivitetsVariabel <<", " <<dDepolAtStartOfTimeWindow <<"]:\t\e[1;39m" <<dLastCalculatedPeriod <<"\e[0;0m"
+	<<"\t\tog tilslutt getCalculateDepol(ulTime): \e[1;39m" <<tempDouble <<"\e[0;0m\n";
 
+// TODO If-else var med. Nå debugger eg, og føler det skal vekk TODO Sjekk om dette stemmer TODO (Tok vekk nå)
 		// 	For K_auron trenger vi ikkje legge til elementet i [liste som skal sjekkes]. pAllKappaAurons sjekkes alltid.. 	
 		// Check if dEstimatedTaskTime is in the future (aways round down):
-		if( ((unsigned long)dEstimatedTaskTime) > time_class::getTid() ){ 
-
-//cerr<<"K_auron::estimatePeriod(): \t[uTime, dEstimatedTaskTime] = [  " <<time_class::getTid() <<" ,   " <<dEstimatedTaskTime <<" ]\n";
+//		if( ((unsigned long)dEstimatedTaskTime) > time_class::getTime() ){ 
 	
-			dEstimatedTaskTime = ( dStartOfTimeWindow 	+ log( (dAktivitetsVariabel-dDepolAtStartOfTimeWindow)/(dAktivitetsVariabel-(double)FYRINGSTERSKEL) )   /  ((double)(ALPHA/ulTemporalAccuracyPerSensoryFunctionOscillation)) )  ;
-		}else{ // ..othervise, a new time window is initialized due to firing. Update estimate to [floating point time instant]+[last computed period]
-			dEstimatedTaskTime = dEstimatedTaskTime + dLastCalculatedPeriod;
-		}
-		//dEstimatedTaskTime = ( dStartOfTimeWindow 	+ log( (dAktivitetsVariabel-dDepolAtStartOfTimeWindow)/(dAktivitetsVariabel-(double)FYRINGSTERSKEL) )   /  (double)LEKKASJE_KONST )  ; 
- // TODO +1 ekstra for å få delay i dendrite, axon ?
-		// [estimert tid}  = 		[no]			+ 		[remainder of depolarizing phase] 
+			// 	TODO 				endre til ulTime() 						TODO 	dDepolAtStartOfTimeWindow TODO er denne god?
+			dEstimatedTaskTime = ( dStartOfTimeWindow 	+ log( (dAktivitetsVariabel-dDepolAtStartOfTimeWindow)/(dAktivitetsVariabel-(double)FYRINGSTERSKEL) )   /  ((double)ALPHA/(double)ulTemporalAccuracyPerSensoryFunctionOscillation));
+//		}else{ // ..othervise, a new time window is initialized due to firing. Update estimate to [floating point time instant]+[last computed period]
+//			dEstimatedTaskTime = dEstimatedTaskTime + dLastCalculatedPeriod;
+//		}
+
 		// GÅR HER UT IFRA AT Kappa endres kvar iterasjon! Seier at [no] er samme som dStartOfTimeWindow: dette er bare rett dersom vi oppdaterer start of time window kvar iter!
 																										
 		/*
@@ -1144,13 +1171,13 @@ inline void K_auron::estimatePeriod()
 		bAuronHarPropagertAtDenErInaktiv = false;
 
 	}else{
-		if(time_class::getTid() == 0){return;}
+		if(time_class::getTime() == 0){return;}
 		cout<<"estimatePeriod() når \tK < T   (id: asdf23r4)\t" <<sNavn <<"\n";
 
 
 		// setter planlagt task time til no, slik at den aldri vil fyre pga. dEstimatedTaskTime. (når den sjekker nest gang, så vil [no] være i fortida..)
 		// TODO TODO TODO TODO TODO TODO UTESTET, men å sette den til null(som før) vil ikkje gå bra!
-//		dEstimatedTaskTime = 1E99; //(double)time_class::getTid();
+//		dEstimatedTaskTime = 1E99; //(double)time_class::getTime();
 		
 		// Setter dLastCalculatedPeriod, dChangeInPeriodINVERSE, dPeriodINVERSE.
 		dLastCalculatedPeriod = 0; 	// Er dette greit?    SKUMMELT! (men funker).
@@ -1207,7 +1234,7 @@ inline void K_sensor_auron::updateSensorValue()
 		//changeKappa_absArg( dSensedValue ); FARLIG! IKKJE BRUK changeKappa_absArg() !
 		//
 	// Lagre tidspunkt for oppdatering av kappa som starten av iterasjonen (definer dette som samplingstidspunkt av sensa variabel).
-	dStartOfNextTimeWindow = (double)time_class::getTid(); // Setter den til [no], før eg beregner resultatet av denne oppdateringa i changeKappa_derivedArg( .. );
+	dStartOfNextTimeWindow = (double)time_class::getTime(); // Setter den til [no], før eg beregner resultatet av denne oppdateringa i changeKappa_derivedArg( .. );
 	// Setter at neste time window skal starte i starten av denne iterasjonen (dette er tidspunktet sensor-neuronet oppdaterer sensinga si).
 		// Dersom denne settes til noke anna, får vi større feil.
 	changeKappa_derivedArg(   (dSensedValue-dLastSensedValue) );  
@@ -1269,11 +1296,11 @@ void recalcKappaClass::doTask()
 	sdLastValue = sdTemp;
 	
 	#if DEBUG_UTSKRIFTS_NIVAA > 2
-	cout<<pKappaAuron_obj->sNavn <<" - recalcKappaClass::doTask() :\tny periode for recalc kappa: \t" <<sdValue <<"\t\tfor feil: " <<dFeil <<"\t\tTid:\t" <<time_class::getTid() <<endl;
+	cout<<pKappaAuron_obj->sNavn <<" - recalcKappaClass::doTask() :\tny periode for recalc kappa: \t" <<sdValue <<"\t\tfor feil: " <<dFeil <<"\t\tTid:\t" <<time_class::getTime() <<endl;
 	#endif
 
 	// Schedule recalcKappaClass til å kjøre på kalkulert tid:
-	dEstimatedTaskTime = (double)time_class::getTid() + sdValue;
+	dEstimatedTaskTime = (double)time_class::getTime() + sdValue;
 
 } //}
 
@@ -1350,8 +1377,9 @@ inline void time_class::addTaskInPresentTimeIteration(timeInterface* pTimeClassA
 	{
 		//cout<<"\e[35mSJEKKER\e[0m om det er type: time_class*\t[sCName, typeid().name()] = [" <<(*iter)->sClassName <<", " <<typeid(iter).name() <<"]\t\nid_asdf452@neuroElement.cpp\n";
 
-/***********/
+/*********** (BARE UTSKRIFT) ************/
 		// Sjekker K_auron:
+#if 0
 		if((*iter)->sClassName =="K_auron"){
 			cout<<"\e[31mdEstimatedTT\e[0m for [(*iter) pArg] = [" <<(*iter)->dEstimatedTaskTime <<", " <<pTimeClassArg_withTask->dEstimatedTaskTime <<"]\t\tAv type ["
 				<<(*iter)->sClassName <<" " <<(*iter)->sClassName <<"]\n";
@@ -1359,11 +1387,12 @@ inline void time_class::addTaskInPresentTimeIteration(timeInterface* pTimeClassA
 				cout<<"iter == pWorkTaskQue.end()\n\n";
 			}
 		}
+#endif
 /*********/
 
 		// Dersom iter-elementets dEstimatedTaskTime er etter det nye elementets dEstimatedTaskTime, er dette første oppføring som skal fyre etter (*iter). Legger dermed til elementet før dette.
 		if( (*iter)->dEstimatedTaskTime > pTimeClassArg_withTask->dEstimatedTaskTime){
- 			cout<<"\e[1;33mHURRA\e[0m la til elementet sist!\n";
+ 			cout<<"la til elementet sist!\n";
 			pWorkTaskQue.insert(iter, pTimeClassArg_withTask); 	//insert legger til elementet før [iter]!
 		}
 
@@ -1372,25 +1401,15 @@ inline void time_class::addTaskInPresentTimeIteration(timeInterface* pTimeClassA
 		{
 			// Har kommet til siste elementet. Nye elementet skal dermed ligge heilt sist!
 			pWorkTaskQue.insert(iter, pTimeClassArg_withTask); 	//insert legger til elementet før [iter]!
- 			cout<<"\e[1;33mHURRA\e[0m la til elementet sist!\n";
+ 			cout<<"la til element " <<pTimeClassArg_withTask->sClassName <<" sist!\n";
 		}
 	}
 
 	
 	// Foreløpig legger eg den bare til først i denne iter: (etter nåværande elem.) TODO TODO TODO TODO TODO  DET ER FEIL Å GJØRE! Fiks! TODO TODO TODO
-	pWorkTaskQue.push_front(pTimeClassArg_withTask);
-	cout<<"Har lagt til elementet i pWorkTaskQue\n";
-#if 0 //{
-	if( pWorkTaskQue.size() > 0 ){
-
-		pWorkTaskQue.push_front(pTimeClassArg_withTask);
-		cout<<"Har lagt til elementet i pWorkTaskQue\n";
-	}else{
-		// BARE FEILSJEKK: if-test kan takast vekk!
-		cerr<<"\t\e[1;34mpWorkTaskQue er tom\e[0m : asdf529@time.h\n\n";
-			//TERMINERER\n"; 	//exit(9);
-	}
-#endif //}
+	//pWorkTaskQue.push_front(pTimeClassArg_withTask);
+	skrivUt_pWorkTaskQue();
+	cout<<"Har lagt til elementet i pWorkTaskQue\t\t[ Returnerer fra addTaskInPTI() ]\n";
 }
 
 

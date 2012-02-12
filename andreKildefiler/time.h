@@ -149,7 +149,7 @@ class time_class : public timeInterface {
 		// itererer gjennom ytre liste:
 		for(std::list<timeInterface*>::iterator l_iter = pWorkTaskQue.begin(); 	l_iter != pWorkTaskQue.end() ; 	l_iter++ )
 		{
-			cout<<nIter <<"\t" <<typeid(*(*l_iter)).name() <<"\t(" <<(*l_iter)->sClassName <<"\n";
+			cout<<nIter <<"\t" <<typeid(*(*l_iter)).name() <<"\t(" <<(*l_iter)->sClassName <<"\tplanlagt til " <<(*l_iter)->dEstimatedTaskTime <<"\n";
 			nIter++;
 		}
 		cout<<"\n\n";
@@ -167,7 +167,7 @@ class time_class : public timeInterface {
 	{
 	 	pWorkTaskQue.push_back( pArg );
 	}
-	static const inline unsigned long getTid(){ return ulTime; }
+	static const inline unsigned long getTime(){ return ulTime; }
 	
 	static const void skrivUt_pPeriodicElements()
 	{

@@ -124,7 +124,7 @@ class i_auron : public timeInterface
 		// XXX Kommenterer ut for å lettere sjå gjennom log-fil:
 		
 		// Logger fyringstidspunkt:
-		actionPotential_logFile<<time_class::getTid() <<";\n";
+		actionPotential_logFile<<time_class::getTime() <<";\n";
 		//actionPotential_logFile.flush();
 
 		
@@ -132,16 +132,16 @@ class i_auron : public timeInterface
 			for(float fTerkelProsent_temp = 1.35; fTerkelProsent_temp>1.1; fTerkelProsent_temp-=0.001)
 			{
 				// TID: endre fra present time iteration til å være gitt av dEstimatedTaskTime i K_auron!
-				depol_logFile 	<<time_class::getTid() <<"\t" <<fTerkelProsent_temp*FYRINGSTERSKEL <<"; \t #Action potential\n" ;
+				depol_logFile 	<<time_class::getTime() <<"\t" <<fTerkelProsent_temp*FYRINGSTERSKEL <<"; \t #Action potential\n" ;
 			}
 */
 
 		// SKriver en enkelt linje med tidspunktet:
 		#if LOGG_DEPOL
-//			depol_logFile 	<<time_class::getTid() <<"\t" <<0*FYRINGSTERSKEL <<"; \t #Action potential - APAPAP\n" ;
+//			depol_logFile 	<<time_class::getTime() <<"\t" <<0*FYRINGSTERSKEL <<"; \t #Action potential - APAPAP\n" ;
 			// Logger depol-strek fra 1050 til 1200.
 			for(int i = 1050; i<1200; i++){
-				actionPotential_depolLogFile<<time_class::getTid() <<", " 		<<i <<";\n";
+				actionPotential_depolLogFile<<time_class::getTime() <<", " 		<<i <<";\n";
 			}
 			//actionPotential_depolLogFile.flush();
 		#endif
@@ -154,7 +154,7 @@ class i_auron : public timeInterface
 			// Lager en vertikal "strek" fra v=0 til v=Terskel*(110%)
 			for(float fTerkelProsent_temp = 1.4; fTerkelProsent_temp<1.7; fTerkelProsent_temp+=0.001)
 			{
-				depol_logFile 	<<time_class::getTid() <<"\t" <<fTerkelProsent_temp*FYRINGSTERSKEL <<"; \t #Action potential\n" ;
+				depol_logFile 	<<time_class::getTime() <<"\t" <<fTerkelProsent_temp*FYRINGSTERSKEL <<"; \t #Action potential\n" ;
 			}
 	 		//depol_logFile.flush();
 		#endif
@@ -243,7 +243,7 @@ class s_auron : public i_auron
 
 			// Unless it is time for writing to log, return.
 			if( (++uIterationsSinceLastWrite > uNumberOfIterationsBetweenWriteToLog) ){
-				depol_logFile 	<<time_class::getTid() <<"\t" <<dAktivitetsVariabel <<"; \t #Depolarization\n" ;
+				depol_logFile 	<<time_class::getTime() <<"\t" <<dAktivitetsVariabel <<"; \t #Depolarization\n" ;
 				// Reset counter
 				uIterationsSinceLastWrite = 0;
 			}else{
@@ -288,6 +288,7 @@ class K_auron : public i_auron
 
 	double dDepolAtStartOfTimeWindow;
 	double dStartOfTimeWindow; 		// Start-tidspunkt for dette time window.
+	double dLastFiringTime; 		// Start-tidspunkt for dette time window, dersom fyring var i denne iter..
 	// Flytta til protected (@asdf1515): double dStartOfNextTimeWindow; 	// Start-tidspunkt for neste time window (brukes til å finne start-depol. for neste time window).
 
 	double dLastCalculatedPeriod;
@@ -380,22 +381,37 @@ class K_auron : public i_auron
 
 
 
-	// TODO TODO TODO 
-	// Sjekk: Kvifor bare lagre det i en temp-variabel? Er vel bedre å lagre det direkte i en medl.var. for K_auron. Da kan det brukes om igjen..
-	// TODO TODO Skriv om heile funk. No er det veldig dårlig (uoptimalisert) stil.
-	inline const double getCalculateDepol()
+	inline const double getCalculateDepol(double dForTimeInstant_arg)
 	{
-		// GAMMEL: return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-(double)LEKKASJE_KONST  * (time_class::getTid() - ulStartOfTimewindow )) + dAktivitetsVariabel ;
 
-		// Går over til bedre tidssoppløysing: double-precition float number accuracy!
-		if( (unsigned long)(dStartOfTimeWindow) <= time_class::getTid() ){
-//			/*TEMPORÆRT:*/ double dDepolSLETT = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dStartOfNextTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ;
-//			cout<<"her: [dStartOfTimeWindow, time]= [" <<dStartOfTimeWindow <<", " <<time_class::getTid() <<"]\t\tdepol: " <<dDepolSLETT <<"\n";
-			return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dStartOfNextTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
-		}else{ //ErrorDetection and handeling
-			cerr<<"ERROR\tasdf1414@auron.h\t[dStartOfTimeWindow, tid] = [" <<dStartOfTimeWindow <<", " <<time_class::getTid() <<"]\n";
+		// Sjekker om den har fyrt denne iter. Isåfall vil dStartOfTimeWindow > dForTimeInstant_arg
+		if( dLastFiringTime > dForTimeInstant_arg ){
+			cerr<<"\n\n\n\n\e[31mERROR asdf1352@auron.h\e[0m\tdLastFiringTime>dForTimeInstant_arg.\tgetCalculateDepol() returnerer 0\t(" <<dLastFiringTime <<">" <<dForTimeInstant_arg <<"\n";
 			return 0;
 		}
+
+		// GAMMEL: return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-(double)LEKKASJE_KONST  * (time_class::getTime() - ulStartOfTimewindow )) + dAktivitetsVariabel ;
+cerr<<"\ngetCalculateDepol(): [dStartOfTimeWindow, ulTime] = \t[" <<dStartOfTimeWindow <<", " <<time_class::getTime() <<"]\n";
+
+		static double dDepolStatic;
+
+		// Går over til bedre tidssoppløysing: double-precition float number format!
+		//if( (unsigned long)(dStartOfTimeWindow) < time_class::getTime() ){
+// Fyrte denne iter: Bruker eksakt fyringstidspunkt når periode skal beregnes:
+		if( dLastFiringTime > time_class::getTime() ){
+			dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dForTimeInstant_arg - dLastFiringTime )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+
+			cout<<"\e[1;33mFyrt \e[32mdenne iter\e[0m\t\tGir depol: " <<dDepolStatic <<"\n";
+		}else if( dStartOfTimeWindow < time_class::getTime()+1 ){ //Stort sett ellers:
+			dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dForTimeInstant_arg - dStartOfTimeWindow )) + dAktivitetsVariabel; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+
+			cout<<"\e[32mIkkje Fyrt denne iter\e[0m\t\tGir depol: " <<dDepolStatic <<"\n";
+		}else{ //ErrorDetection
+			cerr<<"\e[31mERROR\tasdf1414@auron.h\e[0m\t[dStartOfTimeWindow, tid] = [" <<dStartOfTimeWindow <<", " <<time_class::getTime() <<"]\n";
+			exit(0);
+		}
+		writeDepolToLog( dForTimeInstant_arg, dDepolStatic);
+		return dDepolStatic;
 	}
 	#if 0 
 	inline const double getCalculateDepol(double dTidspunktArg)
@@ -404,7 +420,32 @@ class K_auron : public i_auron
 	}
 	#endif
 
+	const inline void writeDepolToLog( double dTimeArg, double dDepolArg)
+	{
+		#if LOGG_DEPOL 
+			#if GCC
+				// Sette precision for output: Funker bare med #include <iomanip>; , som ikkje funker for clang++-compiler..
+				depol_logFile.precision(11);
+			#endif
 	
+			// Handle accuracy for the depol-logfile:
+			static unsigned long uIterationsSinceLastWrite = 0;
+			uIterationsSinceLastWrite++;
+
+			// Unless it is time for writing to log, return.
+			if( uIterationsSinceLastWrite < uNumberOfIterationsBetweenWriteToLog ){
+				return;
+			}else{
+				// Reset counter
+				uIterationsSinceLastWrite = 0;
+			}
+
+			// Skriver dDepolAtStartOfTimeWindow til logg: (Tid er gitt i prosent av heile kjøretid)
+			depol_logFile 	<<dTimeArg <<"\t" <<dDepolArg <<"; \t #Depol\n" ;
+			//depol_logFile.flush();
+		#endif
+		
+	}
 	const inline void writeDepolToLog()
 	{
 		#if LOGG_DEPOL 
@@ -428,7 +469,8 @@ class K_auron : public i_auron
 
 
 			// Skriver dDepolAtStartOfTimeWindow til logg: (Tid er gitt i prosent av heile kjøretid)
-			depol_logFile 	<<(unsigned long)time_class::getTid() <<"\t" <<getCalculateDepol() <<"; \t #Depol\n" ;
+			if(getCalculateDepol(time_class::getTime()>0))
+				depol_logFile 	<<(unsigned long)time_class::getTime() <<"\t" <<getCalculateDepol(time_class::getTime()) <<"; \t #Depol\n" ;
 			//depol_logFile.flush();
 		#endif
 	}
@@ -449,13 +491,16 @@ class K_auron : public i_auron
 			}
 
 			// Skriver dDepolAtStartOfTimeWindow til logg:
-			kappa_logFile 	<<time_class::getTid() <<"\t" <<dAktivitetsVariabel <<"; \t #Kappa\n" ;
+			kappa_logFile 	<<time_class::getTime() <<"\t" <<dAktivitetsVariabel <<"; \t #Kappa\n" ;
 			//kappa_logFile.flush();
 		#endif
 	}
 
 	static const inline void loggeFunk_K_auron()
 	{
+// TODO TODO TDOO  TODO Fjærn alle oppføringer av loggeFunk_K_auron()! TODO TODO TODO
+return;
+#if 0
 		// DEBUG: Skriver depol og kappa til log for alle K_auron:
 		for( std::list<K_auron*>::iterator iter = K_auron::pAllKappaAurons.begin(); iter != K_auron::pAllKappaAurons.end(); iter++ )
 		{
@@ -467,6 +512,7 @@ class K_auron : public i_auron
 				(*iter) ->writeKappaToLog();
 			#endif
 		}
+#endif
 	}
 
 

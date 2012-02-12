@@ -277,11 +277,11 @@ int main(int argc, char *argv[])
 				// ********* taskSchedulerFunction(0) ***********
 				taskSchedulerFunction(0);
 
-				cout<<"sluttTid: " <<time_class::ulTime <<"\tdepol for KN og SN:\t[" <<KN.getCalculateDepol() <<", " <<SN.dAktivitetsVariabel <<"]\n";
+				cout<<"sluttTid: " <<time_class::ulTime <<"\tdepol for KN og SN:\t[" <<KN.getCalculateDepol(time_class::ulTime) <<", " <<SN.dAktivitetsVariabel <<"]\n";
 				cout<<"Siste fyringstid for SN:" <<SN.ulTimestampForrigeFyring <<endl;
 
 				// Skriv slutt-verdi til logg-fil for log/log-plot (for KN og SN: lag to kolonner i data matrisa)
-				LogLog_logFile 	<<KN.getCalculateDepol() <<", "
+				LogLog_logFile 	<<KN.getCalculateDepol(time_class::getTime()) <<", "
 								<<SN.dAktivitetsVariabel <<";\n";
 //				delete KN;
 //				delete SN;
@@ -314,7 +314,7 @@ int main(int argc, char *argv[])
 		//DYNAMISK
 		#if 1
 			new K_sensor_auron("_dKN", &dynamiskSensorFunk);
-			new s_sensor_auron("_dSN", &dynamiskSensorFunk);
+//			new s_sensor_auron("_dSN", &dynamiskSensorFunk);
 		#endif
 	#else
 
@@ -448,12 +448,17 @@ int main(int argc, char *argv[])
 		#endif
 		//cout<<"siste depol. for [SN, KN]: \t[" <<Sd->dAktivitetsVariabel <<", " <<Kd->getCalculateDepol() <<"]\n\n";
 
+
+		time_class::skrivUt_pWorkTaskQue();
+
+
 	
 
 		cout<<"\n\n\n\nSkriver ut alle auron: \t\t";
 		for( std::list<i_auron*>::iterator iter = i_auron::pAllAurons.begin() ;  iter != i_auron::pAllAurons.end() ;  iter++ )
 		{
-			cout<<"[ " <<(*iter)->sNavn <<" ]\t";
+			cout<<"[ " <<(*iter)->sNavn <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<(*iter)->dEstimatedTaskTime 
+				<<endl;
 		}
 		cout<<"\n\n";
 	
@@ -546,7 +551,7 @@ void* taskSchedulerFunction(void* )
 			// (*K_iter)->doTask();    // Løsninga for FDP: dette skaper en spike ved t=0 i plot av depol.
 		// Setter v_0 til 0 og t_0 til [no]:
 		(*K_iter)->dDepolAtStartOfTimeWindow = 0;
-		(*K_iter)->dStartOfTimeWindow = (double)time_class::getTid();
+		(*K_iter)->dStartOfTimeWindow = (double)time_class::getTime();
 		// Regner ut resulterende periode, osv.
 		(*K_iter)->doCalculation();
 	}
@@ -561,7 +566,7 @@ void* taskSchedulerFunction(void* )
 			// (*K_iter)->doTask();    // Løsninga for FDP: dette skaper en spike ved t=0 i plot av depol.
 		// Setter v_0 til 0 og t_0 til [no]:
 		(*K_iter)->updateSensorValue() ;
-		(*K_iter)->dStartOfTimeWindow = (double)time_class::getTid();
+		(*K_iter)->dStartOfTimeWindow = (double)time_class::getTime();
 		// Regner ut resulterende periode, osv.
 		(*K_iter)->doCalculation();
 	}
