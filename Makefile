@@ -36,7 +36,7 @@ auroNett.out: ANN.o main.o neuroElement.o andreKildefiler/*.cpp andreKildefiler/
 	echo "\n\n\n\nmake auroNett.out:\n\n"
 	${CPP} ${CFLAGS} ANN.o main.o neuroElement.o -o auroNett.out
 
-neuroElement.o: andreKildefiler/time.h neuroElements/axon.h neuroElements/dendrite.h neuroElements/synapse.h neuroElements/neuroElement.cpp
+neuroElement.o: andreKildefiler/time.h neuroElements/auron.h neuroElements/axon.h neuroElements/dendrite.h neuroElements/synapse.h neuroElements/neuroElement.cpp
 	${CPP} ${CFLAGS} -c neuroElements/neuroElement.cpp -o neuroElement.o
 
 main.o: andreKildefiler/main.cpp andreKildefiler/main.h andreKildefiler/time.h andreKildefiler/ANN.cpp andreKildefiler/ANN.h

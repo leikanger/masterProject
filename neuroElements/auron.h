@@ -315,17 +315,17 @@ class K_auron : public i_auron
 		#if GCC
 			actionPotential_logFile.precision(11);
 		#endif
-		actionPotential_logFile<<dEstimatedTaskTime <<";\n";		
+		actionPotential_logFile<<dLastFiringTime <<";\n";		
 		//actionPotential_logFile.flush();
 
 		#if LOGG_DEPOL 
-			depol_logFile 	<<dEstimatedTaskTime <<"\t" <<FYRINGSTERSKEL <<"; \t #Action potential - APAPAP\n" ;
-			depol_logFile 	<<dEstimatedTaskTime <<"\t" <<0 <<"; \t #Action potential - APAPAP\n" ;
+			depol_logFile 	<<dLastFiringTime <<"\t" <<FYRINGSTERSKEL <<"; \t #Action potential - APAPAP\n" ;
+			depol_logFile 	<<dLastFiringTime <<"\t" <<0 <<"; \t #Action potential - APAPAP\n" ;
 
 			// Skriver til actionPotential_depolLogFile:
 			// Logger depol-strek fra 1050 til 1200.
 			for(int i = 1050; i<1200; i++){
-				actionPotential_depolLogFile<<dEstimatedTaskTime <<", " 		<<i <<";\n";
+				actionPotential_depolLogFile<<dLastFiringTime <<", " 		<<i <<";\n";
 			}
 			//actionPotential_depolLogFile.flush();
 		#endif
@@ -370,55 +370,53 @@ class K_auron : public i_auron
 	inline void doTask();
 	inline void doCalculation();
 
-	// XXX NY XXX
-	inline void estimatePeriod();
+	inline void estimateFiringTimes(double);
+	inline void estimateFiringTimes(); // Bruker ulTime..
 
 	public:
-	K_auron(std::string sNavn_Arg ="K_auron", double dStartKappa_arg = 0, unsigned uStartDepol_prosent =0); 	
+	K_auron(std::string sNavn_Arg ="K_auron", double dStartKappa_arg = 0); 	
 	~K_auron();
 
 
 
 
+	inline const double getCalculateDepol()
+	{
 
+		// GAMMEL: return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-(double)LEKKASJE_KONST  * (time_class::getTime() - ulStartOfTimewindow )) + dAktivitetsVariabel ;
+
+		static double dDepolStatic;
+
+		//dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (time_class::getTime() - dStartOfTimeWindow )) + dAktivitetsVariabel; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+		dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dStartOfNextTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+
+		writeDepolToLog( time_class::getTime() , dDepolStatic);
+cerr<<"\ngetCalculateDepol(): [dStartOfTimeWindow, ulTime] = \t[" <<dStartOfTimeWindow <<", " <<time_class::getTime() <<"] = " <<dDepolStatic <<"\n";
+		return dDepolStatic;
+	}
+		
 	inline const double getCalculateDepol(double dForTimeInstant_arg)
 	{
 
-		// Sjekker om den har fyrt denne iter. Isåfall vil dStartOfTimeWindow > dForTimeInstant_arg
-		if( dLastFiringTime > dForTimeInstant_arg ){
-			cerr<<"\n\n\n\n\e[31mERROR asdf1352@auron.h\e[0m\tdLastFiringTime>dForTimeInstant_arg.\tgetCalculateDepol() returnerer 0\t(" <<dLastFiringTime <<">" <<dForTimeInstant_arg <<"\n";
-			return 0;
-		}
-
-		// GAMMEL: return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-(double)LEKKASJE_KONST  * (time_class::getTime() - ulStartOfTimewindow )) + dAktivitetsVariabel ;
-cerr<<"\ngetCalculateDepol(): [dStartOfTimeWindow, ulTime] = \t[" <<dStartOfTimeWindow <<", " <<time_class::getTime() <<"]\n";
+	// TODO Hindre negative depol. før fyring. Dette kan brukes for å få rett depol. ved fyring (en metode)
+		#if 0 
+			// Sjekker om den har fyrt denne iter. Isåfall vil dStartOfTimeWindow > dForTimeInstant_arg
+			if( dLastFiringTime > dForTimeInstant_arg ){
+				cerr<<"\n\n\n\n\e[31mERROR asdf1352@auron.h\e[0m\tdLastFiringTime>dForTimeInstant_arg.\tgetCalculateDepol() returnerer 0\t(" <<dLastFiringTime <<">" <<dForTimeInstant_arg <<"\n";
+				exit(0);
+				//return 0; // Dette er litt feil, fordi nå vil den sei at v_0 var 0 for en tid som er litt siden.
+			}
+		#endif
 
 		static double dDepolStatic;
 
 		// Går over til bedre tidssoppløysing: double-precition float number format!
-		//if( (unsigned long)(dStartOfTimeWindow) < time_class::getTime() ){
-// Fyrte denne iter: Bruker eksakt fyringstidspunkt når periode skal beregnes:
-		if( dLastFiringTime > time_class::getTime() ){
-			dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dForTimeInstant_arg - dLastFiringTime )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+		dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dForTimeInstant_arg - dStartOfTimeWindow )) + dAktivitetsVariabel; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
 
-			cout<<"\e[1;33mFyrt \e[32mdenne iter\e[0m\t\tGir depol: " <<dDepolStatic <<"\n";
-		}else if( dStartOfTimeWindow < time_class::getTime()+1 ){ //Stort sett ellers:
-			dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dForTimeInstant_arg - dStartOfTimeWindow )) + dAktivitetsVariabel; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
-
-			cout<<"\e[32mIkkje Fyrt denne iter\e[0m\t\tGir depol: " <<dDepolStatic <<"\n";
-		}else{ //ErrorDetection
-			cerr<<"\e[31mERROR\tasdf1414@auron.h\e[0m\t[dStartOfTimeWindow, tid] = [" <<dStartOfTimeWindow <<", " <<time_class::getTime() <<"]\n";
-			exit(0);
-		}
 		writeDepolToLog( dForTimeInstant_arg, dDepolStatic);
+		cerr<<"\ngetCalculateDepol(): [dStartOfTimeWindow, dForTimeInstant_arg] = \t[" <<dStartOfTimeWindow <<", " <<dForTimeInstant_arg <<"]\n";
 		return dDepolStatic;
 	}
-	#if 0 
-	inline const double getCalculateDepol(double dTidspunktArg)
-	{
-		return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-(double)LEKKASJE_KONST  * (dTidspunktArg - dStartOfTimeWindow )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
-	}
-	#endif
 
 	const inline void writeDepolToLog( double dTimeArg, double dDepolArg)
 	{
@@ -435,10 +433,10 @@ cerr<<"\ngetCalculateDepol(): [dStartOfTimeWindow, ulTime] = \t[" <<dStartOfTime
 			// Unless it is time for writing to log, return.
 			if( uIterationsSinceLastWrite < uNumberOfIterationsBetweenWriteToLog ){
 				return;
-			}else{
-				// Reset counter
-				uIterationsSinceLastWrite = 0;
 			}
+
+			// Reset counter
+			uIterationsSinceLastWrite = 0;
 
 			// Skriver dDepolAtStartOfTimeWindow til logg: (Tid er gitt i prosent av heile kjøretid)
 			depol_logFile 	<<dTimeArg <<"\t" <<dDepolArg <<"; \t #Depol\n" ;
@@ -461,10 +459,10 @@ cerr<<"\ngetCalculateDepol(): [dStartOfTimeWindow, ulTime] = \t[" <<dStartOfTime
 			// Unless it is time for writing to log, return.
 			if( uIterationsSinceLastWrite < uNumberOfIterationsBetweenWriteToLog ){
 				return;
-			}else{
-				// Reset counter
-				uIterationsSinceLastWrite = 0;
 			}
+
+			// Reset counter
+			uIterationsSinceLastWrite = 0;
 
 
 

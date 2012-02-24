@@ -87,7 +87,6 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 #define UTSKRIFT_AV_TID 1
 #define UTSKRIFT_AV_TID_KVAR_Nte_ITER 1
 
-#define DOT_ENTER_UTSKRIFT_AV_TID 	0 // Betyr enter kvar n'te iter. (der n er tall som blir def.). Definer til 0 eller false for å slå av.
 #define DEBUG_UTSKRIFTS_NIVAA 		0
 #define DEBUG_SKRIV_UT_DESTRUCTOR 	0
 #define DEBUG_SKRIV_UT_CONSTRUCTOR 	0

@@ -82,7 +82,6 @@ template <> ANN<K_auron>::ANN(QuadraticMatrix<double> dEdgeMatrix, std::vector<K
 			cout<<"Element nr. " <<i <<" contains an auron pointer. Assigns neuron " <<i <<" of ANN to be this auron.\n";
 			addNodeInANN( pAuronVector[i] );
 		}
-		// Construct K_auron:
 	}
 
 	// 2) Lag alle synapsene: fra neuron til neuron.
