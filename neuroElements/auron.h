@@ -242,6 +242,7 @@ class s_auron : public i_auron
 			static unsigned long uIterationsSinceLastWrite = 0;
 
 			// Unless it is time for writing to log, return.
+			// (GÅR UT FRA AT DEN SKRIVER TIL LOG KVAR ITER. TODO Vurder å skrive om dette til å bare være eit tidspunkt som blir sammenligna med nå-tid! TODO
 			if( (++uIterationsSinceLastWrite > uNumberOfIterationsBetweenWriteToLog) ){
 				depol_logFile 	<<time_class::getTime() <<"\t" <<dAktivitetsVariabel <<"; \t #Depolarization\n" ;
 				// Reset counter
@@ -545,7 +546,7 @@ class s_sensor_auron : public s_auron{
 	// Function pointer:
 	double (*pSensorFunction)(void);
 
-	static std::list<s_sensor_auron*> pAllSensorAurons;
+	static std::list<s_sensor_auron*> pAllSensoryAurons;
 
 	inline void updateSensorValue();
 	static void updateAllSensorAurons();
@@ -568,7 +569,7 @@ class K_sensor_auron : public K_auron{
 	double dSensedValue;
 	double dLastSensedValue;
 
-	static std::list<K_sensor_auron*> pAllSensorAurons;
+	static std::list<K_sensor_auron*> pAllSensoryAurons;
 
 	void updateSensorValue();
 	static void updateAllSensorAurons();

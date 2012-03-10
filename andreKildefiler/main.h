@@ -42,9 +42,9 @@
 #include <sstream> 
 
 
-extern unsigned long ulTemporalAccuracyPerSensoryFunctionOscillation;
+extern unsigned long ulTemporalAccuracyPerSensoryFunctionPeriod;
 extern int nNumberOfSensorFunctionOscillations;
-extern unsigned long ulTotalNumberOfIterations;
+extern unsigned long ulTotalNumberOfTimeSteps;
 extern unsigned uNumberOfIterationsBetweenWriteToLog;
 
 
@@ -56,8 +56,8 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 #define KANN 1
 #define SANN 1
 
-#define DEFAULT_ANTALL_TIDSITERASJONER 1000
-#define DEFAULT_NUMBER_OF_SENSOR_FUNKTION_OSCILLATIONS 1 // ANtall ganger sinus-funksjonen skal gjøre full gjennomgang.
+#define DEFAULT_NUMBERofTIMESTEPS 1000
+#define DEFAULT_NUMBER_OF_SENSORY_FUNCTION_PERIODS 1 // ANtall ganger sinus-funksjonen skal gjøre full gjennomgang.
 //#define MIN_PERIODE_MELLOM_REKALKULERING_AV_KAPPA 100
 
 #define RECALC_c1 100 
@@ -73,8 +73,8 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 //#define T 						(double)0.01 					//[ms]: tidsiterasjoner
 //#define ALPHA   				(double)1  //[verdi]: Lekkkasje per tidsiterasjon = [lengde på tidsiter]*[lekkasjefaktor]
 
-#define ALPHA   				(double)10  //[verdi]: Lekkkasje per tidsiterasjon = [ALPHA]/[ulTemporalAccuracyPerSensoryFunctionOscillation]
-#define LEKKASJE_KONST   		(double) (ALPHA/ulTemporalAccuracyPerSensoryFunctionOscillation)
+#define ALPHA   				(double)10  //[verdi]: Lekkkasje per tidsiterasjon = [ALPHA]/[ulTemporalAccuracyPerSensoryFunctionPeriod]
+#define LEKKASJE_KONST   		(double) (ALPHA/ulTemporalAccuracyPerSensoryFunctionPeriod)
 #define LEKKASJEFAKTOR_FOR_DEPOL (double)(1-LEKKASJE_KONST)
 
 #define FYRINGSTERSKEL 1000.00000

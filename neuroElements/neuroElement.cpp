@@ -35,7 +35,7 @@
 std::ostream & operator<< (std::ostream& ut, i_auron* pAuronArg );
 
 
-extern unsigned long ulTemporalAccuracyPerSensoryFunctionOscillation;
+extern unsigned long ulTemporalAccuracyPerSensoryFunctionPeriod;
 extern bool bContinueExecution;
 
 /*************************************************************
@@ -93,7 +93,7 @@ i_auron::i_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartAktVar /*=0*
 
 		depol_logFile<< "# Kjøring med "
 					 <<"\n#\tAlpha = \t" <<LEKKASJE_KONST 
-					 <<"\n#\tAntall Iter = \t" <<ulTemporalAccuracyPerSensoryFunctionOscillation <<"\n\n";
+					 <<"\n#\tAntall Iter = \t" <<ulTemporalAccuracyPerSensoryFunctionPeriod <<"\n\n";
 		depol_logFile<<"data=[";
 		depol_logFile.flush();
 
@@ -107,7 +107,7 @@ i_auron::i_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartAktVar /*=0*
 
 		actionPotential_depolLogFile 	<< "# Kjøring med "
 					 					<<"\n#\tAlpha = \t" <<LEKKASJE_KONST 
-					 					<<"\n#\tAntall Iter = \t" <<ulTemporalAccuracyPerSensoryFunctionOscillation <<"\n\n";
+					 					<<"\n#\tAntall Iter = \t" <<ulTemporalAccuracyPerSensoryFunctionPeriod <<"\n\n";
 		actionPotential_depolLogFile<<"data=[";
 		actionPotential_depolLogFile.flush();
 	#endif
@@ -122,7 +122,7 @@ i_auron::i_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartAktVar /*=0*
  	actionPotential_logFile.open( tempStr3.c_str() );
 	actionPotential_logFile << "# Kjøring med "
 				 			<<"\n#\tAlpha = \t" <<LEKKASJE_KONST 
-				 			<<"\n#\tAntall Iter = \t" <<ulTemporalAccuracyPerSensoryFunctionOscillation <<"\n\n"
+				 			<<"\n#\tAntall Iter = \t" <<ulTemporalAccuracyPerSensoryFunctionPeriod <<"\n\n"
 							<<"data=[";
 	actionPotential_logFile.flush();
 
@@ -303,8 +303,8 @@ K_sensor_auron::K_sensor_auron( std::string sNavn_Arg , double (*pFunk_arg)(void
 {
 	// Assign the sensor function:
 	pSensorFunction = pFunk_arg;
-	// Add to pAllSensorAurons list:
-	pAllSensorAurons.push_back(this);
+	// Add to pAllSensoryAurons list:
+	pAllSensoryAurons.push_back(this);
 	pAllAurons.push_back( this ); 
 
 	// Tar første sample av pSensorFunction:
@@ -322,8 +322,8 @@ s_sensor_auron::s_sensor_auron( std::string sNavn_Arg , double (*pFunk_arg)(void
 {
 	// Assign the sensor function:
 	pSensorFunction = pFunk_arg;
-	// Add to pAllSensorAurons list:
-	pAllSensorAurons.push_back(this);
+	// Add to pAllSensoryAurons list:
+	pAllSensoryAurons.push_back(this);
 }
 //}2
 //}1 * AURON
@@ -647,9 +647,9 @@ inline void K_auron::changeKappa_derivedArg( double dInputDerived_arg)//int deri
 
 	// TODO TODO SKAL eg gjøre noke med dStartOfNextTimeWindow her (tidspunkt for oppdatering av kappa)?
 
-	// Legger den i pCalculatationTaskQue, slik at effekt av all endring i kappa ila. tidsiterasjonen beregnes etter iterasjonen.
+	// Legger den i pCalculatationTaskQueue, slik at effekt av all endring i kappa ila. tidsiterasjonen beregnes etter iterasjonen.
 
-	time_class::addCalculationIn_pCalculatationTaskQue( this );
+	time_class::addCalculationIn_pCalculatationTaskQueue( this );
 	//TODO Test å kjøre doCalculation() direkte!
 	//doCalculation(); //XXX153@neuroElement.cpp
 
@@ -676,15 +676,15 @@ inline void K_auron::changeKappa_absArg(double dNewKappa)
 { //{
 	cout<<"IKKJE Bruk changeKappa_absArg() ! Den innfører potensial for feil som ødelegger alt. Ikkje ferdig.\nAvlutter."; exit(-9);
 
-	// Kanskje ikkje naudsynt, siden vi ikkje legger til element i pCalculatationTaskQue..
+	// Kanskje ikkje naudsynt, siden vi ikkje legger til element i pCalculatationTaskQueue..
 	//dChangeInKappa_this_iter = 0; // Hindrer .doCalculation() å endre kappa ytterligare.
 	dAktivitetsVariabel = dNewKappa;
 
 	// Foreløpig definerer eg eit sensorauron som en rein sensor (Tar ikkje imot input fra andre auron): 	// I dette tilfellet fjærner eg en potensiell feilkilde:
 	dChangeInKappa_this_iter = 0;
 
-	// Legger den i pCalculatationTaskQue, slik at effekt av all endring i kappa ila. tidsiterasjonen beregnes etter iterasjonen.
-	time_class::addCalculationIn_pCalculatationTaskQue( this );
+	// Legger den i pCalculatationTaskQueue, slik at effekt av all endring i kappa ila. tidsiterasjonen beregnes etter iterasjonen.
+	time_class::addCalculationIn_pCalculatationTaskQueue( this );
 	
 	#if LOGG_KAPPA
 		writeKappaToLog();
@@ -727,7 +727,7 @@ inline void s_dendrite::newInputSignal( double dNewSignal_arg )
 		//bBlockInput_refractionTime = true;
 
 		// Spatioteporal delay from AP initialization at axon hillock:
-		time_class::addTaskIn_pWorkTaskQue( pElementOfAuron );
+		time_class::addTaskIn_pWorkTaskQueue( pElementOfAuron );
 	}
 
 	// Skriver til log for aktivitetsVar:
@@ -780,7 +780,7 @@ inline void s_auron::doTask()
 
 	//Axon hillock: send aksjonspotensial 	-- innkapsling gir at a xon skal ta hånd om all output:
 	// bestiller at a xon skal fyre NESTE tidsiterasjon. Simulerer tidsdelay i a xonet.
-	time_class::addTaskIn_pWorkTaskQue( pOutputAxon );
+	time_class::addTaskIn_pWorkTaskQueue( pOutputAxon );
 
 
 	// Registrerer fyringstid (for feisjekk (over) osv.) 
@@ -805,10 +805,10 @@ inline void s_axon::doTask()
  	cout<<"s_axon::doTask()\tLegger inn alle outputsynapser i arbeidskø. Mdl. av auron: " <<pElementOfAuron->sNavn <<" - - - - - - - - - - - - - - - \n";
 	#endif
 
-	// Legger til alle utsynapser i pWorkTaskQue:
+	// Legger til alle utsynapser i pWorkTaskQueue:
  	for( std::list<s_synapse*>::iterator iter = pUtSynapser.begin(); iter != pUtSynapser.end(); iter++ )
-	{ // Legger alle pUtSynapser inn i time_class::pWorkTaskQue: (FIFO-kø)
-		time_class::addTaskIn_pWorkTaskQue( *iter );
+	{ // Legger alle pUtSynapser inn i time_class::pWorkTaskQueue: (FIFO-kø)
+		time_class::addTaskIn_pWorkTaskQueue( *iter );
 	}
 
 	 //Skriver til logg etter refraction-period.
@@ -833,7 +833,7 @@ inline void s_synapse::doTask()
 inline void s_dendrite::doTask()
 { //{1 DENDRITE
 	// s_dendrite::doTask() er en metode for å få inn spatiotemporal delay for neuronet (simulere ikkje-instant overføring)
-	time_class::addTaskIn_pWorkTaskQue( pElementOfAuron );
+	time_class::addTaskIn_pWorkTaskQueue( pElementOfAuron );
 } //}1
 
 //			* 	KANN
@@ -941,7 +941,7 @@ inline void K_dendrite::doTask()
 //}1            *       KANN slutt
 
 // 		* 	time_class
-/* time_class::doTask() 	: 		Organiserer tid: doTask() itererer tid og holder pWorkTaskQue og tid i orden etter definerte regler */
+/* time_class::doTask() 	: 		Organiserer tid: doTask() itererer tid og holder pWorkTaskQueue og tid i orden etter definerte regler */
 void time_class::doTask()
 { 	//{1 
 
@@ -960,15 +960,15 @@ void time_class::doTask()
 
 
 	// Sjekker om den har kjørt ferdig:
-	if( ulTime >= ulTotalNumberOfIterations )   //ulTemporalAccuracyPerSensoryFunctionOscillation * NUMBER_OF_SENSOR_FUNKTION_OSCILLATIONS )
+	if( ulTime >= ulTotalNumberOfTimeSteps )   //ulTemporalAccuracyPerSensoryFunctionPeriod * NUMBER_OF_SENSOR_FUNKTION_OSCILLATIONS )
 	{
 		bContinueExecution = false;
 		return;
 	}
 
 
-	// Legger til egenpeiker på slutt av pWorkTaskQue
-	pWorkTaskQue.push_back(this);	
+	// Legger til egenpeiker på slutt av pWorkTaskQueue
+	pWorkTaskQueue.push_back(this);	
 
 	//itererer time:
 	ulTime++;
@@ -989,7 +989,7 @@ void time_class::doTask()
 
 
 	/*************************************************
-	* Flytter planlagde oppgaver over i pWorkTaskQue *
+	* Flytter planlagde oppgaver over i pWorkTaskQueue *
 	*************************************************/
 // Kommentert ut fordi dette ordnes i doCalculation()
 // XXX Trur dette er deprecated! Kommenterer ut! //{
@@ -999,11 +999,11 @@ void time_class::doTask()
 		// Typekonverderer dEstimatedTaskTime til unsigned long, og sjekker om elementet er planlagt å gjennomføre noe neste iter (legger til 0.5 for å få rett avrunding):
 		if( (unsigned long)( (*pPE_iter)->dEstimatedTaskTime) == ulTime )
 		{
-			cout<<"dEstimatedTaskTime == ulTime: \e[1;34mlegger\e[0m til " <<(*pPE_iter)->sClassName <<" i pWorkTaskQue\n";
+			cout<<"dEstimatedTaskTime == ulTime: \e[1;34mlegger\e[0m til " <<(*pPE_iter)->sClassName <<" i pWorkTaskQueue\n";
 			//Denne legger til elementet på slutten. Det er litt feil.
-			//addTaskIn_pWorkTaskQue( (*pPE_iter) );
+			//addTaskIn_pWorkTaskQueue( (*pPE_iter) );
 			addTaskInPresentTimeIteration( (*pPE_iter) );
-			//Skal difor heller bruke addTaskInPresentTimeIteration() TODO Da må eg også flytte pWorkTaskQue.push_back(this) til toppen (heilt i toppen?)
+			//Skal difor heller bruke addTaskInPresentTimeIteration() TODO Da må eg også flytte pWorkTaskQueue.push_back(this) til toppen (heilt i toppen?)
 		}
  	}
 #endif //}
@@ -1093,7 +1093,7 @@ void K_auron::doCalculation()
 	if( (unsigned)(dEstimatedTaskTime) < time_class::getTime()+1 ){ //TODO
 		cerr<<"K_auron::doCalc()\tLegg til task i denne iter: [TID, dEstimatedTaskTime] :\t[" <<time_class::getTime() <<", " <<dEstimatedTaskTime <<"]\n";
 		time_class::addTaskInPresentTimeIteration( this );
-		time_class::skrivUt_pWorkTaskQue();
+		time_class::skrivUt_pWorkTaskQueue();
 	}
 }
 
@@ -1153,7 +1153,7 @@ inline void K_auron::estimateFiringTimes()
 		cout<<"estimatedPeriod(): \t[t_0, K, v_0]: \t[" <<dStartOfTimeWindow <<", " <<dAktivitetsVariabel <<", " <<dDepolAtStartOfTimeWindow <<"]:\t\e[1;39m" <<dLastCalculatedPeriod <<"\e[0;0m"
 			<<"\t\tog tilslutt getCalculateDepol(ulTime): \e[1;39m" <<tempDouble <<"\e[0;0m\n";
 
-		dEstimatedTaskTime = ( dStartOfTimeWindow 	+ log( (dAktivitetsVariabel-dDepolAtStartOfTimeWindow)/(dAktivitetsVariabel-(double)FYRINGSTERSKEL) )   /  ((double)ALPHA/(double)ulTemporalAccuracyPerSensoryFunctionOscillation));
+		dEstimatedTaskTime = ( dStartOfTimeWindow 	+ log( (dAktivitetsVariabel-dDepolAtStartOfTimeWindow)/(dAktivitetsVariabel-(double)FYRINGSTERSKEL) )   /  ((double)ALPHA/(double)ulTemporalAccuracyPerSensoryFunctionPeriod));
 
 		// GÅR HER UT IFRA AT Kappa endres kvar iterasjon! Seier at [no] er samme som dStartOfTimeWindow: dette er bare rett dersom vi oppdaterer start of time window kvar iter!
 																										
@@ -1214,8 +1214,8 @@ inline void K_auron::estimateFiringTimes()
 void K_sensor_auron::updateAllSensorAurons()
 { //{
 
-	// Itererer gjennom lista pAllSensorAurons, og kaller updateSensorValue() for de.
-	for( std::list<K_sensor_auron*>::iterator sensorIter = pAllSensorAurons.begin() 	; 	sensorIter != pAllSensorAurons.end() ; sensorIter++)
+	// Itererer gjennom lista pAllSensoryAurons, og kaller updateSensorValue() for de.
+	for( std::list<K_sensor_auron*>::iterator sensorIter = pAllSensoryAurons.begin() 	; 	sensorIter != pAllSensoryAurons.end() ; sensorIter++)
 	{
 		(*sensorIter)->updateSensorValue();
 	}
@@ -1254,8 +1254,8 @@ inline void K_sensor_auron::updateSensorValue()
 inline void s_sensor_auron::updateAllSensorAurons()
 { //{
 
-	// Itererer gjennom lista pAllSensorAurons, og kaller updateSensorValue() for de.
-	for( std::list<s_sensor_auron*>::iterator sensorIter = pAllSensorAurons.begin() 	; 	sensorIter != pAllSensorAurons.end() ; sensorIter++)
+	// Itererer gjennom lista pAllSensoryAurons, og kaller updateSensorValue() for de.
+	for( std::list<s_sensor_auron*>::iterator sensorIter = pAllSensoryAurons.begin() 	; 	sensorIter != pAllSensoryAurons.end() ; sensorIter++)
 	{
 		(*sensorIter)->updateSensorValue();
 	}
@@ -1376,7 +1376,7 @@ inline void time_class::addTaskInPresentTimeIteration(timeInterface* pTimeClassA
 	cout<<"Inne i time_class::addTaskInPresentTimeIteration(..)\n";
 
 	// Finner rett plass for nye elementet (sortert etter dEstimatedTaskTime)
-	for( std::list<timeInterface*>::iterator iter = pWorkTaskQue.begin(); iter != pWorkTaskQue.end(); iter++ )
+	for( std::list<timeInterface*>::iterator iter = pWorkTaskQueue.begin(); iter != pWorkTaskQueue.end(); iter++ )
 	{
 		//cout<<"\e[35mSJEKKER\e[0m om det er type: time_class*\t[sCName, typeid().name()] = [" <<(*iter)->sClassName <<", " <<typeid(iter).name() <<"]\t\nid_asdf452@neuroElement.cpp\n";
 
@@ -1385,8 +1385,8 @@ inline void time_class::addTaskInPresentTimeIteration(timeInterface* pTimeClassA
 		if((*iter)->sClassName =="K_auron"){
 			cout<<"\e[31mdEstimatedTT\e[0m for [(*iter) pArg] = [" <<(*iter)->dEstimatedTaskTime <<", " <<pTimeClassArg_withTask->dEstimatedTaskTime <<"]\t\tAv type ["
 				<<(*iter)->sClassName <<" " <<(*iter)->sClassName <<"]\n";
-			if(iter == pWorkTaskQue.end()){
-				cout<<"iter == pWorkTaskQue.end()\n\n";
+			if(iter == pWorkTaskQueue.end()){
+				cout<<"iter == pWorkTaskQueue.end()\n\n";
 			}
 		}
 #endif
@@ -1395,8 +1395,8 @@ inline void time_class::addTaskInPresentTimeIteration(timeInterface* pTimeClassA
 
 		// Dersom iter-elementets dEstimatedTaskTime er etter det nye elementets dEstimatedTaskTime, er dette første oppføring som skal fyre etter (*iter). Legger dermed til elementet før dette.
 		if( (*iter)->dEstimatedTaskTime > pTimeClassArg_withTask->dEstimatedTaskTime){
- 			cout<<"legg til elementet på rett plass i pWorkTaskQue.\n";
-			pWorkTaskQue.insert(iter, pTimeClassArg_withTask); 	//insert legger til elementet før [iter]!
+ 			cout<<"legg til elementet på rett plass i pWorkTaskQueue.\n";
+			pWorkTaskQueue.insert(iter, pTimeClassArg_withTask); 	//insert legger til elementet før [iter]!
 			return;
 		}
 
@@ -1404,16 +1404,16 @@ inline void time_class::addTaskInPresentTimeIteration(timeInterface* pTimeClassA
  		if( (*iter)->sClassName == "time" )
 		{
 			// Har kommet til siste elementet. Nye elementet skal dermed ligge heilt sist!
-			pWorkTaskQue.insert(iter, pTimeClassArg_withTask); 	//insert legger til elementet før [iter]!
- 			cout<<"la til element " <<pTimeClassArg_withTask->sClassName <<" sist i pWorkTaskQue!\n";
+			pWorkTaskQueue.insert(iter, pTimeClassArg_withTask); 	//insert legger til elementet før [iter]!
+ 			cout<<"la til element " <<pTimeClassArg_withTask->sClassName <<" sist i pWorkTaskQueue!\n";
 			return;
 		}
 	}
 
 	
 	// Foreløpig legger eg den bare til først i denne iter: (etter nåværande elem.) TODO TODO TODO TODO TODO  DET ER FEIL Å GJØRE! Fiks! TODO TODO TODO
-	//pWorkTaskQue.push_front(pTimeClassArg_withTask);
-	skrivUt_pWorkTaskQue();
+	//pWorkTaskQueue.push_front(pTimeClassArg_withTask);
+	skrivUt_pWorkTaskQueue();
 }
 
 
@@ -1434,10 +1434,10 @@ inline void K_auron::doTransmission()
 	Delay kan dermed være forskjellig for kvar synapse!
 	TODO */
 
-	// Legg til alle utsynapser i pWorkTaskQue:
+	// Legg til alle utsynapser i pWorkTaskQueue:
  	for( std::list<K_synapse*>::iterator iter = pUtSynapser.begin(); iter != pUtSynapser.end(); iter++ )
-	{ // Legger alle pUtSynapser inn i time_class::pWorkTaskQue: (FIFO-kø)
-		time_class::addTaskIn_pWorkTaskQue( *iter );
+	{ // Legger alle pUtSynapser inn i time_class::pWorkTaskQueue: (FIFO-kø)
+		time_class::addTaskIn_pWorkTaskQueue( *iter );
 	}
 }
 

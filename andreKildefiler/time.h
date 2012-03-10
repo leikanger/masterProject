@@ -73,10 +73,10 @@ class timeInterface
 class time_class : public timeInterface {
 	static unsigned long ulTime;
 	
-	static std::list<timeInterface*> pWorkTaskQue;
-	static std::list<timeInterface*> pCalculatationTaskQue;
+	static std::list<timeInterface*> pWorkTaskQueue;
+	static std::list<timeInterface*> pCalculatationTaskQueue;
 
-	// Liste som sjekkes ved kvar tidsiterering: Dersom eit element har dEstimatedTaskTime til neste tidssted legges peiker inn i pWorkTaskQue.
+	// Liste som sjekkes ved kvar tidsiterering: Dersom eit element har dEstimatedTaskTime til neste tidssted legges peiker inn i pWorkTaskQueue.
 	static std::list<timeInterface*> pPeriodicElements;
 
 	protected:
@@ -84,48 +84,48 @@ class time_class : public timeInterface {
 	void doCalculation()
 	{ //{
 		/**************************************************************************************
-		*** Gjennomføre kalkulering på alle kalkuleringsoppgaver (pCalculatationTaskQue) 	***
+		*** Gjennomføre kalkulering på alle kalkuleringsoppgaver (pCalculatationTaskQueue) 	***
 		**************************************************************************************/
 
 		//  TA VEKK (redundant test?)
-		if( pCalculatationTaskQue.empty() ) return;
+		if( pCalculatationTaskQueue.empty() ) return;
 
 		// Organiserer liste slik at kvar oppføring er unik:
-		for( std::list<timeInterface*>::iterator iter = pCalculatationTaskQue.begin(); iter != pCalculatationTaskQue.end(); iter++ )
+		for( std::list<timeInterface*>::iterator iter = pCalculatationTaskQueue.begin(); iter != pCalculatationTaskQueue.end(); iter++ )
 		{
 			std::list<timeInterface*>::iterator iter2 = iter; 
 			iter2++;
-			while(iter2!=pCalculatationTaskQue.end()){
+			while(iter2!=pCalculatationTaskQueue.end()){
 				// ser om iteratorene peker til samme minneadresse (samme timeInterface-element). Isåfall: fjærn det andre elementet.
 			 	if( (*iter2) == (*iter) ){ 
 					// Øker iterator før eg sletter element på iter2.
 					std::list<timeInterface*>::iterator slettIter = iter2;
 					iter2++;
-					pCalculatationTaskQue.erase(slettIter);
+					pCalculatationTaskQueue.erase(slettIter);
 					continue;
 				}
 				iter2++;
 			}
 		}
 	
-		while( !pCalculatationTaskQue.empty() ){
-			// Kaller pCalculatationTaskQue.front()->pCalculatationTaskQue();
-			pCalculatationTaskQue.front()->doCalculation();
+		while( !pCalculatationTaskQueue.empty() ){
+			// Kaller pCalculatationTaskQueue.front()->pCalculatationTaskQueue();
+			pCalculatationTaskQueue.front()->doCalculation();
 
 // BARE PISS TODO Men kan være nyttig kode..
 #if 0
 			// Legger til task i neste iterasjon, dersom dette er dEstimatedTaskTime:
-			if( (unsigned)(pCalculatationTaskQue.front()->dEstimatedTaskTime) < ulTime+2 ){ // Dersom den er før [nå+2], kan vi legge den til i pWorkTaskQue (da er den mest sansynligvis til neste iter(Dette er jo siste ting som skjer!)
-								//															// (doCalculation() er siste som skjer før elem. flyttes over i pWorkTaskQue (i time_class::doTask() kalles doCalc() rett før flytting av elem)
+			if( (unsigned)(pCalculatationTaskQueue.front()->dEstimatedTaskTime) < ulTime+2 ){ // Dersom den er før [nå+2], kan vi legge den til i pWorkTaskQueue (da er den mest sansynligvis til neste iter(Dette er jo siste ting som skjer!)
+								//															// (doCalculation() er siste som skjer før elem. flyttes over i pWorkTaskQueue (i time_class::doTask() kalles doCalc() rett før flytting av elem)
 				// FUNKER IKKJE: 	doTask(); (fører til at den bruker veldig lang tid (venter lenge..)
-				cout<<"\e[1;33mOK:\t\e[0m dEsmatedTaskTime < ulTime+1: \e[31m" <<(pCalculatationTaskQue.front())->dEstimatedTaskTime <<"\e[0m < \e[33m" <<ulTime <<"+1\e[0m]\n";	
+				cout<<"\e[1;33mOK:\t\e[0m dEsmatedTaskTime < ulTime+1: \e[31m" <<(pCalculatationTaskQueue.front())->dEstimatedTaskTime <<"\e[0m < \e[33m" <<ulTime <<"+1\e[0m]\n";	
 			}else{
-				cout<<"\e[1;31mFEIL:\t\e[0m dEsmatedTaskTime !< ulTime+1: \e[31m" <<(pCalculatationTaskQue.front())->dEstimatedTaskTime <<"\e[0m !< \e[33m" <<ulTime <<"+1\e[0m]\n";	
+				cout<<"\e[1;31mFEIL:\t\e[0m dEsmatedTaskTime !< ulTime+1: \e[31m" <<(pCalculatationTaskQueue.front())->dEstimatedTaskTime <<"\e[0m !< \e[33m" <<ulTime <<"+1\e[0m]\n";	
 			}
 #endif
 	
 			// Går videre (popper første elementet)
-			pCalculatationTaskQue.pop_front();
+			pCalculatationTaskQueue.pop_front();
 		}
 
 
@@ -136,18 +136,18 @@ class time_class : public timeInterface {
 	static inline void addTaskInPresentTimeIteration(timeInterface* pTimeClassArg_withTask);
 
 
-	static inline void addCalculationIn_pCalculatationTaskQue( timeInterface* pObject_arg)
+	static inline void addCalculationIn_pCalculatationTaskQueue( timeInterface* pObject_arg)
 	{
-	 	pCalculatationTaskQue.push_back( pObject_arg );
+	 	pCalculatationTaskQueue.push_back( pObject_arg );
 	}
 
 
-	const static void skrivUt_pWorkTaskQue()
+	const static void skrivUt_pWorkTaskQueue()
 	{ //{
-		cout<<"Skriver ut pWorkTaskQue: \n";
+		cout<<"Skriver ut pWorkTaskQueue: \n";
 		int nIter = 0;
 		// itererer gjennom ytre liste:
-		for(std::list<timeInterface*>::iterator l_iter = pWorkTaskQue.begin(); 	l_iter != pWorkTaskQue.end() ; 	l_iter++ )
+		for(std::list<timeInterface*>::iterator l_iter = pWorkTaskQueue.begin(); 	l_iter != pWorkTaskQueue.end() ; 	l_iter++ )
 		{
 			cout<<nIter <<"\t" <<typeid(*(*l_iter)).name() <<"\t(" <<(*l_iter)->sClassName <<"\tplanlagt til " <<(*l_iter)->dEstimatedTaskTime <<"\n";
 			nIter++;
@@ -163,9 +163,9 @@ class time_class : public timeInterface {
 	{
 		pPeriodicElements.push_back( pArg );
 	}
-	static void addTaskIn_pWorkTaskQue( timeInterface* pArg )
+	static void addTaskIn_pWorkTaskQueue( timeInterface* pArg )
 	{
-	 	pWorkTaskQue.push_back( pArg );
+	 	pWorkTaskQueue.push_back( pArg );
 	}
 	static const inline unsigned long getTime(){ return ulTime; }
 	
@@ -184,7 +184,7 @@ class time_class : public timeInterface {
 	friend class K_auron;
 	friend class i_auron;
 
-	friend void initialiserArbeidsKoe();
+	friend void initialzeWorkTaskQueue();
 	friend void* taskSchedulerFunction(void*);
 	friend int main(int, char**);
 };
