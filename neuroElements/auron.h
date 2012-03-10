@@ -79,7 +79,7 @@ class recalcKappaClass : public timeInterface
 	K_auron* pKappaAuron_obj;
 
 	friend class K_auron;
-	//friend class K_sensor_auron;
+	//friend class K_sensory_auron;
 };
 
 
@@ -562,23 +562,23 @@ class s_sensor_auron : public s_auron{
 	friend class time_class;
 };
 
-class K_sensor_auron : public K_auron{
+class K_sensory_auron : public K_auron{
 	// Function pointer:
 	double (*pSensorFunction)(void);
 
 	double dSensedValue;
 	double dLastSensedValue;
 
-	static std::list<K_sensor_auron*> pAllSensoryAurons;
+	static std::list<K_sensory_auron*> pAllSensoryAurons;
 
 	void updateSensorValue();
 	static void updateAllSensorAurons();
 
 
 	// Making copy constructor private to disable copying:
-	K_sensor_auron(const K_sensor_auron& arg);
+	K_sensory_auron(const K_sensory_auron& arg);
 	// Same with assignment:
-	K_sensor_auron& operator=(const K_sensor_auron& arg);
+	K_sensory_auron& operator=(const K_sensory_auron& arg);
 
 
 	
@@ -586,7 +586,7 @@ class K_sensor_auron : public K_auron{
 	inline double recalculateKappa();
 
 	public:
-		K_sensor_auron( std::string sNavn_Arg ,   double (*pFunk_arg)(void) );
+		K_sensory_auron( std::string sNavn_Arg ,   double (*pFunk_arg)(void) );
 
 		double getSensedValue()
 		{

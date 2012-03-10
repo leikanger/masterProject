@@ -142,7 +142,7 @@ class time_class : public timeInterface {
 	}
 
 
-	const static void skrivUt_pWorkTaskQueue()
+	const static void printAllElementsOf_pWorkTaskQueue()
 	{ //{
 		cout<<"Skriver ut pWorkTaskQueue: \n";
 		int nIter = 0;
@@ -169,12 +169,12 @@ class time_class : public timeInterface {
 	}
 	static const inline unsigned long getTime(){ return ulTime; }
 	
-	static const void skrivUt_pPeriodicElements()
+	static const void printAllElementsOf_pPeriodicElements()
 	{
-		cout<<"Skriver ut pPeriodicElements-lista:\n";
+		cout<<"Print type of all elements in the pPeriodicElements list:\n";
 		for( std::list<timeInterface*>::iterator pPE_iter = pPeriodicElements.begin() ; pPE_iter != pPeriodicElements.end() ; pPE_iter++ )
 		{
-			cout<<"[ " <<(*pPE_iter)->sClassName <<" ]\n";
+			cout<<"\t[ " <<(*pPE_iter)->sClassName <<" ]\n";
 		}
 		cout<<"\n\n";
 	}

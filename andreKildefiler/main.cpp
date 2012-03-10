@@ -41,7 +41,12 @@
 
 
 //TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+// 			Innfør atexit(&i_auron::callDestructorForAllAurons) ! Dette står i rapporten, og er også veldig lurt!
+// 				Kanskje eg heller skal lage en egen avsluttingsfunksjon, der eg også skriver ut alle viktige element. Isåfall må eg skrive om rapportan!. Dette er bedre!
+// 				Kanskje eg også skal handtere SIGTERM signal? Bare for å briefe litt? JA!
 // 			s_auron funker ikkje lenger! TODO TODO
+// 			lager av en eller anna grunn: to K_auron istadenfor eitt av samme node (med navn [dKN])!
+// 				LAGER DOBBELT OPP for KN: Skriver ivertfall to oppføringer i lista alleAuron. NEI: slik er det: sletter først alle element i K_auron::pAllKappaAurons, så alle i i_auron::pAllAurons. Fiks det slik at dette ikkje skjer(ikkje skrive ut to oppføringer av samme!)
 //TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 
 
@@ -83,7 +88,7 @@ extern std::list<timeInterface*> 				time_class::pPeriodicElements;
 
 extern std::list<i_auron*> i_auron::pAllAurons;
 extern std::list<K_auron*> K_auron::pAllKappaAurons;
-extern std::list<K_sensor_auron*> K_sensor_auron::pAllSensoryAurons;
+extern std::list<K_sensory_auron*> K_sensory_auron::pAllSensoryAurons;
 extern std::list<s_sensor_auron*> s_sensor_auron::pAllSensoryAurons;
 
 extern unsigned long time_class::ulTime;
@@ -125,6 +130,11 @@ int nResolutionInLogLogErrorPlot; // TA VEKK 												TODO TODO TODO TA VEKK!
  ****************************************/
 int main(int argc, char *argv[])
 {
+	// Register atexit()-function: funtion to be called when auroSim terminates.
+	// Call static i_auron member funtion i_auron::callDestructorForAllAurons() when auroSim terminates:
+	atexit(&i_auron::callDestructorForAllAurons);
+
+
 	cout<<"Set default text print style: \e[0;39m Weak text, default terminal text colour.\n\n";
 
 	//Read in arguments from shell:  //{1
@@ -245,6 +255,7 @@ int main(int argc, char *argv[])
 
 	// TODO TODO TODO TODO TODO TODO  TA VEKK! TODO TODO TODO TODO TODO 
 //TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+#if 0
 	// Ny mekanisme: Lag log/log errorplot datafil. Kjører simuleringe med [100 : 100*2^nResolutionInLogLogErrorPlot] tidssteg. Lagrer slutt-verdien for depol. verdien.
 	if( bLogLogExecution ){ 	// Skal kjøre for å generere datafil til log-log error plot.
 
@@ -275,7 +286,7 @@ int main(int argc, char *argv[])
 				// Setter temporalAccuracy:
 	 			ulTemporalAccuracyPerSensoryFunctionPeriod = 100*pow(2,i);
 				// Lager auron:
-				K_sensor_auron KN("KN", &dynamiskSensorFunk);
+				K_sensory_auron KN("KN", &dynamiskSensorFunk);
 				s_sensor_auron SN("SN", &dynamiskSensorFunk);
 
 				// Starter kjøring:
@@ -299,28 +310,29 @@ int main(int argc, char *argv[])
 			// Avslutter LogLog-datafil:
 			LogLog_logFile<<"]; \n";
 
+	}else{ 						// Normal run:
+#endif
 //TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO  (SLUTT. Ta vekk det over!)
-
-	}else{ 						// Normal execution:
+	{
 
 	// Different test cases:
 
 	#if 1 // Tests for a single sensory neuron:
 		// Experiment 1:
 		#if 0
-			new K_sensor_auron("sKN", &statiskSensorFunk);
+			new K_sensory_auron("sKN", &statiskSensorFunk);
 			new s_sensor_auron("sSN", &statiskSensorFunk);
 		#endif
 
 		// Linearily increasing depol. velocity:
 		#if 0
-			new K_sensor_auron("dKN", &linearilyIncreasingDepolVelocity);
+			new K_sensory_auron("dKN", &linearilyIncreasingDepolVelocity);
 			new s_sensor_auron("dSN", &linearilyIncreasingDepolVelocity);
 		#endif
 
 		// Experiment 2:
 		#if 1
-			new K_sensor_auron("dKN", &dynamiskSensorFunk);
+			new K_sensory_auron("dKN", &dynamiskSensorFunk);
 			new s_sensor_auron("dSN", &dynamiskSensorFunk);
 		#endif
 	#else
@@ -340,9 +352,9 @@ int main(int argc, char *argv[])
 		// TRENGER IKKJE MATRISE: bruk heller std::vector<K_auron*>
 	cout<<"\tInitialize K_auron*-vector:\n";
 		std::vector<K_auron*> AlleAuron(3);
-		//AlleAuron[0] = new K_sensor_auron("Ksensor1",statiskSensorFunkMedHoegAktivitet);
-		AlleAuron[0] = new K_sensor_auron("K0Sensor", dynamiskSensorFunk);
-		AlleAuron[2] = new K_sensor_auron("K2Sensor", dynamiskSensorFunk2);
+		//AlleAuron[0] = new K_sensory_auron("Ksensor1",statiskSensorFunkMedHoegAktivitet);
+		AlleAuron[0] = new K_sensory_auron("K0Sensor", dynamiskSensorFunk);
+		AlleAuron[2] = new K_sensory_auron("K2Sensor", dynamiskSensorFunk2);
 	
 		QuadraticMatrix<double> KMat(3);
 		KMat(0,1) = 50;
@@ -363,7 +375,7 @@ int main(int argc, char *argv[])
 //{ KOMMENTERT UT
 //  BARE KAPPA:
 	#if 0
-	K_sensor_auron* Ks1 = new K_sensor_auron("K_sensor_auron", &sensorFunk1a);
+	K_sensory_auron* Ks1 = new K_sensory_auron("K_sensory_auron", &sensorFunk1a);
 	K_auron* k1 = new K_auron("k1");
 	new K_synapse(Ks1, k1, true);
 
@@ -377,15 +389,15 @@ int main(int argc, char *argv[])
 		K_auron* K2 = new K_auron("K2" );
 		K_auron* K3 = new K_auron("K3" );
 	
-		K_sensor_auron* KsStatisk = new K_sensor_auron("KsStatisk", &statiskSensorFunk);
+		K_sensory_auron* KsStatisk = new K_sensory_auron("KsStatisk", &statiskSensorFunk);
 		new K_synapse(KsStatisk, K1, 200);
 	
 	
 
-		K_sensor_auron* Ks1 = new K_sensor_auron( "Ks1", &sensorFunk1 );
+		K_sensory_auron* Ks1 = new K_sensory_auron( "Ks1", &sensorFunk1 );
 		new K_synapse( Ks1, K1, 400, false ); 
 	
-		K_sensor_auron* Ks2 = new K_sensor_auron( "Ks2", &sensorFunk2 );
+		K_sensory_auron* Ks2 = new K_sensory_auron( "Ks2", &sensorFunk2 );
 		new K_synapse( Ks2, K1, 400, false ); 
 		new K_synapse( Ks2, KsStatisk, 333, false);
 
@@ -407,11 +419,11 @@ int main(int argc, char *argv[])
 
 
 		#if 0 // Testoppsett 1, KANN
-			K_auron* Ks1 = new K_sensor_auron("Ks1", &sensorFunk_TEST1_s1 );
-			K_auron* Ks2 = new K_sensor_auron("Ks2", &sensorFunk_TEST1_s2 );
-			K_auron* Ks3 = new K_sensor_auron("Ks3", &sensorFunk_TEST1_s3 );
-			K_auron* Ks4 = new K_sensor_auron("Ks4", &sensorFunk_TEST1_s4 );
-			K_auron* Ks5 = new K_sensor_auron("Ks5", &sensorFunk_TEST1_s5 );
+			K_auron* Ks1 = new K_sensory_auron("Ks1", &sensorFunk_TEST1_s1 );
+			K_auron* Ks2 = new K_sensory_auron("Ks2", &sensorFunk_TEST1_s2 );
+			K_auron* Ks3 = new K_sensory_auron("Ks3", &sensorFunk_TEST1_s3 );
+			K_auron* Ks4 = new K_sensory_auron("Ks4", &sensorFunk_TEST1_s4 );
+			K_auron* Ks5 = new K_sensory_auron("Ks5", &sensorFunk_TEST1_s5 );
 		
 			K_auron* Kt1 = new K_auron("Kt1");
 			new K_synapse(Ks1, Kt1, 100);
@@ -443,45 +455,37 @@ int main(int argc, char *argv[])
 
 
 
-		cout<<"******************************************\n*** BEGYNNER KJØRING AV ANN: ***\n******************************************\n\n";
+		cout<<"******************************************\n***  START RUN OF auroSIM : ****\n******************************************\n\n";
 
-//		K_sensor_auron::updateAllSensorAurons();
-
-/******************************************* Starter void taskSchedulerFunction(void*); ****************************************************/
+/******************************************* Call taskSchedulerFunction(void*); ****************************************************/
 		taskSchedulerFunction(0);
-/*******************************************************************************************************************************************/
+/***********************************************************************************************************************************/
 
 
-		cout<<"\n\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nAvslutter.\n\n\n";
+		cout<<"\n\n\nXXXXXX Successful run. Completes simulation. XXXXX\n\n\n";
 
-		#if GCC	
-			cout.precision(20);
-		#endif
+		//#if GCC	
+		//	cout.precision(20);
+		//#endif
 		//cout<<"siste depol. for [SN, KN]: \t[" <<Sd->dAktivitetsVariabel <<", " <<Kd->getCalculateDepol() <<"]\n\n";
 
 
-		time_class::skrivUt_pWorkTaskQueue();
+/* TODO Lag en egen avsluttingsfunksjon(og registrer den med atexit(void (*)(void)).). Den skal gjøre følgende:*/
+		time_class::printAllElementsOf_pWorkTaskQueue();
 
-
+//		cout<<"\n\n\n\nPrint all elements of i_auron:\n";
+//		for( std::list<i_auron*>::iterator iter = i_auron::pAllAurons.begin() ;  iter != i_auron::pAllAurons.end() ;  iter++ )
+//		{
+//			cout<<"\t[ " <<(*iter)->sNavn <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<(*iter)->dEstimatedTaskTime 
+//				<<endl;
+//		}
+//		cout<<"\n\n";
 	
-
-		cout<<"\n\n\n\nSkriver ut alle auron: \t\t";
-		for( std::list<i_auron*>::iterator iter = i_auron::pAllAurons.begin() ;  iter != i_auron::pAllAurons.end() ;  iter++ )
-		{
-			cout<<"[ " <<(*iter)->sNavn <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<(*iter)->dEstimatedTaskTime 
-				<<endl;
-		}
-		cout<<"\n\n";
-	
-		#if DEBUG_UTSKRIFTS_NIVAA > 3
-			time_class::skrivUt_pPeriodicElements();
+		#if DEBUG_PRINT_LEVEL > 1
+			time_class::printAllElementsOf_pPeriodicElements();
 		#endif
 
-
-		// Avlutt alle loggane rett:
-		i_auron::callDestructorForAllAurons();
-
-	} // if( bLogLogExecution == false ){ .. }
+	} // end of if( bLogLogExecution == false ){ .. }
 
 
 	cout<<"\n\nWIN!\n\n\n";
@@ -489,10 +493,16 @@ int main(int argc, char *argv[])
 }
 
 
-void printArgumentConventions(std::string programKall)
+/*****************************************************************
+** void printArgumentConventions() 								**
+** 	-arguments: void 											**
+** 	-return: 	void 											**
+** 	Funtion: 	prints out argument convention for auroSim 		**
+*****************************************************************/
+void printArgumentConventions(std::string programCall)
 { //{
-	cout <<"\nConventions for executing auron.out: \n"
-		 <<"\t"<<programKall <<" [-options]\n"
+	cout <<"\nConventions for executing auroSim: \n"
+		 <<"\t"<<programCall <<" [-options]\n"
 		 <<"\t\tOptions: \n\t\t\t-r [n] \t number of iterations per forcing function period."
 		 <<"\t\t\n           \t\t-n [n] \t float number of periods of sensor function(e.g. one half period can be called by -n0.5)"
 		 <<"\t\t\n           \t\t-L [n] \t make log/log plot of error for [100:100*2^[n]] time iterations." // TODO TODO TODO FJÆRN! TODO TODO TODO
@@ -501,105 +511,103 @@ void printArgumentConventions(std::string programKall)
 
 
 /*****************************************************************
-** 	void initialzeWorkTaskQueue() 								**
-**		-skal kjøre en gang(kun 1) for å initialisere arbeidskø.**
-**		Ligger som egen funksjon for å få ryddig kode i main()	**
+** void initialzeWorkTaskQueue() 								**
+** 	-arg: 	void 												**
+** 	-ret: 	void 												**
+** 	Funtion: 													**
+** 		Initialize pWorkTaskQueue by inserting an object of  	** 
+** 		time_class(called timeSepartionObj in the report). 		**
 *****************************************************************/
 void initialzeWorkTaskQueue()
 { //{1
-	// Sjekker om arbeidskø er initialisert fra før, eller: Slett tidligare element!
-	while( ! time_class::pWorkTaskQueue.empty() ){
-		time_class::pWorkTaskQueue.pop_front();
-	}
+	// Guard to prevent reinitialization(only one object of time_class is needed in pWorkTaskQueue)
+	static bool bPreviouslyInitialized = false;
+	if(bPreviouslyInitialized)
+		return;
 	 
-
-	
-	// Lager instans av time, og legger den i det frie lageret.
-//	time_class* pHovedskille = new time_class();
-	// Legger til denne peikeren i arbeidskøa (som ligger som static-element i class time) :
-// 	time_class::pWorkTaskQueue 	.push_back( pHovedskille );
+	// Push pointer to element of time_class, allocated in the free store:
  	time_class::pWorkTaskQueue 	.push_back( new time_class() );
 
-	// No ligger peikeren pHovedskille som einaste element i pWorkTaskQueue. Kvar gang denne kjører doTask() vil den ikkje fjærne seg fra arbeidsliste, men flytte seg bakerst i køa isteden.
+	// This element will be inserted by its doTask() funtion. Unless illegal access removes it, this cause timeSepartionObj to remain in pWorkTaskQueue
+	// 	until the simulation terminates.
 
-	// static bInitialisertAllerede vil eksistere kvar gang denne funksjonen kalles. Setter dermed bInitialisertAllerede til true for å forhindre at fleire time legges til arbeidsKoe.
-	//bInitialisertAllerede = true;
+	// Set the static funtion variable bPreviouslyInitialized to [true] to prevent reinitialization.
+	bPreviouslyInitialized = true;
 } //}1
 
 
 /*****************************************************************
-** 	void* taskSchedulerFunction(void*)							**
-** 																**
-** 		- Har ansvaret for å schedule arbeidet. 				**
-** 			- kaller nesteJobb.doTask()							**
-** 			- For nesteJobb==time vil time_class::doTask() kalles 		**
-** 				Dette itererer time, og gjør anna tidsrelevant 	**
-** 					arbeid										**
+** void* taskSchedulerFunction(void*)							**
+** 	-arg: 	void*												**
+** 	-arg: 	void*												**
+** 	Funtion: 													**
+** 		(Have the form required by pthread to be ready for  	**
+** 		implementation of auroSim with concurrency. 			**
+** 		Main loop of auroSim: 									**
+** 		while(bContinueExecution == true) : 					**
+** 			- pop first element of pWorkTaskQueue 				**
+** 			- call this element's doTask() function 			**
 ** 																**
 *****************************************************************/
 void* taskSchedulerFunction(void* )
 { //{1
 	
 	/****************************
-	**  Initierer kjøring :    **
+	**  Initialize Run: 	   **
 	****************************/
 
+	// Initialize time: (important to start at one to avoid strange behaviour the first iteration)
+	time_class::ulTime = 1;
 	// Initialiserer tid: begynner på iter 1. Dette (t_0=1) er viktig for å få rett initiering av K_auron som begynner med en konst kappa (gir K=(v_0-K)e^(-a*(1-0)) istedenfor K=..*e^0)
-	time_class::ulTime = 0;
+	//time_class::ulTime = 0;
 
-	// Initierer arbeidskø (time_class::pWorkTaskQueue)   Om dette er gjort før, returnerer den bare..
+	// Initialize pWorkTaskQueue by inserting one, and only one, object of time_class:
+	// ( limiting to one is handled by initialzeWorkTaskQueue() )
 	initialzeWorkTaskQueue();
 
-	// Skriver ut pAlleKappaAuron:
-	cout<<"SKRIVER ut pAlleKappaAuron\n";
+	// DEBUG: Print all K_auron-objects:
+	cout<<"Prints all pAlleKappaAuron objects\n";
 	for( std::list<K_auron*>::iterator iter = K_auron::pAllKappaAurons.begin(); iter != K_auron::pAllKappaAurons.end(); iter++ )
 		cout<<"\titer->sNavn: " <<(*iter)->sNavn <<endl;
 
-	// Initialiserer 'time window' for alle K_auron:
+	// Initialize first 'time window' for all K_aurons:
 	for( std::list<K_auron*>::iterator K_iter = K_auron::pAllKappaAurons.begin(); K_iter != K_auron::pAllKappaAurons.end(); K_iter++ )
 	{
-		// Initierer 'time window':
-			// (*K_iter)->doTask();    // Løsninga for FDP: dette skaper en spike ved t=0 i plot av depol.
-		// Setter v_0 til 0 og t_0 til [no]:
+		// Initialize 'time window'(set v_0 and t_0 to [now]):
 		(*K_iter)->dDepolAtStartOfTimeWindow = 0;
 		(*K_iter)->dStartOfTimeWindow = (double)time_class::getTime();
-		// Regner ut resulterende periode, osv.
+		// Compute the activation level's corresponding period for all K_aurons:
 		(*K_iter)->doCalculation();
 	}
 
-	// Initialiserer 'time window' for alle K_sensor_auron:
-#if 0 	
-	K_sensor_auron::updateAllSensorAurons();
-#else
-	for( std::list<K_sensor_auron*>::iterator K_iter = K_sensor_auron::pAllSensoryAurons.begin(); K_iter != K_sensor_auron::pAllSensoryAurons.end(); K_iter++ )
+	// Initialize all K_sensory_aurons:
+	for( std::list<K_sensory_auron*>::iterator K_iter = K_sensory_auron::pAllSensoryAurons.begin(); K_iter != K_sensory_auron::pAllSensoryAurons.end(); K_iter++ )
 	{
-		// Initierer 'time window':
-			// (*K_iter)->doTask();    // Løsninga for FDP: dette skaper en spike ved t=0 i plot av depol.
-		// Setter v_0 til 0 og t_0 til [no]:
+		// Initialize first 'time window':
 		(*K_iter)->updateSensorValue() ;
 		(*K_iter)->dStartOfTimeWindow = (double)time_class::getTime();
-		// Regner ut resulterende periode, osv.
+		// Compute the resulting period for the forcing funtions input flow:
 		(*K_iter)->doCalculation();
 	}
-#endif
 
-	/* * * * * * * * Begynner vanlig kjøring av auroNett * * * * * * * * */
-
-	// Hoved-loop:
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * 
+	 * * * * * * * * auroSim's main loop * * * * * * * * *
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	while( bContinueExecution )
 	{
-
-		// Poppe første element før utførelse, for å holde list pWorkTaskQueue fri fra dette elementet før utførelse kvar iterasjon.
+		// Pop first element before execution of its doTask():
+		// 	(to keep pWorkTaskQueue free of this element during execution of its task)
 		static timeInterface* pConsideredElementForThisIteration;
 		pConsideredElementForThisIteration = time_class::pWorkTaskQueue.front();
 
-		// Tar vekk jobben fra pWorkTaskQueue:
+		// Remove element from pWorkTaskQueue:
 		time_class::pWorkTaskQueue.pop_front();
 
-		// Kjør task:
+		// Execute Task:
 		pConsideredElementForThisIteration->doTask();
 
-#if 0 //GAMMEL (til 10.02.1012)
+// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO Fiks dårligere depol-kurve, eller skriv om rapport TODO TODO TODO TODO
+#if 0 //GAMMEL (til 10.02.1012) 
 
 		// Setter igang utføring av neste jobb i lista:
 		time_class::pWorkTaskQueue.front() ->doTask(); 		//Dette er i orden, siden pWorkTaskQueue er av type list<timeInterface*> og alle arvinger av timeInterface har overlagra funksjonen doTask().
@@ -615,10 +623,10 @@ void* taskSchedulerFunction(void* )
 } //}1
 
 
-
-/***************************
-*** Utskriftsprosedyrer: ***
-***************************/
+// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO  Rydd opp! Fjærn alt som ikkje brukes! TODO TODO TODO TODO TODO  
+/*************************
+*** Print procedures:  ***
+*************************/
 std::ostream & operator<< (std::ostream & ut, i_auron* pAuronArg )
 { //{
 	// For now: Print the adress in the i_auron pointer:

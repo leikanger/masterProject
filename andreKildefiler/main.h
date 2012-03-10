@@ -87,7 +87,7 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 #define UTSKRIFT_AV_TID 1
 #define UTSKRIFT_AV_TID_KVAR_Nte_ITER 1
 
-#define DEBUG_UTSKRIFTS_NIVAA 		0
+#define DEBUG_PRINT_LEVEL 		0
 #define DEBUG_SKRIV_UT_DESTRUCTOR 	0
 #define DEBUG_SKRIV_UT_CONSTRUCTOR 	0
 
