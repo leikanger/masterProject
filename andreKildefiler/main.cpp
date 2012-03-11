@@ -73,6 +73,7 @@
 
 #include "../andreKildefiler/ANN.h" 	// TODO TODO TODO Endre navn på andreKildefiler/ TODO TODO TODO 
 
+
 /*** declarations ***/
 	/*** funtion declations ***/
 void initialzeWorkTaskQueue();
@@ -256,7 +257,7 @@ int main(int argc, char *argv[])
 		#endif
 
 		// Illustration of sensory funtion (fig. 3.6 in the report when auroSim is called with arguments [./auroSim.out -r1000 -n4] )
-		new K_sensory_auron("dKN2", &sensoryFunctionExample);
+		//new K_sensory_auron("dKN2", &sensoryFunctionExample);
 	#else
 
 
@@ -405,7 +406,6 @@ int main(int argc, char *argv[])
 	#if DEBUG_PRINT_LEVEL > 1
 		time_class::printAllElementsOf_pPeriodicElements();
 	#endif
-
 
 
 	cout<<"\n\n----------------------------\nEnd of main()\n----------------------------\n";

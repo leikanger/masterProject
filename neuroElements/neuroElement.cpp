@@ -860,20 +860,19 @@ inline void K_auron::doTask()
 		cout<<"\t* * *\t\e[4;32mFIRING\e[31m ERROR\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t[time > (int)est.time]: [\e[1;33m" <<time_class::getTime() <<"\e[0m>\e[1;31m " <<dEstimatedTaskTime <<"\e[0m]\n";
 	}else //if( dEstimatedTaskTime > time_class::getTime()+1 ) //Dersom dEstimatedTaskTime er mindre enn nå-tid: at den skulle fyre forrige iter..
 	{
-		cout<<"\t* * *\t\e[4;32mFYRE\e[31mFEIL\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t[tid+1, (int)est.tid] = [\e[1;33m" <<time_class::getTime() <<"+1\e[0m<\e[1;31m " <<dEstimatedTaskTime <<"]\e[33m  RETURN.\e[0m\n";
-		return; // XXX Returnerer uten å gjøre noe.
+		cout<<"\t* * *\t\e[4;32mFIRING\e[31m ERROR\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t[est.t.time != [now] : [tid, (int)est.tid] = [\e[1;33m" <<time_class::getTime() <<"\e[0m<\e[1;31m " <<dEstimatedTaskTime <<"\e[0m]\n";
+		DEBUG_L2( <<"Depol.:\t" <<getCalculateDepol());
+		exit(2); // XXX Returnerer uten å gjøre noe.
 	}
 
+
+
 	//Utskrift til skjerm:
-	#if DEBUG_PRINT_LEVEL > 1
-	//{
 	DEBUG_L2(
 			<<"[t="<<time_class::getTime() <<" est.tt:" <<dEstimatedTaskTime <<"]\tv(t_n)=" <<getCalculateDepol(dEstimatedTaskTime)
 		   	<<"\t" <<sNavn <<".doTask()\t  [periode/1000]=" <<dLastCalculatedPeriod/1000
 			<<"\t | K=" <<dAktivitetsVariabel  <<"\tSiste v_0:" <<dDepolAtStartOfTimeWindow 
 			);
-	//}
-	#endif
 
 
 	#if LOGG_DEPOL
@@ -954,52 +953,32 @@ inline void K_dendrite::doTask()
 /* time_class::doTask() 	: 		Organiserer tid: doTask() itererer tid og holder pWorkTaskQueue og tid i orden etter definerte regler */
 void time_class::doTask()
 { 	//{1 
-
-	#if PRINT_TIME_ITERATION
-	if(ulTime % PRINT_TIME_EVERY_Nth_ITER  == 0)		
-		cout<<"\n\t* * *\tTID: \t * * * * * * * Inne i time_class::doTask() - Øker fra:   * * * * * * * * * * = \e[4;39m"	<<ulTime <<"->" <<ulTime+1 <<"\e[0m :\n";
-	#endif
-
-	/*cout<<"FØØR \e[33mNY ITER\e[0m, nye muligheiter:\t\tSkriver ut alle auron: \n";
-	for( std::list<K_auron*>::iterator iter = K_auron::pAllKappaAurons.begin() ;  iter != K_auron::pAllKappaAurons.end() ;  iter++ )
-	{
-		cout<<"\t[ " <<(*iter)->sNavn <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<(*iter)->dEstimatedTaskTime 
-			<<"\n\n";
-	}*/
-
-
-
-	// Sjekker om den har kjørt ferdig:
-	if( ulTime >= ulTotalNumberOfTimeSteps )   //ulTemporalAccuracyPerSensoryFunctionPeriod * NUMBER_OF_SENSOR_FUNKTION_OSCILLATIONS )
+	// Check whether simulation is complete: in this case, initialize graceful termination.
+	if( ulTime >= ulTotalNumberOfTimeSteps )
 	{
 		bContinueExecution = false;
 		return;
 	}
 
-
-	// Legger til egenpeiker på slutt av pWorkTaskQueue
-	pWorkTaskQueue.push_back(this);	
-
-	//itererer time:
-	ulTime++;
-
-	// gjennomfører planlagte kalkulasjoner:
-	doCalculation();
-
-
-
-	// Kaller loggeFunk for å teste K_auron. 
-	//K_auron::loggeFunk_K_auron();
-
-
 	#if PRINT_TIME_ITERATION
 	if(ulTime % PRINT_TIME_EVERY_Nth_ITER  == 0)		
-		cout<<"\t* * *\tTID:" <<"\e[33m"	<<ulTime <<"\e[0m" <<"\t * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * = "	<<ulTime <<"\n";
+		cout<<"\n\t* * *\tIterate time: \t * * * * * * * In time_class::doTask() - Increase from:   * * * * * * * * * * = \e[4;39m"	<<ulTime <<"->" <<ulTime+1 <<"\e[0m :\n";
+	#endif
+	#if PRINT_TIME_ITERATION
+	// Increase by one (ulTime+1) to show t_n for the new time step.
+	if(ulTime % PRINT_TIME_EVERY_Nth_ITER  == 0)		
+		cout<<"\t* * *\tTIME:" <<"\e[33m"	<<ulTime+1 <<"\e[0m" <<"\t * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * = "	<<ulTime <<"\n";
 	#endif
 
 
+	// Push self-pointer to back of pWorkTaskQueue:
+	pWorkTaskQueue.push_back(this);	
+
+	// Iterate t_n:
+	ulTime++;
+
 	/*************************************************
-	* Flytter planlagde oppgaver over i pWorkTaskQueue *
+	* Push scheduled tasks to back of pWorkTaskQueue *  	DEPRECATED
 	*************************************************/
 // Kommentert ut fordi dette ordnes i doCalculation()
 // XXX Trur dette er deprecated! Kommenterer ut! //{
@@ -1019,19 +998,23 @@ void time_class::doTask()
 #endif //}
 
 
-	/*******************************
-	* Oppdater alle K_sensory_auron *
-	*******************************/
+	/******************************
+	* Update all K_sensory_aurons *
+	******************************/
 	#if KANN
 	K_sensory_auron::updateAllSensorAurons();
 	#endif
 
-	/*******************************
-	* Oppdater alle s_sensor_auron *
-	*******************************/
+	/*****************************
+	* Update all s_sensor_aurons *
+	*****************************/
 	#if SANN
 	s_sensor_auron::updateAllSensorAurons();
 	#endif
+
+// XXX Denne sto over #ifKANN og #ifSANN. Tenker at dette er meir rett..
+	// Commence scheduled computations:
+	doCalculation();
 
 
 
@@ -1095,8 +1078,8 @@ void K_auron::doCalculation()
 	// Sjekker om den skal fyre denne iter: (før neste iter)
 	// dEstimatedTaskTime RUNDES ALLTID NED!! Skal ikkje sjekke om den er over eller under halvegs, bare kva steg den har starta på..
 
-	if( (unsigned)(dEstimatedTaskTime) < time_class::getTime()+1 ){ //TODO
-		DEBUG_L4(<<"K_auron::doCalc()\tSchedule task for firint, this iteration:\t[TID, dEstimatedTaskTime] :\t[" <<time_class::getTime() <<", " <<dEstimatedTaskTime <<"]");
+	if( dEstimatedTaskTime < time_class::getTime()+1 ){ //TODO
+		DEBUG_L4(<<"K_auron::doCalc()\tK_auron schduled to fire this iteration:\t[TID, dEstimatedTaskTime] :\t[" <<time_class::getTime() <<", " <<dEstimatedTaskTime <<"]");
 		time_class::addTaskInPresentTimeIteration( this );
 		time_class::printAllElementsOf_pWorkTaskQueue();
 	}
@@ -1120,28 +1103,40 @@ inline void K_auron::estimateFiringTimes(double dTimeInstant_arg)
 		dPeriodINVERSE = dPeriodInverse_static_local;
 
 		// Beregner v_0 og fyringstid P_d(K)
-		DEBUG_L2(
+		DEBUG_L3(
 				<<"estimatedPeriod(): \t[t_0, K, v_0]: \t[" <<dStartOfTimeWindow <<", " <<dAktivitetsVariabel <<", " <<dDepolAtStartOfTimeWindow <<"]:\t"
-				<<"\t\tand finally getCalculateDepol(" <<dTimeInstant_arg <<") = \e[1;39m" <<getCalculateDepol(dTimeInstant_arg) <<"\e[0;0m\n"
+				<<"\t\tand finally getCalculateDepol(" <<dTimeInstant_arg <<") = \e[33;1m" <<getCalculateDepol(dTimeInstant_arg) <<"\e[0;0m\n"
 				);
 
 // TODO XXX Denne er diskret tid? Fra starten av denne iter?
 		// Oppdaterer dEstimatedTaskTime! 
 		dEstimatedTaskTime = ( dStartOfTimeWindow 	+ log( (dAktivitetsVariabel-dDepolAtStartOfTimeWindow)/(dAktivitetsVariabel-(double)FIRING_THRESHOLD) )   / (double)LEAKAGE_CONST );
-		DEBUG_L2(<<"\t\t\e[31mdEstimatedTaskTime\e[0m for neuron " <<sNavn <<", time:" <<dTimeInstant_arg <<" = \e[1;39m" <<dEstimatedTaskTime <<"\e[0;0m");
+		//DEBUG_L2(<<"\t\t\e[32mdEstimatedTaskTime\e[0m for neuron " <<sNavn <<", time:" <<dTimeInstant_arg <<" = \e[39;1m" <<dEstimatedTaskTime <<"\e[0;0m");
 
 	}else{ // Kommer hit dersom dAktivitetsVariabel <= FIRING_THRESHOLD
-		cout<<"\n\nadf52908i@neuroElement.cpp \e[31mIkkje implementert ferdig estimatedPeriod(dTime) for K<T\e[0m\n\n";
-		dEstimatedTaskTime = 1000000000;
-		//TODO Endre linja over til å være gitt av max(double) (sjå cplusplus.com sin oversikt http://www.cplusplus.com/reference/std/limits/numeric_limits/ )
-		// 	F.eks. lag en 	 const double maxDouble(max(double)) [illustraturisk kode] i global scope, og sett dEstimatedTaskTime fil denne når K<T..
-		//TODO Fiks også for alle andre variablene.
+		//cout<<"\n\nadf52908i@neuroElement.cpp \e[33mIkkje implementert ferdig estimatedPeriod(dTime) for K<T\e[0m\n\n";
+		//exit(EXIT_FAILURE);
+
+		// Set period (close) to infty.
+		dLastCalculatedPeriod  = DBL_MAX;
+		dChangeInPeriodINVERSE = -dPeriodINVERSE;
+		dPeriodINVERSE = 0;
+
+		// Set estimated firing time to the maximal value(ca. 10^308)
+		dEstimatedTaskTime = DBL_MAX;
+
+		DEBUG_L2(
+				<<"estimatedPeriod(): \t[t_0, K, v_0, t^f]: \t[" <<dStartOfTimeWindow <<", " <<dAktivitetsVariabel <<", " <<dDepolAtStartOfTimeWindow <<", "
+			   	<<dEstimatedTaskTime	<<"]:\t"
+				<<"\t\tand finally getCalculateDepol(" <<dTimeInstant_arg <<") = \e[31;0m" <<getCalculateDepol(dTimeInstant_arg) <<"\e[0;0m\n"
+				);
+
 		//exit(0);
 	} //slutt if( dAktivitetsVariabel > FIRING_THRESHOLD ){X}else{ ... }
 } //}
 
 // Gammel variant, uten float-tid: KOMMENTERT UT!
-#if 1
+#if 0
 inline void K_auron::estimateFiringTimes()
 { //{
 	//cout<<"\n\nGAMMEL K_auron::estimateFiringTimes(). IKKJE BRUK!\n[\e[31mTERMINERER\e[0m]\n\n\n\n\n"; exit(0);
@@ -1150,6 +1145,9 @@ inline void K_auron::estimateFiringTimes()
 	//*  Beregn estimert fyringstid:   				*
 	//***********************************************
 	if( dAktivitetsVariabel > FIRING_THRESHOLD){
+		DEBUG_L1(<<"FEIL plass. Ikkje fiksa, heilt..\nasdf234@neuroElement.cpp\nTERMINERER");
+		exit(EXIT_FAILURE);
+
 		static double dPeriodInverse_static_local;
 
 		// Berenger dPeriodINVERSE og dChangeInPeriodINVERSE:
@@ -1182,10 +1180,24 @@ inline void K_auron::estimateFiringTimes()
 		bAuronHarPropagertAtDenErInaktiv = false;
 
 	}else{
+		cout<<"\n\nadf52908i@neuroElement.cpp \e[33mIkkje implementert ferdig estimatedPeriod(dTime) for K<T\e[0m\n\n";
+
+		// Set period (close) to infty.
+		dLastCalculatedPeriod  = DBL_MAX;
+		dChangeInPeriodINVERSE = -dPeriodINVERSE;
+		dPeriodINVERSE = 0;
+
+		// Set estimated firing time to the maximal value(ca. 10^308)
+		dEstimatedTaskTime = DBL_MAX;
+
+		//exit(0);
+
+
+
 		if(time_class::getTime() == 0){return;}
 		cout<<"estimateFiringTimes() når \tK < T   (id: asdf23r4)\t" <<sNavn <<"\n";
 		cout<<"\n\nadf52908i@neuroElement.cpp Ikkje implementert estimatedPeriod(dTime) for K<T\n\e[31mAVLUTTER\e[0m\n\n"; 
-		exit(0);
+		exit(EXIT_FAILURE); //XXX MERK! EXIT()!
 		//{
 
 
@@ -1219,13 +1231,12 @@ inline void K_auron::estimateFiringTimes()
 #endif
 	
 /**************************************************************
-****** 			K_sensory_auron - senseFunksjoner        *******
+****** 		K_sensory_auron - update sensor funktions  	******* 			XXX ok XXX
 **************************************************************/
 void K_sensory_auron::updateAllSensorAurons()
 { //{
-
-	// Itererer gjennom lista pAllSensoryAurons, og kaller updateSensorValue() for de.
-	for( std::list<K_sensory_auron*>::iterator sensorIter = pAllSensoryAurons.begin() 	; 	sensorIter != pAllSensoryAurons.end() ; sensorIter++)
+	// Iterate through list pAllSensoryAurons and call updateAllSensorAurons() for each element
+	for( std::list<K_sensory_auron*>::iterator sensorIter = pAllSensoryAurons.begin(); sensorIter != pAllSensoryAurons.end(); sensorIter++)
 	{
 		(*sensorIter)->updateSensorValue();
 	}
@@ -1233,50 +1244,38 @@ void K_sensory_auron::updateAllSensorAurons()
 
 inline void K_sensory_auron::updateSensorValue()
 { //{
-	#if DEBUG_PRINT_LEVEL > 2
 	DEBUG_L3(<<"K_sensory_auron::updateSensorValue()");
-	#endif
 
-// Oppdaterer sensed value. Ved init av K_sensory_auron, blir dSensedValue satt til verdien til pSensorFunc()..
-	// To variabler for å finne deriverte. Denne skal bestemme ny kappa..
+	// Update sensed value. Two variables to find the change in sensed value
 	dLastSensedValue = dSensedValue;
-		// VIKTIG123@neuonElements.cpp LEAKAGE_CONST for KANN:
 	dSensedValue =  (*pSensorFunction)();
 
-	//if( dSensedValue != dLastSensedValue){
-		//changeKappa_absArg( dSensedValue ); FARLIG! IKKJE BRUK changeKappa_absArg() !
-		//
-	// Lagre tidspunkt for oppdatering av kappa som starten av iterasjonen (definer dette som samplingstidspunkt av sensa variabel).
-	dStartOfNextTimeWindow = (double)time_class::getTime(); // Setter den til [no], før eg beregner resultatet av denne oppdateringa i changeKappa_derivedArg( .. );
-	// Setter at neste time window skal starte i starten av denne iterasjonen (dette er tidspunktet sensor-neuronet oppdaterer sensinga si).
-		// Dersom denne settes til noke anna, får vi større feil.
+	// Save time for initiation of new time window(define this to happen at start of iteration for sensory aurons)
+	dStartOfNextTimeWindow = (double)time_class::getTime(); // Set it to [now] before result is computed in changeKappa_derivedArg(-)
 	changeKappa_derivedArg(   (dSensedValue-dLastSensedValue) );  
-
-	//DEBUG_L4(<<"Kappa for K_sensory_auron: " <<dAktivitetsVariabel <<"\n\n");
 } //}
 	
 
 /**************************************************************
-****** 			s_sensor_auron - senseFunksjoner        *******
+****** 		s_sensory_auron - update sensor funktions  	******* 		XXX almost ok XXX
 **************************************************************/
 inline void s_sensor_auron::updateAllSensorAurons()
 { //{
-
-	// Itererer gjennom lista pAllSensoryAurons, og kaller updateSensorValue() for de.
+	// Iterate through list pAllSensoryAurons and call updateAllSensorAurons() for each element
 	for( std::list<s_sensor_auron*>::iterator sensorIter = pAllSensoryAurons.begin() 	; 	sensorIter != pAllSensoryAurons.end() ; sensorIter++)
 	{
 		(*sensorIter)->updateSensorValue();
 	}
 } //}
 
-
 inline void s_sensor_auron::updateSensorValue()
 { //{
 //	static double sdLastValue = 0;
-	static double sdValue = 0;
+//	static double sdValue = 0;
 //	sdLastValue = sdValue;
-	sdValue = (*pSensorFunction)();
-	pInputDendrite->newInputSignal( ( sdValue )); // XXX OPPMERKSOMHET!    Sender inn umiddelbart sensa signal, ikkje den deriverte.  (Sjekk dette).
+//	sdValue = (*pSensorFunction)();
+//	pInputDendrite->newInputSignal( ( sdValue ));
+	pInputDendrite->newInputSignal( ( (*pSensorFunction)() )); 
 } //}
 
 
@@ -1348,6 +1347,8 @@ inline double K_auron::recalculateKappa()
 
 inline double K_sensory_auron::recalculateKappa()
 {
+	// In this work, a sensory auron does not receive input from other neurons.
+
 	// TODO No er dette bare en sensor (Har ikkje muligheten for å få input fra andre neuron. Dette kan eg kanskje implementere om eg har tid..)
 	#if 0
 	static double dOldActivityVariable;
@@ -1356,7 +1357,6 @@ inline double K_sensory_auron::recalculateKappa()
 	// Er dette rett :
 	return dAktivitetsVariabel-dOldActivityVariable;
 	#endif
-	// Gjør det lett: (sensorauron har ikkje muligheten til å få input (enda))
 	return 0;
 }
 // SKAL VEKK:
@@ -1421,7 +1421,7 @@ inline void time_class::addTaskInPresentTimeIteration(timeInterface* pTimeClassA
 	
 	// Foreløpig legger eg den bare til først i denne iter: (etter nåværande elem.) TODO TODO TODO TODO TODO  DET ER FEIL Å GJØRE! Fiks! TODO TODO TODO
 	//pWorkTaskQueue.push_front(pTimeClassArg_withTask);
-	#if DEBUG_PRINT_LEVEL>2
+	#if DEBUG_PRINT_LEVEL>4
 	printAllElementsOf_pWorkTaskQueue();
 	#endif
 }

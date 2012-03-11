@@ -95,7 +95,7 @@ class time_class : public timeInterface {
 			}
 		}
 	
-		// Call first elements .doCalculation() and pop first element until list is empty:
+		// Call first elements .doCalculation() and pop element. Repeat until list is empty:
 		while( !pCalculatationTaskQueue.empty() ){
 			// Call first element's doCalculation():
 			pCalculatationTaskQueue.front()->doCalculation();

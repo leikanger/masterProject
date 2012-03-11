@@ -36,7 +36,10 @@
 // For string-strems (to convert int, float, etc to string..)
 #include <sstream> 
 
+// For DBL_MAX: The maximal value for double data type.
+#include <float.h>
 
+// Variable declarations:
 extern unsigned long ulTemporalAccuracyPerSensoryFunctionPeriod;
 extern int nNumberOfSensorFunctionOscillations;
 extern unsigned long ulTotalNumberOfTimeSteps;
@@ -73,7 +76,7 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 #define OCTAVE_SLEEP_AFTER_PLOTTING 0
 
 #define PRINT_TIME_ITERATION 1
-#define PRINT_TIME_EVERY_Nth_ITER 5
+#define PRINT_TIME_EVERY_Nth_ITER 1
 
 
 /*****************************
@@ -87,7 +90,7 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 /*************************
 ** 	Debug print level 	**
 *************************/
-#define DEBUG_PRINT_LEVEL 		1 	// Debug print level: 0 means that no additional information is printed.
+#define DEBUG_PRINT_LEVEL 		2 	// Debug print level: 0 means that no additional information is printed.
 #define DEBUG_PRINT_DESCTRUCTOR 	0 	// Print in destructors if this is set to true (=1)
 #define DEBUG_PRINT_CONSTRUCTOR 	0 	// Print in constructors if this is set to true (=1)
 
