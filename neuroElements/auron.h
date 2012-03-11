@@ -132,13 +132,13 @@ class i_auron : public timeInterface
 			for(float fTerkelProsent_temp = 1.35; fTerkelProsent_temp>1.1; fTerkelProsent_temp-=0.001)
 			{
 				// TID: endre fra present time iteration til å være gitt av dEstimatedTaskTime i K_auron!
-				depol_logFile 	<<time_class::getTime() <<"\t" <<fTerkelProsent_temp*FYRINGSTERSKEL <<"; \t #Action potential\n" ;
+				depol_logFile 	<<time_class::getTime() <<"\t" <<fTerkelProsent_temp*FIRING_THRESHOLD <<"; \t #Action potential\n" ;
 			}
 */
 
 		// SKriver en enkelt linje med tidspunktet:
 		#if LOGG_DEPOL
-//			depol_logFile 	<<time_class::getTime() <<"\t" <<0*FYRINGSTERSKEL <<"; \t #Action potential - APAPAP\n" ;
+//			depol_logFile 	<<time_class::getTime() <<"\t" <<0*FIRING_THRESHOLD <<"; \t #Action potential - APAPAP\n" ;
 			// Logger depol-strek fra 1050 til 1200.
 			for(int i = 1050; i<1200; i++){
 				actionPotential_depolLogFile<<time_class::getTime() <<", " 		<<i <<";\n";
@@ -154,7 +154,7 @@ class i_auron : public timeInterface
 			// Lager en vertikal "strek" fra v=0 til v=Terskel*(110%)
 			for(float fTerkelProsent_temp = 1.4; fTerkelProsent_temp<1.7; fTerkelProsent_temp+=0.001)
 			{
-				depol_logFile 	<<time_class::getTime() <<"\t" <<fTerkelProsent_temp*FYRINGSTERSKEL <<"; \t #Action potential\n" ;
+				depol_logFile 	<<time_class::getTime() <<"\t" <<fTerkelProsent_temp*FIRING_THRESHOLD <<"; \t #Action potential\n" ;
 			}
 	 		//depol_logFile.flush();
 		#endif
@@ -320,7 +320,7 @@ class K_auron : public i_auron
 		//actionPotential_logFile.flush();
 
 		#if LOGG_DEPOL 
-			depol_logFile 	<<dLastFiringTime <<"\t" <<FYRINGSTERSKEL <<"; \t #Action potential - APAPAP\n" ;
+			depol_logFile 	<<dLastFiringTime <<"\t" <<FIRING_THRESHOLD <<"; \t #Action potential - APAPAP\n" ;
 			depol_logFile 	<<dLastFiringTime <<"\t" <<0 <<"; \t #Action potential - APAPAP\n" ;
 
 			// Skriver til actionPotential_depolLogFile:
@@ -338,7 +338,7 @@ class K_auron : public i_auron
 			for(float fTerkelProsent_temp = 1.35; fTerkelProsent_temp>1.1; fTerkelProsent_temp-=0.001)
 			{
 				// TID: endre fra present time iteration til å være gitt av dEstimatedTaskTime i K_auron!
-				depol_logFile 	<<dEstimatedTaskTime <<"\t" <<fTerkelProsent_temp*FYRINGSTERSKEL <<"; \t #Action potential\n" ;
+				depol_logFile 	<<dEstimatedTaskTime <<"\t" <<fTerkelProsent_temp*FIRING_THRESHOLD <<"; \t #Action potential\n" ;
 			}
 	 		depol_logFile.flush();
 		#endif
@@ -384,15 +384,15 @@ class K_auron : public i_auron
 	inline const double getCalculateDepol()
 	{
 
-		// GAMMEL: return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-(double)LEKKASJE_KONST  * (time_class::getTime() - ulStartOfTimewindow )) + dAktivitetsVariabel ;
+		// GAMMEL: return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-(double)LEAKAGE_CONST  * (time_class::getTime() - ulStartOfTimewindow )) + dAktivitetsVariabel ;
 
 		static double dDepolStatic;
 
-		//dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (time_class::getTime() - dStartOfTimeWindow )) + dAktivitetsVariabel; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
-		dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dStartOfNextTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+		//dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEAKAGE_CONST  * (time_class::getTime() - dStartOfTimeWindow )) + dAktivitetsVariabel; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+		dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEAKAGE_CONST  * (dStartOfNextTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
 
 		writeDepolToLog( time_class::getTime() , dDepolStatic);
-cerr<<"\ngetCalculateDepol(): [dStartOfTimeWindow, ulTime] = \t[" <<dStartOfTimeWindow <<", " <<time_class::getTime() <<"] = " <<dDepolStatic <<"\n";
+//cerr<<"\ngetCalculateDepol(): [dStartOfTimeWindow, ulTime] = \t[" <<dStartOfTimeWindow <<", " <<time_class::getTime() <<"] = " <<dDepolStatic <<"\n";
 		return dDepolStatic;
 	}
 		
@@ -409,13 +409,15 @@ cerr<<"\ngetCalculateDepol(): [dStartOfTimeWindow, ulTime] = \t[" <<dStartOfTime
 			}
 		#endif
 
+		// TODO PLAN: getCalculateDepol(*) skal ikkje skrive ut noke. Dette er dårlig stil(roter til utskrift)..
+			// Difor: fjærn dDepolStatic! TODO
 		static double dDepolStatic;
 
 		// Går over til bedre tidssoppløysing: double-precition float number format!
-		dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEKKASJE_KONST  * (dForTimeInstant_arg - dStartOfTimeWindow )) + dAktivitetsVariabel; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+		dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEAKAGE_CONST  * (dForTimeInstant_arg - dStartOfTimeWindow )) + dAktivitetsVariabel; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
 
 		writeDepolToLog( dForTimeInstant_arg, dDepolStatic);
-		cerr<<"\ngetCalculateDepol(): [dStartOfTimeWindow, dForTimeInstant_arg] = \t[" <<dStartOfTimeWindow <<", " <<dForTimeInstant_arg <<"]\n";
+		//DEBUG_L3(<<"getCalculateDepol(): [dStartOfTimeWindow, dForTimeInstant_arg] = \t[" <<dStartOfTimeWindow <<", " <<dForTimeInstant_arg <<"]");
 		return dDepolStatic;
 	}
 

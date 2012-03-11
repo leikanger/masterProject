@@ -101,9 +101,6 @@ unsigned uNumberOfIterationsBetweenWriteToLog;
 // The program exits gracefully when bContinueExecution is set to [false]:
 bool bContinueExecution = true;
 
-bool bLogLogExecution = false; 	// For å lage log/log plot av feil: sett denne til true 	TODO TODO TODO TA VEKK! TODO TODO TODO
-int nResolutionInLogLogErrorPlot; // TA VEKK 												TODO TODO TODO TA VEKK! TODO TODO TODO
-
 /*** end: declarations ***/
 
 
@@ -123,11 +120,12 @@ int nResolutionInLogLogErrorPlot; // TA VEKK 												TODO TODO TODO TA VEKK!
 //}
 
 
-/*****************************************
- **  int main(int argc, char *argv[]) 	**
- ** 	Reads in arguments from shell,  **
- ** 	and  TODO Skriv ferdig.. 		**
- ****************************************/
+/*****************************************************************
+** void main(int argc, char *argv[])							**
+** 	-arguments: number and array of arguments from shell		**
+** 	-return: 	int 											**
+** 	Funtion: 	Program's main funtion. 						**
+*****************************************************************/
 int main(int argc, char *argv[])
 {
 	// Register atexit()-function: funtion to be called when auroSim terminates.
@@ -153,18 +151,6 @@ int main(int argc, char *argv[])
 						printArgumentConventions(argv[0]);
 						exit(EXIT_SUCCESS);
 						break;
-					case 'L': 		// TODO TODO TODO TA VEKK! TODO TODO TODO 
-						bLogLogExecution = true;
-						if( (nResolutionInLogLogErrorPlot =  atoi( &argv[nInputArgumentPos][2])) ){
-							cout<<"log/log error plot with " <<nResolutionInLogLogErrorPlot <<" entries.\n"; 
-							cerr<<"NOT IMPLEMENTED YET.\n";
-						}else{
-							cout<<"Can not read argument. Please follow the conventions:" <<endl;
-							bPrintCallingConventions = true;
-							//printArgumentConventions(argv[0]);
-							//exit(EXIT_FAILURE);
-						}
-						break; 		// TODO TODO TODO TA VEKK:slutt TODO TODO TODO 
 					case 'r':
 						// Check whether the number of iterations is written in the same argument( like: -r100 )
 						if( 		(ulTemporalAccuracyPerSensoryFunctionPeriod = atoi( &argv[nInputArgumentPos][2])) ) 	
@@ -234,8 +220,8 @@ int main(int argc, char *argv[])
 	cout<<"Giving a total of \e[0;1m" <<ulTotalNumberOfTimeSteps<<"\e[0;0m time steps for this run of auroSim.\n\n";
 
 	// Set uNumberOfIterationsBetweenWriteToLog (to restrict number of points in log file)
-	if(ulTemporalAccuracyPerSensoryFunctionPeriod > LOGG_OPPLOYSING){
-		uNumberOfIterationsBetweenWriteToLog = (int)(((float)ulTemporalAccuracyPerSensoryFunctionPeriod / (float)LOGG_OPPLOYSING) +0.5);
+	if(ulTemporalAccuracyPerSensoryFunctionPeriod > LOGG_RESOLUTION){
+		uNumberOfIterationsBetweenWriteToLog = (int)(((float)ulTemporalAccuracyPerSensoryFunctionPeriod / (float)LOGG_RESOLUTION) +0.5);
 		cout<<"Restricting number of entries in log file: Write log every " <<uNumberOfIterationsBetweenWriteToLog <<" iteration.\n";
 	}else{
 		cout<<"No nead to restrict number of log entries due to few iterations.\n\n";
@@ -253,90 +239,25 @@ int main(int argc, char *argv[])
 	if( system("rm ./datafiles_for_evaluation/log_*.oct") != 0)
 		cout<<"Could not remove old log files. Please do this manually to avoid plotting old results.\n";
 
-	// TODO TODO TODO TODO TODO TODO  TA VEKK! TODO TODO TODO TODO TODO 
-//TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-#if 0
-	// Ny mekanisme: Lag log/log errorplot datafil. Kjører simuleringe med [100 : 100*2^nResolutionInLogLogErrorPlot] tidssteg. Lagrer slutt-verdien for depol. verdien.
-	if( bLogLogExecution ){ 	// Skal kjøre for å generere datafil til log-log error plot.
 
-			cout<<"FUNKER IKKJE ENDA. Avslutter!\n\n"; exit(0);
-
-			// TODO : Lag en egen logge-fil for LogLogError-datafila.
-			// Lager logge-fil (der data skal skrives).
-			std::ofstream LogLog_logFile;
-			std::ostringstream tempFilAdr;
-			tempFilAdr<<"./datafiles_for_evaluation/log_LogLog_data_file" <<".oct";
-	
-			std::string tempStr( tempFilAdr.str() );
-	
-			// need c-style string for open() function:
-			LogLog_logFile.open( tempStr.c_str() );
-
-			LogLog_logFile<< "# Log/Log datafil med slutt-depol. ved ei kjøring med [100 : 100*(2^" <<nResolutionInLogLogErrorPlot <<")] iterasjoner.\n";
-			LogLog_logFile<<"data=[";
-			LogLog_logFile.flush();
-
-
-
-
-			for( int i=0; i<nResolutionInLogLogErrorPlot; i++ )
-			{
-				// Resetter Tid
-				time_class::ulTime = 0;
-				// Setter temporalAccuracy:
-	 			ulTemporalAccuracyPerSensoryFunctionPeriod = 100*pow(2,i);
-				// Lager auron:
-				K_sensory_auron KN("KN", &dynamiskSensorFunk);
-				s_sensor_auron SN("SN", &dynamiskSensorFunk);
-
-				// Starter kjøring:
-				bContinueExecution = true; 
-				cout 	<<"\nSTARTER kjøring nummer " <<i 
-						<<" med temporalAccuracy " <<ulTemporalAccuracyPerSensoryFunctionPeriod <<".\tStarter på tid:" <<time_class::ulTime <<endl;
-				// ********* taskSchedulerFunction(0) ***********
-				taskSchedulerFunction(0);
-
-				cout<<"sluttTid: " <<time_class::ulTime <<"\tdepol for KN og SN:\t[" <<KN.getCalculateDepol(time_class::ulTime) <<", " <<SN.dAktivitetsVariabel <<"]\n";
-				cout<<"Siste fyringstid for SN:" <<SN.ulTimestampForrigeFyring <<endl;
-
-				// Skriv slutt-verdi til logg-fil for log/log-plot (for KN og SN: lag to kolonner i data matrisa)
-				LogLog_logFile 	<<KN.getCalculateDepol(time_class::getTime()) <<", "
-								<<SN.dAktivitetsVariabel <<";\n";
-//				delete KN;
-//				delete SN;
-			
-			}
-			
-			// Avslutter LogLog-datafil:
-			LogLog_logFile<<"]; \n";
-
-	}else{ 						// Normal run:
-#endif
-//TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO  (SLUTT. Ta vekk det over!)
-	{
-
-	// Different test cases:
+	// The experiments:
 
 	#if 1 // Tests for a single sensory neuron:
 		// Experiment 1:
 		#if 0
-			new K_sensory_auron("sKN", &statiskSensorFunk);
-			new s_sensor_auron("sSN", &statiskSensorFunk);
-		#endif
-
-		// Linearily increasing depol. velocity:
-		#if 0
-			new K_sensory_auron("dKN", &linearilyIncreasingDepolVelocity);
-			new s_sensor_auron("dSN", &linearilyIncreasingDepolVelocity);
+			new K_sensory_auron("sKN", &staticSensoryFunc);
+			new s_sensor_auron("sSN", &staticSensoryFunc);
 		#endif
 
 		// Experiment 2:
 		#if 1
-			new K_sensory_auron("dKN", &dynamiskSensorFunk);
-			new s_sensor_auron("dSN", &dynamiskSensorFunk);
+			new K_sensory_auron("dKN", &dynamicSensoryFunc);
+			new s_sensor_auron("dSN", &dynamicSensoryFunc);
 		#endif
-	#else
 
+		// Illustration of sensory funtion (fig. 3.6 in the report when auroSim is called with arguments [./auroSim.out -r1000 -n4] )
+		new K_sensory_auron("dKN2", &sensoryFunctionExample);
+	#else
 
 
 
@@ -352,9 +273,9 @@ int main(int argc, char *argv[])
 		// TRENGER IKKJE MATRISE: bruk heller std::vector<K_auron*>
 	cout<<"\tInitialize K_auron*-vector:\n";
 		std::vector<K_auron*> AlleAuron(3);
-		//AlleAuron[0] = new K_sensory_auron("Ksensor1",statiskSensorFunkMedHoegAktivitet);
-		AlleAuron[0] = new K_sensory_auron("K0Sensor", dynamiskSensorFunk);
-		AlleAuron[2] = new K_sensory_auron("K2Sensor", dynamiskSensorFunk2);
+		//AlleAuron[0] = new K_sensory_auron("Ksensor1",staticSensoryFuncWithHighActivity);
+		AlleAuron[0] = new K_sensory_auron("K0Sensor", dynamicSensoryFunc);
+		AlleAuron[2] = new K_sensory_auron("K2Sensor", dynamicSensoryFunc2);
 	
 		QuadraticMatrix<double> KMat(3);
 		KMat(0,1) = 50;
@@ -389,7 +310,7 @@ int main(int argc, char *argv[])
 		K_auron* K2 = new K_auron("K2" );
 		K_auron* K3 = new K_auron("K3" );
 	
-		K_sensory_auron* KsStatisk = new K_sensory_auron("KsStatisk", &statiskSensorFunk);
+		K_sensory_auron* KsStatisk = new K_sensory_auron("KsStatisk", &staticSensoryFunc);
 		new K_synapse(KsStatisk, K1, 200);
 	
 	
@@ -455,14 +376,14 @@ int main(int argc, char *argv[])
 
 
 
-		cout<<"******************************************\n***  START RUN OF auroSIM : ****\n******************************************\n\n";
+	cout<<"******************************************\n***  START RUN OF auroSIM : ****\n******************************************\n\n";
 
 /******************************************* Call taskSchedulerFunction(void*); ****************************************************/
-		taskSchedulerFunction(0);
+	taskSchedulerFunction(0);
 /***********************************************************************************************************************************/
 
 
-		cout<<"\n\n\nXXXXXX Successful run. Completes simulation. XXXXX\n\n\n";
+	cout<<"\n\n\nXXXXXX Successful run. Completes log and clean up. XXXXX\n\n\n";
 
 		//#if GCC	
 		//	cout.precision(20);
@@ -471,7 +392,7 @@ int main(int argc, char *argv[])
 
 
 /* TODO Lag en egen avsluttingsfunksjon(og registrer den med atexit(void (*)(void)).). Den skal gjøre følgende:*/
-		time_class::printAllElementsOf_pWorkTaskQueue();
+	time_class::printAllElementsOf_pWorkTaskQueue();
 
 //		cout<<"\n\n\n\nPrint all elements of i_auron:\n";
 //		for( std::list<i_auron*>::iterator iter = i_auron::pAllAurons.begin() ;  iter != i_auron::pAllAurons.end() ;  iter++ )
@@ -481,14 +402,14 @@ int main(int argc, char *argv[])
 //		}
 //		cout<<"\n\n";
 	
-		#if DEBUG_PRINT_LEVEL > 1
-			time_class::printAllElementsOf_pPeriodicElements();
-		#endif
-
-	} // end of if( bLogLogExecution == false ){ .. }
+	#if DEBUG_PRINT_LEVEL > 1
+		time_class::printAllElementsOf_pPeriodicElements();
+	#endif
 
 
-	cout<<"\n\nWIN!\n\n\n";
+
+	cout<<"\n\n----------------------------\nEnd of main()\n----------------------------\n";
+
 	return 0;
 }
 
@@ -505,7 +426,6 @@ void printArgumentConventions(std::string programCall)
 		 <<"\t"<<programCall <<" [-options]\n"
 		 <<"\t\tOptions: \n\t\t\t-r [n] \t number of iterations per forcing function period."
 		 <<"\t\t\n           \t\t-n [n] \t float number of periods of sensor function(e.g. one half period can be called by -n0.5)"
-		 <<"\t\t\n           \t\t-L [n] \t make log/log plot of error for [100:100*2^[n]] time iterations." // TODO TODO TODO FJÆRN! TODO TODO TODO
 		 <<"\n\n\n\n\n";
 } //}
 
@@ -516,7 +436,7 @@ void printArgumentConventions(std::string programCall)
 ** 	-ret: 	void 												**
 ** 	Funtion: 													**
 ** 		Initialize pWorkTaskQueue by inserting an object of  	** 
-** 		time_class(called timeSepartionObj in the report). 		**
+** 		  time_class(called timeSepartionObj in the report). 	**
 *****************************************************************/
 void initialzeWorkTaskQueue()
 { //{1
@@ -542,7 +462,7 @@ void initialzeWorkTaskQueue()
 ** 	-arg: 	void*												**
 ** 	Funtion: 													**
 ** 		(Have the form required by pthread to be ready for  	**
-** 		implementation of auroSim with concurrency. 			**
+** 		implementation of auroSim with concurrency). 			**
 ** 		Main loop of auroSim: 									**
 ** 		while(bContinueExecution == true) : 					**
 ** 			- pop first element of pWorkTaskQueue 				**
@@ -558,8 +478,6 @@ void* taskSchedulerFunction(void* )
 
 	// Initialize time: (important to start at one to avoid strange behaviour the first iteration)
 	time_class::ulTime = 1;
-	// Initialiserer tid: begynner på iter 1. Dette (t_0=1) er viktig for å få rett initiering av K_auron som begynner med en konst kappa (gir K=(v_0-K)e^(-a*(1-0)) istedenfor K=..*e^0)
-	//time_class::ulTime = 0;
 
 	// Initialize pWorkTaskQueue by inserting one, and only one, object of time_class:
 	// ( limiting to one is handled by initialzeWorkTaskQueue() )
@@ -580,7 +498,7 @@ void* taskSchedulerFunction(void* )
 		(*K_iter)->doCalculation();
 	}
 
-	// Initialize all K_sensory_aurons:
+	// Initialize first 'time window' for all K_sensory_aurons:
 	for( std::list<K_sensory_auron*>::iterator K_iter = K_sensory_auron::pAllSensoryAurons.begin(); K_iter != K_sensory_auron::pAllSensoryAurons.end(); K_iter++ )
 	{
 		// Initialize first 'time window':

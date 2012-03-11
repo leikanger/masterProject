@@ -25,18 +25,13 @@
 //}
 #include <iostream>
 #include <string>
-//#include <vector>
 #include <list>
 #include <map>
 #include <vector>
-//#include <set>
 
-
-
-#include <stdlib.h> 	//- for rand()
-#include <cmath> 		//- for pow() funksjoner
-//include <algorithm> 	- for_each()
-//include <fstream> 	- file streams
+#include <stdlib.h> 	//- for rand() functions
+#include <cmath> 		//- for pow() functions 
+//include <fstream> 	//- file streams
 
 // For string-strems (to convert int, float, etc to string..)
 #include <sstream> 
@@ -50,54 +45,84 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 
 //Defines:
 
-#define GCC false // Må til for å bruke iomanip.h
+#define GCC false // iomanip.h can not be used with compiler clang++. Define flag GCC when gcc is used: this enables the use of setprecision() for cout of floats.
 
-// Velger KANN eller SANN for neste compilasjon
+// Defines whether KANN(kappa M-ANN) is used, and if SANN(NIM-ANN) is used for next compilation of auroSim
 #define KANN 1
 #define SANN 1
 
-#define DEFAULT_NUMBERofTIMESTEPS 1000
-#define DEFAULT_NUMBER_OF_SENSORY_FUNCTION_PERIODS 1 // ANtall ganger sinus-funksjonen skal gjøre full gjennomgang.
-//#define MIN_PERIODE_MELLOM_REKALKULERING_AV_KAPPA 100
+#define DEFAULT_NUMBERofTIMESTEPS 1000 				 // default temporal resolution, each forcing funtion period.
+#define DEFAULT_NUMBER_OF_SENSORY_FUNCTION_PERIODS 1 // number of forcing funtion periods.
 
+// Define the form of K-recalculation-curve (appendix B3 in the technical report)
 #define RECALC_c1 100 
 #define RECALC_c2 250
 #define RECALC_c3 10
 #define RECALC_c4 0.5
 
-
-#define LOGG_DEPOL true // Denne gir om implementasjonen skal skrive til depol-logg.
-#define LOGG_KAPPA false // ...samma for kappa
-#define LOGG_OPPLOYSING 10000
-
-//#define T 						(double)0.01 					//[ms]: tidsiterasjoner
-//#define ALPHA   				(double)1  //[verdi]: Lekkkasje per tidsiterasjon = [lengde på tidsiter]*[lekkasjefaktor]
-
-#define ALPHA   				(double)10  //[verdi]: Lekkkasje per tidsiterasjon = [ALPHA]/[ulTemporalAccuracyPerSensoryFunctionPeriod]
-#define LEKKASJE_KONST   		(double) (ALPHA/ulTemporalAccuracyPerSensoryFunctionPeriod)
-#define LEKKASJEFAKTOR_FOR_DEPOL (double)(1-LEKKASJE_KONST)
-
-#define FYRINGSTERSKEL 1000.00000
-
-
-#define OCTAVE_SLEEP_ETTER_PLOTTA 0
-
-
-
-#define UTSKRIFT_AV_TID 1
-#define UTSKRIFT_AV_TID_KVAR_Nte_ITER 1
-
-#define DEBUG_PRINT_LEVEL 		0
-#define DEBUG_SKRIV_UT_DESTRUCTOR 	0
-#define DEBUG_SKRIV_UT_CONSTRUCTOR 	0
-
-
-
 #define PI 3.14159265
 
-#define DEBUG_EXIT(tekst) cerr<<"\n\nDEBUG_EXIT :\t" <<tekst <<"\nexit(99);\n\n"; exit(99);
-//#define DEBUG(tekst) cerr<<"DEBUG :\t" <<tekst <<"\n";
-#define DEBUG(tekst) ;
+
+#define ALPHA   				(double)10  //[value]: Leakage constant (1-l)*1000, to be multiplied to v(t_n) to find (per mille) leakage at time t_n. 
+#define LEAKAGE_CONST   		(double) (ALPHA/ulTemporalAccuracyPerSensoryFunctionPeriod)
+//#define LEAKAGE_FACTOR_FOR_DEPOL (double)(1-LEAKAGE_CONST)
+
+#define FIRING_THRESHOLD 1000.00000
+
+
+#define OCTAVE_SLEEP_AFTER_PLOTTING 0
+
+#define PRINT_TIME_ITERATION 1
+#define PRINT_TIME_EVERY_Nth_ITER 5
+
+
+/*****************************
+** 	Set which var. is logged**
+*****************************/
+#define LOGG_DEPOL true 		// Defines whether depolarization is to be logged by the auroSim
+#define LOGG_KAPPA true// ... same for Kappa
+#define LOGG_RESOLUTION 10000
+
+
+/*************************
+** 	Debug print level 	**
+*************************/
+#define DEBUG_PRINT_LEVEL 		1 	// Debug print level: 0 means that no additional information is printed.
+#define DEBUG_PRINT_DESCTRUCTOR 	0 	// Print in destructors if this is set to true (=1)
+#define DEBUG_PRINT_CONSTRUCTOR 	0 	// Print in constructors if this is set to true (=1)
+
+/***** DEBUG_L?(<<text): prints [text] if DEBUG_PRINT_LEVEL is ? or larger *******/  
+/***  :  ***/
+// debug level 1: does nothing unless DEBUG_PRINT_LEVEL is larger than 0
+#if DEBUG_PRINT_LEVEL>0
+	#define DEBUG_L1(TEXT_IN_std_ostream_FORMATE) cout<<"[DEBUG L1]:\t" TEXT_IN_std_ostream_FORMATE <<"\n" 	;
+#else
+	#define DEBUG_L1(X) ;
+#endif
+// debug level 2: does nothing unless DEBUG_PRINT_LEVEL is larger than 1
+#if DEBUG_PRINT_LEVEL>1 
+	#define DEBUG_L2(TEXT_IN_std_ostream_FORMATE) cerr<<"\t[DEBUG L2]:\t" TEXT_IN_std_ostream_FORMATE <<"\n" ;
+#else
+	#define DEBUG_L2(X) ;
+#endif
+// debug level 3: does nothing unless DEBUG_PRINT_LEVEL is larger  than 2
+#if DEBUG_PRINT_LEVEL>2
+	#define DEBUG_L3(TEXT_IN_std_ostream_FORMATE) cerr<<"\t\t[DEBUG L3]:\t" TEXT_IN_std_ostream_FORMATE <<"\n";
+#else
+	#define DEBUG_L3(X) ;
+#endif
+// debug level 4: does nothing unless DEBUG_PRINT_LEVEL is larger than 3
+#if DEBUG_PRINT_LEVEL>3
+	#define DEBUG_L4(TEXT_IN_std_ostream_FORMATE) cerr<<"\t\t\t[DEBUG L4]:\t" TEXT_IN_std_ostream_FORMATE <<"\n";
+#else
+	#define DEBUG_L4(X) ;
+#endif
+// debug level 5: does nothing unless DEBUG_PRINT_LEVEL is larger than 4
+#if DEBUG_PRINT_LEVEL>4
+	#define DEBUG_L5(TEXT_IN_std_ostream_FORMATE) cerr<<"\t\t\t\t[DEBUG L5]:\t" TEXT_IN_std_ostream_FORMATE <<"\n";
+#else
+	#define DEBUG_L5(X) ;
+#endif
 
 
 #if GCC
@@ -114,44 +139,13 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 #ifndef SYNAPSE_H_
 #include "../neuroElements/synapse.h"
 #endif
-/*
-#ifndef DENDRITE_H_
-#include "../neuroElements/dendrite.h"
-#endif*/
 
 using std::cerr;
 using std::cout;
 using std::endl;
 
-
-
-
-
-// deklarasjoner:
-
+// declarations:
 extern bool bContinueExecution;
-
-
-class comparisonClass{
-	public:
-	static unsigned long ulNumberOfCallsToKappa_doCalculations;
-	static unsigned long ulNumberOfCallsTo_doTask;
-};
-
-
-
-
-
-
-/*
-	simulert, diskret TID
-*/
-//unsigned long ulTime; // ligg i main.h
-// flytta inn som static time_class::ulTime;
-
-
-
-
 
 
 

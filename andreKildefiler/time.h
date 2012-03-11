@@ -23,12 +23,6 @@
  *                                                                         *
  ***************************************************************************/
 //}
-#ifndef TID_H_
-#define TID_H_
-
-// TODO sjekk om desse er nødvendig (kommenter ut, når kompilering funker..)
-//#include "main.h"
-#include "../neuroElements/auron.h"
 
 #include <typeinfo> //For å bryke typeid..
 
@@ -38,12 +32,15 @@ using std::endl;
 
 // DEKLARASJONER:
 //extern unsigned long ulTime;
-void loggeFunk_K_auron(); // auron.h
+extern void loggeFunk_K_auron(); // auron.h
+
+#ifndef TID_H_
+#define TID_H_
 
 
 
 /****************************************
-***      abstract class !             ***
+***   abstract class timeInterface:   ***
 ****************************************/
 class timeInterface
 {
@@ -52,112 +49,75 @@ class timeInterface
 
 	virtual void doTask() =0;
 	virtual void doCalculation() =0;
-	//unsigned long dEstimatedTaskTime; 
 	double dEstimatedTaskTime; 
 
-	//for debugging:
+	// For debugging(print to screen):
 	std::string sClassName;
 };
 
 
-
-
-
-
-
-/*********************************************************************************
-** 	class time  																	**
-** 		- time skal bare være en instans av denne klassen (i planen så langt). 		**
-** 		 																		**
-*********************************************************************************/
+/**************************************
+*** 	class time_class 			***
+**************************************/
 class time_class : public timeInterface {
+	// variable to hold t_n, [time step number]:
 	static unsigned long ulTime;
 	
+	// Lists for scheduling tasks and recalculation of elements
 	static std::list<timeInterface*> pWorkTaskQueue;
 	static std::list<timeInterface*> pCalculatationTaskQueue;
 
-	// Liste som sjekkes ved kvar tidsiterering: Dersom eit element har dEstimatedTaskTime til neste tidssted legges peiker inn i pWorkTaskQueue.
+	// List that contain all periodic elements in the simulation:
+	// 	All elements are checked each time step: If an element have dEstimatedTaskTime during the next iteration, it is inserted into pWorkTaskQueue.
 	static std::list<timeInterface*> pPeriodicElements;
 
 	protected:
-	void doTask();
-	void doCalculation()
+	void doTask(); 			// Defined in neuroElement.cpp
+	void doCalculation()	// Conduct calculations on all calculation tasks in pCalculatationTaskQueue.
 	{ //{
-		/**************************************************************************************
-		*** Gjennomføre kalkulering på alle kalkuleringsoppgaver (pCalculatationTaskQueue) 	***
-		**************************************************************************************/
-
-		//  TA VEKK (redundant test?)
-		if( pCalculatationTaskQueue.empty() ) return;
-
-		// Organiserer liste slik at kvar oppføring er unik:
+		// Organize list so that every entry is unique:
 		for( std::list<timeInterface*>::iterator iter = pCalculatationTaskQueue.begin(); iter != pCalculatationTaskQueue.end(); iter++ )
 		{
-			std::list<timeInterface*>::iterator iter2 = iter; 
+			static std::list<timeInterface*>::iterator iter2;
+		   	iter2	= iter; 
 			iter2++;
 			while(iter2!=pCalculatationTaskQueue.end()){
-				// ser om iteratorene peker til samme minneadresse (samme timeInterface-element). Isåfall: fjærn det andre elementet.
+				// Check if iterators point at same memory address: If so, remove second element:
 			 	if( (*iter2) == (*iter) ){ 
-					// Øker iterator før eg sletter element på iter2.
-					std::list<timeInterface*>::iterator slettIter = iter2;
+					// Iterate before iter2 is removed:
+					static std::list<timeInterface*>::iterator pDeleteElement;
+					pDeleteElement = iter2;
 					iter2++;
-					pCalculatationTaskQueue.erase(slettIter);
+					pCalculatationTaskQueue.erase(pDeleteElement);
 					continue;
 				}
 				iter2++;
 			}
 		}
 	
+		// Call first elements .doCalculation() and pop first element until list is empty:
 		while( !pCalculatationTaskQueue.empty() ){
-			// Kaller pCalculatationTaskQueue.front()->pCalculatationTaskQueue();
+			// Call first element's doCalculation():
 			pCalculatationTaskQueue.front()->doCalculation();
 
-// BARE PISS TODO Men kan være nyttig kode..
-#if 0
-			// Legger til task i neste iterasjon, dersom dette er dEstimatedTaskTime:
-			if( (unsigned)(pCalculatationTaskQueue.front()->dEstimatedTaskTime) < ulTime+2 ){ // Dersom den er før [nå+2], kan vi legge den til i pWorkTaskQueue (da er den mest sansynligvis til neste iter(Dette er jo siste ting som skjer!)
-								//															// (doCalculation() er siste som skjer før elem. flyttes over i pWorkTaskQueue (i time_class::doTask() kalles doCalc() rett før flytting av elem)
-				// FUNKER IKKJE: 	doTask(); (fører til at den bruker veldig lang tid (venter lenge..)
-				cout<<"\e[1;33mOK:\t\e[0m dEsmatedTaskTime < ulTime+1: \e[31m" <<(pCalculatationTaskQueue.front())->dEstimatedTaskTime <<"\e[0m < \e[33m" <<ulTime <<"+1\e[0m]\n";	
-			}else{
-				cout<<"\e[1;31mFEIL:\t\e[0m dEsmatedTaskTime !< ulTime+1: \e[31m" <<(pCalculatationTaskQueue.front())->dEstimatedTaskTime <<"\e[0m !< \e[33m" <<ulTime <<"+1\e[0m]\n";	
-			}
-#endif
-	
-			// Går videre (popper første elementet)
+			// Pop first element from pCalculatationTaskQueue(calculation is executed)
 			pCalculatationTaskQueue.pop_front();
 		}
-
-
-
 	} //}
 
-
+	// Funtion to push task to pWorkTaskQueue in present time iteration(only possible for a KM node).
 	static inline void addTaskInPresentTimeIteration(timeInterface* pTimeClassArg_withTask);
 
-
+	// Funtion to schedule calculation
 	static inline void addCalculationIn_pCalculatationTaskQueue( timeInterface* pObject_arg)
 	{
 	 	pCalculatationTaskQueue.push_back( pObject_arg );
 	}
 
-
-	const static void printAllElementsOf_pWorkTaskQueue()
-	{ //{
-		cout<<"Skriver ut pWorkTaskQueue: \n";
-		int nIter = 0;
-		// itererer gjennom ytre liste:
-		for(std::list<timeInterface*>::iterator l_iter = pWorkTaskQueue.begin(); 	l_iter != pWorkTaskQueue.end() ; 	l_iter++ )
-		{
-			cout<<nIter <<"\t" <<typeid(*(*l_iter)).name() <<"\t(" <<(*l_iter)->sClassName <<"\tplanlagt til " <<(*l_iter)->dEstimatedTaskTime <<"\n";
-			nIter++;
-		}
-		cout<<"\n\n";
-	} //}
-
-
 	public:
 	time_class() : timeInterface("time"){}
+
+	// Functions to access private elements:
 
 	static void addElementIn_pPeriodicElements( timeInterface* pArg )
 	{
@@ -167,9 +127,9 @@ class time_class : public timeInterface {
 	{
 	 	pWorkTaskQueue.push_back( pArg );
 	}
-	static const inline unsigned long getTime(){ return ulTime; }
+	static inline const unsigned long getTime(){ return ulTime; }
 	
-	static const void printAllElementsOf_pPeriodicElements()
+	static void printAllElementsOf_pPeriodicElements()
 	{
 		cout<<"Print type of all elements in the pPeriodicElements list:\n";
 		for( std::list<timeInterface*>::iterator pPE_iter = pPeriodicElements.begin() ; pPE_iter != pPeriodicElements.end() ; pPE_iter++ )
@@ -179,19 +139,26 @@ class time_class : public timeInterface {
 		cout<<"\n\n";
 	}
 
-	// Viktig med inkapsling!
+	static void printAllElementsOf_pWorkTaskQueue()
+	{ //{
+		cout<<"All elements of pWorkTaskQueue: \n";
+		int nIter = 0;
+		// itererer gjennom ytre liste:
+		for(std::list<timeInterface*>::iterator l_iter = pWorkTaskQueue.begin(); 	l_iter != pWorkTaskQueue.end() ; 	l_iter++ )
+		{
+			cout<<nIter <<")\t" <<typeid(*(*l_iter)).name() <<"\t(" <<(*l_iter)->sClassName <<"\tscheduled for time " <<(*l_iter)->dEstimatedTaskTime <<"\n";
+			nIter++;
+		}
+		cout<<"\n\n";
+	} //}
 
+
+	// Allow class K_auron to access protected elements:
 	friend class K_auron;
-	friend class i_auron;
-
+	// Also the following functions:
 	friend void initialzeWorkTaskQueue();
 	friend void* taskSchedulerFunction(void*);
-	friend int main(int, char**);
 };
-
-
-
-
 
 #endif
 // vim:fdm=marker:fmr=//{,//}
