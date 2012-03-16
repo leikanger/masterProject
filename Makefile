@@ -1,30 +1,34 @@
-CFLAGS=-g3 -O1 -Wall -I/usr/include/c++/4.5 -I/usr/include/c++/4.5/x86_64-linux-gnu #-pthread
+CFLAGS=-O1 -Wall -I/usr/include/c++/4.5 -I/usr/include/c++/4.5/x86_64-linux-gnu #-pthread
 CPP=clang++
-#CPP=g++
+# CPP=g++
 CPPFLAGS=${CFLAGS} 
 
 
 #all: andreKildefiler/main.cpp andreKildefiler/main.h andreKildefiler/tid.cpp andreKildefiler/time.h neuroElements/axon.h neuroElements/dendrite.h neuroElements/synapse.h neuroElements/neuroElement.cpp
-#	clear; echo "make all:\n\n"; g++ ${CFLAGS} andreKildefiler/main.cpp neuroElements/neuroElement.cpp -o auroNett.out
+#	clear; echo "make all:\n\n"; g++ ${CFLAGS} andreKildefiler/main.cpp neuroElements/neuroElement.cpp -o auroSim.out
 
-all: auroNett.out
-	make auroNett.out
+all: auroSim.out
+	make auroSim.out
 
-run: auroNett.out
-	make auroNett.out && sh kjør.sh
+run: auroSim.out
+	make auroSim.out && sh kjør.sh
 
-kjoerOgPlott: auroNett.out 
-	make auroNett.out && sh kjør.sh -r100 -n1.5 && octave -q sammenligningKmedFileneFraDatafilesForEvaluation.m
+kjoerOgPlott: auroSim.out 
+	make auroSim.out && sh kjør.sh -r100 -n1.5 && octave -q sammenligningKmedFileneFraDatafilesForEvaluation.m
 
+
+gprof:
+	make clean
+	g++ -pg neuroElements/neuroElement.cpp andreKildefiler/main.cpp -o auroSim.out 
 
 
 altI_en: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroElements/*.h
 	echo "\n\n\n\nmake altI_en:\n\n"
-	${CPP} ${CFLAGS} neuroElements/neuroElement.cpp andreKildefiler/ANN.cpp andreKildefiler/main.cpp -o auroNett.out 
+	${CPP} ${CFLAGS} andreKildefiler/main.cpp neuroElements/neuroElement.cpp andreKildefiler/ANN.cpp -o auroSim.out 
 
 altI_enGCC: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroElements/*.h
 	echo "\n\n\n\nmake altI_en: i GCC\n\n"
-	g++ ${CFLAGS} neuroElements/neuroElement.cpp andreKildefiler/ANN.cpp andreKildefiler/main.cpp -o auroNett.out 
+	g++ ${CFLAGS} neuroElements/neuroElement.cpp andreKildefiler/main.cpp andreKildefiler/ANN.cpp -o auroSim.out 
 
 
 
@@ -32,9 +36,9 @@ altI_enGCC: andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*.cpp neuroE
 
 
 
-auroNett.out: ANN.o main.o neuroElement.o andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*cpp neuroElements/*.h
-	echo "\n\n\n\nmake auroNett.out:\n\n"
-	${CPP} ${CFLAGS} ANN.o main.o neuroElement.o -o auroNett.out
+auroSim.out: ANN.o main.o neuroElement.o andreKildefiler/*.cpp andreKildefiler/*.h neuroElements/*cpp neuroElements/*.h
+	echo "\n\n\n\nmake auroSim.out:\n\n"
+	${CPP} ${CFLAGS} ANN.o main.o neuroElement.o -o auroSim.out
 
 neuroElement.o: andreKildefiler/time.h neuroElements/auron.h neuroElements/axon.h neuroElements/dendrite.h neuroElements/synapse.h neuroElements/neuroElement.cpp
 	${CPP} ${CFLAGS} -c neuroElements/neuroElement.cpp -o neuroElement.o

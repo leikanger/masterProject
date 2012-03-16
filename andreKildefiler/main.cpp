@@ -252,8 +252,12 @@ int main(int argc, char *argv[])
 
 		// Experiment 2:
 		#if 1
+			#if KANN
 			new K_sensory_auron("dKN", &dynamicSensoryFunc);
+			#endif
+			#if SANN
 			new s_sensor_auron("dSN", &dynamicSensoryFunc);
+			#endif
 		#endif
 
 		// Illustration of sensory funtion (fig. 3.6 in the report when auroSim is called with arguments [./auroSim.out -r1000 -n4] )
@@ -384,16 +388,9 @@ int main(int argc, char *argv[])
 /***********************************************************************************************************************************/
 
 
-	cout<<"\n\n\nXXXXXX Successful run. Completes log and clean up. XXXXX\n\n\n";
-
-		//#if GCC	
-		//	cout.precision(20);
-		//#endif
-		//cout<<"siste depol. for [SN, KN]: \t[" <<Sd->dAktivitetsVariabel <<", " <<Kd->getCalculateDepol() <<"]\n\n";
+	cout<<"\n\n\nXXXXXX Successful run. Complete log and clean up. XXXXX\n\n\n";
 
 
-/* TODO Lag en egen avsluttingsfunksjon(og registrer den med atexit(void (*)(void)).). Den skal gjøre følgende:*/
-	time_class::printAllElementsOf_pWorkTaskQueue();
 
 //		cout<<"\n\n\n\nPrint all elements of i_auron:\n";
 //		for( std::list<i_auron*>::iterator iter = i_auron::pAllAurons.begin() ;  iter != i_auron::pAllAurons.end() ;  iter++ )
@@ -403,7 +400,9 @@ int main(int argc, char *argv[])
 //		}
 //		cout<<"\n\n";
 	
-	#if DEBUG_PRINT_LEVEL > 1
+	#if DEBUG_PRINT_LEVEL>4
+		/* TODO Lag en egen avsluttingsfunksjon(og registrer den med atexit(void (*)(void)).). Den skal gjøre følgende:*/
+		time_class::printAllElementsOf_pWorkTaskQueue();
 		time_class::printAllElementsOf_pPeriodicElements();
 	#endif
 
@@ -476,8 +475,8 @@ void* taskSchedulerFunction(void* )
 	**  Initialize Run: 	   **
 	****************************/
 
-	// Initialize time: (important to start at one to avoid strange behaviour the first iteration)
-	time_class::ulTime = 1;
+	// Initialize time:
+	time_class::ulTime = 0;
 
 	// Initialize pWorkTaskQueue by inserting one, and only one, object of time_class:
 	// ( limiting to one is handled by initialzeWorkTaskQueue() )
@@ -502,7 +501,7 @@ void* taskSchedulerFunction(void* )
 	for( std::list<K_sensory_auron*>::iterator K_iter = K_sensory_auron::pAllSensoryAurons.begin(); K_iter != K_sensory_auron::pAllSensoryAurons.end(); K_iter++ )
 	{
 		// Initialize first 'time window':
-		(*K_iter)->updateSensorValue() ;
+		(*K_iter)->updateSensoryValue() ;
 		(*K_iter)->dStartOfTimeWindow = (double)time_class::getTime();
 		// Compute the resulting period for the forcing funtions input flow:
 		(*K_iter)->doCalculation();
@@ -569,7 +568,7 @@ std::ostream & operator<< (std::ostream & ut, i_auron* pAuronArg )
 
 
 
-// TODO TODO 
+// TODO TODO  Ta vekk ?
 std::ostream & operator<< (std::ostream & ut, s_axon* pAxonArg ) //XXX Skal gjøres til i_axon* istaden for s_axon* som argument! XXX
 { //{
 	ut<<"Utsynapser fra axon tilhørende neuron " <<(pAxonArg->pElementOfAuron)->sNavn <<endl; 

@@ -31,100 +31,62 @@
 #include "../neuroElements/synapse.h"
 #include "../neuroElements/auron.h"
 
-//Deklarasjoner:
-class i_synapse;
-class s_synapse;
-class s_auron;
-
 /*****************************************************************
-** class dendritt 			-  	Notater:
-** 		- Skal vekk. Class dendrite skal ikkje være med i K_auron! 	
-** 			(i_dendrite skal vekk. Alt innhold skal inn i s_dendrite..)
+** class dendritt 			-  	Notes:
+** 		- Can remove this class. Only needed for NIM nodes. 
+** 			Can use task scheduling instead..
 **
 *****************************************************************/
 class i_dendrite : public timeInterface{
+	// Pointers to the next and previous element. Are overloaded to the model specific vertions in derived classes(s_dendrite and K_dendrite)
 	i_auron* pElementOfAuron;
 	std::list<i_synapse*> pInnSynapser;
 
- 	virtual inline void doTask() =0;
-	// XXX XXX XXX Utsetter doCalculation() for alle dendrite: (definerer den til å gjøre ingenting her for å unngå at klassene under blir abstract..)
+ 	//virtual inline void doTask() =0; -- Stays pure virtual..
+	// Define doCalculation() to do nothing. Not used for dendrite, yet.
+	// 	 Derived classes thus does not have do define this funtion..
 	virtual void doCalculation() {}
 
+	// Different for the two simulation models. Defined pure virtual.
 	virtual inline void newInputSignal( double ) =0;
 
 	public:
 	i_dendrite(std::string sNavn /*="dendrite"*/);
 	~i_dendrite();
-
-	friend int main(int, char**);
-	friend std::ostream & operator<< (std::ostream & ut, s_axon* pAxonArg );
-
-	friend class i_synapse;
-	friend class i_axon;
-	friend class i_auron;
-
-	friend class s_synapse;
-	friend class s_axon;
-	friend class s_auron;
-	friend class s_dendrite;
-
-	friend class K_synapse;
-	friend class K_auron;
-	friend class K_dendrite;
 };
 
 
 class s_dendrite : public i_dendrite{
-	inline void doTask();
-	inline void feedbackToDendrite();
+	inline void doTask(); 				// Defined in neuroElements.cpp
 
-	// Overlagrer i_dendrite::pElementOfAuron og i_dendrite::pInnSynapser, slik at desse blir modellspesifikke.
-	// 	Ligger også i i_dendrite, slik at i_dendrite* også kan kalle pElementOfAuron og pInnSynapser.
+	// Overload i_dendrite::pElementOfAuron and i_dendrite::pInnSynapser to be modelspecific for the NIM simulation model:
 	s_auron* pElementOfAuron;
 	std::list<s_synapse*> pInnSynapser;
 
 	inline void newInputSignal( double /*nNewSignal*/ );
-	inline void calculateLeakage(); 		//Bare for SANN
+	inline void calculateLeakage(); 		// Only for NIM dendrites.
 
-	bool bBlockInput_refractionTime; 		//Bare for SANN 	//Blokkere input når refraction period eller når depol er over terskel.
+	bool bBlockInput_refractionTime; 		// Only for NIM dendrites.
+	// This is how the NIM simulation simulates absolute refraction time after firing.
 
 	public:
-	//Constructor: 	
-	s_dendrite( s_auron* pPostSynAuron_Arg ); // : pElementOfAuron(pPostSynAuron_Arg)  		Definisjon i neuroElement.cpp
+	s_dendrite( s_auron* pPostSynAuron_Arg );
 	~s_dendrite();
 
-	//Destructor:
-	/* kommenterer ut mens s_synapser ikkje er laga enda.. //{
-	~sDendritt()
-	{
-		// destruerer alle innsynapser:
-	 	while( !pInnSynapser.empty() )
-		{
-	 		cout<<"~dendritt: fjerner innsyn fra " <<pInnSynapser.back()->pPreNode->sNavn <<" til " <<pInnSynapser.back()->pPostNode->sNavn <<"( " <<pInnSynapser.size() <<" synapser igjen)."	<<endl;
-			pInnSynapser.pop_back(); 	//pop_back() fjærner siste ledd i std::vector. Kaller også destructor for dette elementet.
-			// ~synapse tar hånd om (fjærner) presynaptisk kobling til denne synapsen. TODO
-		}
-	}
-	*/ //}
-
-	friend class s_auron;
+	// Friend declarations:
 	friend class s_sensor_auron;
-
-	friend class s_axon;
 	friend class s_synapse;
 	friend std::ostream & operator<< (std::ostream & ut, s_axon* );
-
-	friend int main(int, char**); //TODO SLETT
 };
 
 class K_dendrite : public i_dendrite{
- 	inline void doTask();
-	//inline void feedbackToDendrite();
+ 	inline void doTask(); // Defined in neuroElements.cpp
 
-	// Overlagrer i_dendrite::pElementOfAuron og i_dendrite::pInnSynapser, slik at desse blir modellspesifikke.
+	// Overload i_dendrite::pElementOfAuron and i_dendrite::pInnSynapser, so that these point to model specific variants.
 	K_auron* pElementOfAuron;
 	std::list<K_synapse*> pInnSynapser;
 	
+	// called by auron::recalculateKappa() and does the actual recalculation. Most efficient this way.
 	inline double recalculateKappa();
 
 	inline void newInputSignal(double);

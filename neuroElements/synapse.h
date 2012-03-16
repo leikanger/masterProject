@@ -31,7 +31,7 @@
 #include "../neuroElements/auron.h"
 #include "../andreKildefiler/time.h"
 
-//#include "../andreKildefiler/aktivitetsObj.h"
+// Declarations:
 class i_axon;
 class s_axon;
 class i_dendrite;
@@ -41,33 +41,30 @@ class s_auron;
 class K_auron;
 
 
-// <<interface>>
+// abstract class i_synapse:
 class i_synapse : public timeInterface{
 
-	virtual inline void doTask() =0; // Reint virtuell klasse!
-	
-	// Utsetter doCalculation() for alle synapser: (definerer den til å gjøre ingenting her for å unngå at klassene under blir abstract..)
-	virtual void doCalculation() {}
+	// virtual inline void doTask() =0;   -- i_synapse remains abstract.
+	virtual void doCalculation() {} 	//-- doCalculation() is not used for the synapse...yet. Might be important when synaptic plasticity is introduced.
 	
 	protected:
+	// Defines whether the synapse is inhibitory or not
 	const bool bInhibitoryEffect;
+	// Defines the synaptic weight of the synapse
 	double dSynapticWeight;
-	double dSynapticWeightChange;
 
+	// Log file, for logging synaptic transmission
 	std::ofstream synTransmission_logFile;
 
-	// Overlagres i underklassene, s_synapse og K_synapse. 	 Gjør at underelement som er sammenkobbla til samme s_[element], veit dette.
+	// Overloaded in the model specific derived classes
  	i_axon* pPreNodeAxon;
 	i_dendrite* pPostNodeDendrite; 
 
-
 	public:
 	i_synapse(double dSynVekt_Arg, bool bInhibEffekt_Arg, std::string sKlasseNavn /*="synapse"*/ );
-	//~i_synapse();  TRUR IKKJE DENNE TRENGS. Ingen peikere i i_synapse ?
 	
-	double getSynVekt(){ return dSynapticWeight; }
+	double getSynWeight(){ return dSynapticWeight; }
 
-	friend int make(int, char**);
 	friend std::ostream & operator<< (std::ostream & ut, i_axon* );
  	friend std::ostream & operator<< (std::ostream & ut, s_axon* pAxonArg );
 };
@@ -76,9 +73,9 @@ class i_synapse : public timeInterface{
 
 class s_synapse : public i_synapse{
 
-	inline void doTask();
+	inline void doTask(); 	// Defined in neuroElements.cpp
 
-	// Overlagrer i underklasseene, s_synapse og K_synapse. 	 Gjør at underelement som er sammenkobbla til samme s_[element], veit dette.
+	// Overload node-subelement pointers from i_synapse:
  	s_axon* pPreNodeAxon;
 	s_dendrite* pPostNodeDendrite; 
 
@@ -93,29 +90,25 @@ class s_synapse : public i_synapse{
 
 
 class K_synapse : public i_synapse{
-	inline void doTask();
+	inline void doTask(); 	// Defined in neuroElements.cpp
 	
-	// NYTT:
-	unsigned uTemporalDistanceFromSoma; // Avstant fra axon hillock til synapse langs axon.
-	unsigned uTemporalDistanceToSoma; 	// Avstand fra dendrite til soma.
-	//void scheduleTransmission(); 		// Tar hand om alt som har med å schedule transmission (legge til synapse etter rett delay og anna).
+	// Planned further development: Schedule spatiotemporal delay by having member variables that gives the delay from/to the previous/next auron.
+	//unsigned uTemporalDistanceFromSoma; // Distance from axon hillock to synapse.
+	//unsigned uTemporalDistanceToSoma; 	// Distance from dendrite to soma.
+	//void scheduleTransmission(); 		// Handles the scheduling of task(schedule after the predefined delay)
 
+	// Overload abstract class i_synapse's pointers to next and previous element.
 	K_auron* pPreNodeAuron;
-	// GAMMELT:
-	// Overlagrer peikarane, for å få rett preElement og postElement for synapsen (av rett modell).
- 	// K_axon* pPreNodeAxon; GJORT OM TIL pPreNodeAuron!
 	K_dendrite* pPostNodeDendrite; 
 
+	// For recalculation of Kappa(by the postsynaptic neuron)
 	double dPresynPeriodINVERSE;
 	const inline double getDerivedTransmission();
 	const inline double getTotalTransmission();
 
 	public:
-	K_synapse(K_auron*, K_auron*, double dSynVekt_Arg =1, bool bInhibEffekt_Arg =false, unsigned uTemporalDistanceFromSoma_arg =1) ;
-	//K_synapse(K_auron*, K_auron*, double dSynVekt_Arg =1, bool bInhibEffekt_Arg =false) ;
+	K_synapse(K_auron*, K_auron*, double dSynVekt_Arg =1, bool bInhibEffekt_Arg =false) ;
 	~K_synapse();
-	
-	inline void print();
 	
 	K_dendrite* getPostNodeDendrite(){
 		return pPostNodeDendrite;
@@ -123,8 +116,6 @@ class K_synapse : public i_synapse{
 
 	friend class K_dendrite;
 	friend class K_auron;
-
-	friend int main(int, char**);
 };
 
 #endif

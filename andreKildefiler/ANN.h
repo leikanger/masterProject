@@ -64,7 +64,7 @@ template <class C> class QuadraticMatrix{
 	 
 		}
 
-		const unsigned getDim(){
+		int getDim() const {
 			return uDim;
 		}
 		const void printMatrix(){

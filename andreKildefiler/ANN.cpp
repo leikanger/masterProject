@@ -61,7 +61,7 @@ template <> ANN<K_auron>::ANN(QuadraticMatrix<double> dEdgeMatrix, std::vector<K
 	}
 
 	// Check whether pAuronVector has the same lenght as dim(dEdgeMatrix):
-	if(pAuronVector.size() != dEdgeMatrix.getDim()){
+	if(pAuronVector.size() != (unsigned)dEdgeMatrix.getDim()){
 		cout<<"pAuronVector does not have the same lenght as the dimention of dEdgeMatrix.\nTerminating\n\n(error-ref.: asdf135@ANN.cpp)\n";
 		exit(-1);
 	}
@@ -144,16 +144,16 @@ template <> const void ANN<K_auron>::printEdgeMatrix(){
 	//cout<<"lager matrise i størrelse " <<pAllNodesInANN.size() <<endl;
 	QuadraticMatrix<double> tempMatrix(pAllNodesInANN.size(), "tempW");
 
-	for(int n=0; n<pAllNodesInANN.size(); n++){
+	for(unsigned n=0; n<pAllNodesInANN.size(); n++){
 
 		std::list<K_synapse*> liste = pAllNodesInANN[n]->getUtSynapserP();
 		for(std::list<K_synapse*>::iterator iter = liste.begin(); iter!= liste.end(); iter++ ){
 			K_auron* pPostSynAuron = (*iter)->getPostNodeDendrite()->getElementOfAuron();
-			for(int i=0; i<pAllNodesInANN.size(); i++){
+			for(unsigned i=0; i<pAllNodesInANN.size(); i++){
 				if( pAllNodesInANN[i] == pPostSynAuron ){
 					// Dette er funky! Matrise-labels er feil veil: i burde stått først (Jmf. Rolls/Treves-konvensjonen).
-					tempMatrix(n, i) = (*iter)->getSynVekt();
-					//cout<<"n->i: \t"  <<n <<" "<<i <<", " <<(*iter)->getSynVekt() <<endl; 
+					tempMatrix(n, i) = (*iter)->getSynWeight();
+					//cout<<"n->i: \t"  <<n <<" "<<i <<", " <<(*iter)->getSynWeight() <<endl; 
 					break;
 				}
 			}

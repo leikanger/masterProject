@@ -30,10 +30,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-// DEKLARASJONER:
-//extern unsigned long ulTime;
-extern void loggeFunk_K_auron(); // auron.h
-
 #ifndef TID_H_
 #define TID_H_
 
@@ -127,7 +123,7 @@ class time_class : public timeInterface {
 	{
 	 	pWorkTaskQueue.push_back( pArg );
 	}
-	static inline const unsigned long getTime(){ return ulTime; }
+	static inline const unsigned long& getTime(){ return ulTime; }
 	
 	static void printAllElementsOf_pPeriodicElements()
 	{

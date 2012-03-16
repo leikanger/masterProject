@@ -92,7 +92,7 @@ void K_auron::callDestructorForAllKappaAurons()
 i_auron::i_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartAktVar /*=0*/) : timeInterface("auron"), dAktivitetsVariabel(dStartAktVar), sNavn(sNavn_Arg)
 {
 
-	#if LOGG_DEPOL
+	#if LOG_DEPOL
 		// Printing to log file. Initiation of file stream and creation of a .oct file that is executable in octave.
 		std::ostringstream tempDepolLoggFileAdr;
 		tempDepolLoggFileAdr<<"./datafiles_for_evaluation/log_auron_" <<sNavn <<"-depol" <<".oct";
@@ -149,7 +149,7 @@ i_auron::~i_auron()
 	// remove auron from pAllAurons:
 	pAllAurons.remove(this);
 
-	#if LOGG_DEPOL
+	#if LOG_DEPOL
 		// Finalize octave script to make it executable:
 		depol_logFile 	<<"];\n\n"
 						<<"plot( data([1:end],1), data([1:end],2), \"@;Depolarization;\");\n"
@@ -158,7 +158,6 @@ i_auron::~i_auron()
 						//<<"axis([0, " <<time_class::getTime() <<", 0, " <<FIRING_THRESHOLD*1.3 <<"]);\n"
 						//<<"axis([0, " <<time_class::getTime() <<", 0, " <<FIRING_THRESHOLD*1.3 <<"]);\n"
 						<<"akser=([0 data(end,1) 0 1400 ]);\n"
-		//				<<"print(\'./eps/eps_auron" <<sNavn <<"-depol.eps\', \'-deps\');\n"
 						<<"sleep(" <<OCTAVE_SLEEP_AFTER_PLOTTING <<"); "
 						;
 		depol_logFile.flush();
@@ -301,7 +300,6 @@ K_auron::~K_auron()
 						<<"title \"Activity variable for K-auron " <<sNavn <<"\"\n"
 						<<"xlabel Time\n" <<"ylabel \"Activity variable\"\n"
 						//<<"akser=[0 data(end,1) 0 1400 ]; axis(akser);\n"
-						//<<"print(\'./eps/eps_auron" <<sNavn <<"-kappa.eps\', \'-deps\');\n"
 						<<"sleep(" <<OCTAVE_SLEEP_AFTER_PLOTTING <<"); "
 						;
 		kappa_logFile.close();
@@ -344,7 +342,6 @@ s_sensor_auron::s_sensor_auron( std::string sNavn_Arg , double (*pFunk_arg)(void
 i_synapse::i_synapse(double dSynVekt_Arg, bool bInhibEffekt_Arg, std::string sKlasseNavn /*="synapse"*/ ) : timeInterface(sKlasseNavn), bInhibitoryEffect(bInhibEffekt_Arg)
 {
 	dSynapticWeight = abs(dSynVekt_Arg);
-	dSynapticWeightChange = 0;
 	
 	#if DEBUG_PRINT_CONSTRUCTOR
 		cout<<"\tConstructor :\ti_synapse::i_synapse(unsigned uSynVekt_Arg, bool bInhibEffekt_Arg, string navn);\n";
@@ -438,7 +435,6 @@ s_synapse::~s_synapse()
 					<<"title \"Synaptic weight for s_synapse: " <<pPreNodeAxon->pElementOfAuron->sNavn <<" -> " <<pPostNodeDendrite->pElementOfAuron->sNavn <<"\"\n"
 					<<"xlabel Time\n" <<"ylabel syn.w.\n"
 					//<<"akser=[0 data(end,1) 0 1400 ]; axis(akser);\n"
-					//<<"print(\'eps_" <<pPreNodeAxon->pElementOfAuron->sNavn <<"->" <<pPostNodeDendrite->pElementOfAuron->sNavn <<".eps\', \'-deps\');\"\n"
 			//		<<"print(\'eps__s_synapse_" <<pPreNodeAxon->pElementOfAuron->sNavn <<"->" <<pPostNodeDendrite->pElementOfAuron->sNavn <<".eps\', \'-deps\');" 	
 					<<"sleep(" <<OCTAVE_SLEEP_AFTER_PLOTTING <<"); ";
 	synTransmission_logFile.close();
@@ -447,8 +443,8 @@ s_synapse::~s_synapse()
 }
 //}2
 //{2 K_synapse
-K_synapse::K_synapse(K_auron* pPresynAuron_arg, K_auron* pPostsynAuron_arg, double dSynVekt_Arg /*=1*/, bool bInhibEffekt_Arg /*=false*/ , unsigned uTemporalDistanceFromSoma_arg /* =1*/)
- :  i_synapse(dSynVekt_Arg * FIRING_THRESHOLD      , bInhibEffekt_Arg, "K_synapse") , uTemporalDistanceFromSoma(uTemporalDistanceFromSoma_arg) , pPreNodeAuron(pPresynAuron_arg), pPostNodeDendrite(pPostsynAuron_arg->pInputDendrite)
+K_synapse::K_synapse(K_auron* pPresynAuron_arg, K_auron* pPostsynAuron_arg, double dSynVekt_Arg /*=1*/, bool bInhibEffekt_Arg /*=false*/ )
+ :  i_synapse(dSynVekt_Arg * FIRING_THRESHOLD      , bInhibEffekt_Arg, "K_synapse") , pPreNodeAuron(pPresynAuron_arg), pPostNodeDendrite(pPostsynAuron_arg->pInputDendrite)
 {
 	#if DEBUG_PRINT_CONSTRUCTOR
 		cout<<"Constructor :\tK_synapse::K_synapse(" <<pPreNodeAuron->sNavn <<", " <<pPostNodeDendrite->pElementOfAuron->sNavn <<".pInputDendrite, ...)\n";
@@ -458,7 +454,6 @@ K_synapse::K_synapse(K_auron* pPresynAuron_arg, K_auron* pPostsynAuron_arg, doub
 	// Foreløpig skriver eg noko som gjør jobben, men som er dårlig:
 	// kommentarID_asd603@neuroElement.cpp
 	pPreNodeAuron->pUtSynapser.push_back(this);
-	uTemporalDistanceFromSoma = 1;
 
 // XXX XXX  TA VEKK axon OG dendrite XXX XXX
 	//pPre NodeAxon->pUtSynapser.push_back(this);
@@ -651,7 +646,7 @@ inline void K_dendrite::newInputSignal( double dNewSignal_arg )
 	pElementOfAuron->changeKappa_derivedArg( dNewSignal_arg );
 } //}2
 
-inline void K_auron::changeKappa_derivedArg( double dInputDerived_arg)//int derivedInput_arg )
+inline void K_auron::changeKappa_derivedArg( const double& dInputDerived_arg)//int derivedInput_arg )
 {
 	// Arg legges til Kappa no, og effektene av endringa kalkuleres i .doCalculation().
 	dChangeInKappa_this_iter +=  dInputDerived_arg ;
@@ -683,7 +678,7 @@ inline void K_auron::changeKappa_derivedArg( double dInputDerived_arg)//int deri
 }
 
 // XXX XXX XXX FARLIG ! Lager føkk når den endrer kappa, og doCalculation(). Kalkulerer v_0 fra gammel tid, men ny kappa. XXX IKKJE BRUK!
-inline void K_auron::changeKappa_absArg(double dNewKappa)
+inline void K_auron::changeKappa_absArg(const double& dNewKappa)
 { //{
 	cout<<"IKKJE Bruk changeKappa_absArg() ! Den innfører potensial for feil som ødelegger alt. Ikkje ferdig.\nAvlutter."; exit(-9);
 
@@ -739,6 +734,8 @@ inline void s_dendrite::newInputSignal( double dNewSignal_arg )
 
 		// Spatioteporal delay from AP initialization at axon hillock:
 		time_class::addTaskIn_pWorkTaskQueue( pElementOfAuron );
+		// Resetter v(t) nå, OG VED FYRING. Dette er fordi newInput skjer før iterasjonen for sensor-neuron. Gjør det for å unngå dobbelfyring..
+		pElementOfAuron->dAktivitetsVariabel = 0;
 	}
 
 	// Skriver til log for aktivitetsVar:
@@ -780,11 +777,14 @@ inline void s_auron::doTask()
 		return;
 	}
 
+ 	#if DEBUG_PRINT_LEVEL>0
+	cout<<"\t* \e[34ms\e[0m *\t\e[4;32mAction Potential\e[0;0m for neuron " <<sNavn <<"\t\t\t\t[time step] = [\e[1;33m" <<time_class::getTime() <<"\e[0m]\n";
+ 	#endif
 	// FYRER A.P.:
-	#if DEBUG_PRINT_LEVEL > 1
-		cout	<<"\tS S " <<sNavn <<" | S | " <<sNavn <<" | S | S | S | | " <<sNavn <<" | S | | " <<sNavn <<" | S | | " <<sNavn <<"| S | S | S | S |\t"
-				<<sNavn <<".doTask()\t\e[33mFYRER\e[0m neuron " <<sNavn <<".\t\t| S S | \t  | S |  \t  | S |\t\tS | " <<time_class::getTime() <<" |\n";
-	#endif
+//	#if DEBUG_PRINT_LEVEL > 1
+//		cout	<<"\tS S " <<sNavn <<" | S | " <<sNavn <<" | S | S | S | | " <<sNavn <<" | S | | " <<sNavn <<" | S | | " <<sNavn <<"| S | S | S | S |\t"
+//				<<sNavn <<".doTask()\t\e[33mFYRER\e[0m neuron " <<sNavn <<".\t\t| S S | \t  | S |  \t  | S |\t\tS | " <<time_class::getTime() <<" |\n";
+//	#endif
 
 	//Axon hillock: send aksjonspotensial 	-- innkapsling gir at a xon skal ta hånd om all output:
 	// bestiller at a xon skal fyre NESTE tidsiterasjon. Simulerer tidsdelay i a xonet.
@@ -820,7 +820,7 @@ inline void s_axon::doTask()
 	}
 
 	 //Skriver til logg etter refraction-period.
-	 pElementOfAuron->writeDepolToLog();
+	 //pElementOfAuron->writeDepolToLog();
 } //}
 /*  s_synapse::doTask() : 		Simulerer overføring i synapse */
 inline void s_synapse::doTask()
@@ -853,16 +853,20 @@ inline void K_auron::doTask()
 	
 	if( (unsigned)dEstimatedTaskTime == time_class::getTime() ){
 		// Not an error to fire:
-		cout<<"\t* * *\t\e[4;32mFIRE\e[0;0m neuron " <<sNavn <<"\t\t\t\t[time, est.t.time] = [\e[1;33m" <<time_class::getTime() <<"\e[0m,\e[32m " <<dEstimatedTaskTime <<"\e[0m]\n";
+ 		#if DEBUG_PRINT_LEVEL>0
+		cout<<"\t* \e[35mK\e[0m *\t\e[4;32mAction Potential\e[0;0m for neuron " <<sNavn <<"\t\t\t\t[time step, est.t.time] = [\e[1;33m" <<time_class::getTime() <<"\e[0m,\e[32m " <<dEstimatedTaskTime <<"\e[0m]\n";
+ 		#endif
 	}else if( dEstimatedTaskTime < time_class::getTime() ) //Dersom dEstimatedTaskTime er mindre enn nå-tid: at den skulle fyre forrige iter..
 	{
 		// Error to fire at this time:
+		#if DEBUG_PRINT_LEVEL>0
 		cout<<"\t* * *\t\e[4;32mFIRING\e[31m ERROR\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t[time > (int)est.time]: [\e[1;33m" <<time_class::getTime() <<"\e[0m>\e[1;31m " <<dEstimatedTaskTime <<"\e[0m]\n";
+		#endif
 	}else //if( dEstimatedTaskTime > time_class::getTime()+1 ) //Dersom dEstimatedTaskTime er mindre enn nå-tid: at den skulle fyre forrige iter..
 	{
 		cout<<"\t* * *\t\e[4;32mFIRING\e[31m ERROR\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t[est.t.time != [now] : [tid, (int)est.tid] = [\e[1;33m" <<time_class::getTime() <<"\e[0m<\e[1;31m " <<dEstimatedTaskTime <<"\e[0m]\n";
 		DEBUG_L2( <<"Depol.:\t" <<getCalculateDepol());
-		exit(2); // XXX Returnerer uten å gjøre noe.
+		exit(2); // XXX Terminate
 	}
 
 
@@ -875,7 +879,7 @@ inline void K_auron::doTask()
 			);
 
 
-	#if LOGG_DEPOL
+	#if LOG_DEPOL
 		// For more accurate depol.-curves (log files) //{
 		#if GCC
 			// Set precision for output: only works with #include <iomanip>, that does not work for clang++ compiler..
@@ -961,13 +965,13 @@ void time_class::doTask()
 	}
 
 	#if PRINT_TIME_ITERATION
-	if(ulTime % PRINT_TIME_EVERY_Nth_ITER  == 0)		
-		cout<<"\n\t* * *\tIterate time: \t * * * * * * * In time_class::doTask() - Increase from:   * * * * * * * * * * = \e[4;39m"	<<ulTime <<"->" <<ulTime+1 <<"\e[0m :\n";
-	#endif
-	#if PRINT_TIME_ITERATION
 	// Increase by one (ulTime+1) to show t_n for the new time step.
 	if(ulTime % PRINT_TIME_EVERY_Nth_ITER  == 0)		
-		cout<<"\t* * *\tTIME:" <<"\e[33m"	<<ulTime+1 <<"\e[0m" <<"\t * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * = "	<<ulTime <<"\n";
+		cout<<"\t- - -\tTIME:" <<"\e[33m"	<<ulTime+1 <<"\e[0m" <<"\t - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - = "	<<ulTime <<"\n";
+	#if DEBUG_PRINT_LEVEL>3
+	if(ulTime % PRINT_TIME_EVERY_Nth_ITER  == 0)		
+		cout<<"\n\t- - -\tIterate time: \t - - - - - - - In time_class::doTask() - Increase from:   - - - - - - - - - - = \e[4;39m"	<<ulTime <<"->" <<ulTime+1 <<"\e[0m :\n";
+	#endif
 	#endif
 
 
@@ -1081,7 +1085,9 @@ void K_auron::doCalculation()
 	if( dEstimatedTaskTime < time_class::getTime()+1 ){ //TODO
 		DEBUG_L4(<<"K_auron::doCalc()\tK_auron schduled to fire this iteration:\t[TID, dEstimatedTaskTime] :\t[" <<time_class::getTime() <<", " <<dEstimatedTaskTime <<"]");
 		time_class::addTaskInPresentTimeIteration( this );
+		#if DEBUG_PRINT_LEVEL>3
 		time_class::printAllElementsOf_pWorkTaskQueue();
+		#endif
 	}
 }
 
@@ -1090,14 +1096,16 @@ void K_auron::doCalculation()
 
 
 
-inline void K_auron::estimateFiringTimes(double dTimeInstant_arg)
+inline void K_auron::estimateFiringTimes(const double& dTimeInstant_arg)
 { //{
 	if( dAktivitetsVariabel > FIRING_THRESHOLD ){
-		static double dPeriodInverse_static_local;
 
 		// Berenger dPeriodINVERSE og dChangeInPeriodINVERSE:
 		// dLastCalculatedPeriod gir synaptisk overføring. Perioden er uavhengig av spatiotemporal effekts. Dermed: +A simulerer en refraction time på A tidssteg. ref:asdf5415@neuroElement.cpp
 		dLastCalculatedPeriod  = (( log( dAktivitetsVariabel / (dAktivitetsVariabel - (double)FIRING_THRESHOLD) ) / (double)LEAKAGE_CONST)) 	;	//							+1 	
+#if 0 // kommenterer ut 13.03 Vettafaen om eg trenger det..
+		static double dPeriodInverse_static_local;
+
 		dPeriodInverse_static_local = 1/dLastCalculatedPeriod;
 		dChangeInPeriodINVERSE = dPeriodInverse_static_local - dPeriodINVERSE;
 		dPeriodINVERSE = dPeriodInverse_static_local;
@@ -1107,6 +1115,7 @@ inline void K_auron::estimateFiringTimes(double dTimeInstant_arg)
 				<<"estimatedPeriod(): \t[t_0, K, v_0]: \t[" <<dStartOfTimeWindow <<", " <<dAktivitetsVariabel <<", " <<dDepolAtStartOfTimeWindow <<"]:\t"
 				<<"\t\tand finally getCalculateDepol(" <<dTimeInstant_arg <<") = \e[33;1m" <<getCalculateDepol(dTimeInstant_arg) <<"\e[0;0m\n"
 				);
+#endif
 
 // TODO XXX Denne er diskret tid? Fra starten av denne iter?
 		// Oppdaterer dEstimatedTaskTime! 
@@ -1119,6 +1128,7 @@ inline void K_auron::estimateFiringTimes(double dTimeInstant_arg)
 
 		// Set period (close) to infty.
 		dLastCalculatedPeriod  = DBL_MAX;
+#if 0 // kommenterer ut 13.03 Trur ikkje eg trenger det til rapporten (først nyttig når syn.trans)
 		dChangeInPeriodINVERSE = -dPeriodINVERSE;
 		dPeriodINVERSE = 0;
 
@@ -1130,6 +1140,7 @@ inline void K_auron::estimateFiringTimes(double dTimeInstant_arg)
 			   	<<dEstimatedTaskTime	<<"]:\t"
 				<<"\t\tand finally getCalculateDepol(" <<dTimeInstant_arg <<") = \e[31;0m" <<getCalculateDepol(dTimeInstant_arg) <<"\e[0;0m\n"
 				);
+#endif
 
 		//exit(0);
 	} //slutt if( dAktivitetsVariabel > FIRING_THRESHOLD ){X}else{ ... }
@@ -1238,13 +1249,13 @@ void K_sensory_auron::updateAllSensorAurons()
 	// Iterate through list pAllSensoryAurons and call updateAllSensorAurons() for each element
 	for( std::list<K_sensory_auron*>::iterator sensorIter = pAllSensoryAurons.begin(); sensorIter != pAllSensoryAurons.end(); sensorIter++)
 	{
-		(*sensorIter)->updateSensorValue();
+		(*sensorIter)->updateSensoryValue();
 	}
 } //}1
 
-inline void K_sensory_auron::updateSensorValue()
+inline void K_sensory_auron::updateSensoryValue()
 { //{
-	DEBUG_L3(<<"K_sensory_auron::updateSensorValue()");
+	DEBUG_L3(<<"K_sensory_auron::updateSensoryValue()");
 
 	// Update sensed value. Two variables to find the change in sensed value
 	dLastSensedValue = dSensedValue;
@@ -1264,11 +1275,11 @@ inline void s_sensor_auron::updateAllSensorAurons()
 	// Iterate through list pAllSensoryAurons and call updateAllSensorAurons() for each element
 	for( std::list<s_sensor_auron*>::iterator sensorIter = pAllSensoryAurons.begin() 	; 	sensorIter != pAllSensoryAurons.end() ; sensorIter++)
 	{
-		(*sensorIter)->updateSensorValue();
+		(*sensorIter)->updateSensoryValue();
 	}
 } //}
 
-inline void s_sensor_auron::updateSensorValue()
+inline void s_sensor_auron::updateSensoryValue()
 { //{
 //	static double sdLastValue = 0;
 //	static double sdValue = 0;
@@ -1353,7 +1364,7 @@ inline double K_sensory_auron::recalculateKappa()
 	#if 0
 	static double dOldActivityVariable;
 	dOldActivityVariable = dAktivitetsVariabel;
-	updateSensorValue();
+	updateSensoryValue();
 	// Er dette rett :
 	return dAktivitetsVariabel-dOldActivityVariable;
 	#endif
@@ -1462,14 +1473,6 @@ const double K_synapse::getTotalTransmission()
 	return (1-2*bInhibitoryEffect)*(pPreNodeAuron->dPeriodINVERSE)*dSynapticWeight;
 }
 
-inline void K_synapse::print()
-{ //{
- 	cout<<"Synapse mellom " <<pPreNodeAuron->sNavn <<" og " <<(pPostNodeDendrite->pElementOfAuron)->sNavn 
-		<<" med W_ij = " <<dSynapticWeight 
-		<<" og presyn. periodeINVERSE: "  <<pPreNodeAuron->dChangeInPeriodINVERSE <<" \t Gir (total) overføring: " <<getTotalTransmission() 
-		<<endl;
-
-} //}
 
 
 // vim:fdm=marker:fmr=//{,//}

@@ -52,10 +52,15 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 
 // Defines whether KANN(kappa M-ANN) is used, and if SANN(NIM-ANN) is used for next compilation of auroSim
 #define KANN 1
-#define SANN 1
+#define SANN 0
 
-#define DEFAULT_NUMBERofTIMESTEPS 1000 				 // default temporal resolution, each forcing funtion period.
-#define DEFAULT_NUMBER_OF_SENSORY_FUNCTION_PERIODS 1 // number of forcing funtion periods.
+// Debug print level and the printing of time:
+#define DEFAULT_NUMBER_OF_SENSORY_FUNCTION_PERIODS 1.5 // number of forcing funtion periods.
+#define DEFAULT_NUMBERofTIMESTEPS 	1000000 				 // default temporal resolution, each forcing funtion period.
+
+#define PRINT_TIME_ITERATION 		true  //means [true]
+#define PRINT_TIME_EVERY_Nth_ITER 	20000
+
 
 // Define the form of K-recalculation-curve (appendix B3 in the technical report)
 #define RECALC_c1 100 
@@ -73,26 +78,25 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 #define FIRING_THRESHOLD 1000.00000
 
 
-#define OCTAVE_SLEEP_AFTER_PLOTTING 0
-
-#define PRINT_TIME_ITERATION 1
-#define PRINT_TIME_EVERY_Nth_ITER 1
 
 
 /*****************************
 ** 	Set which var. is logged**
 *****************************/
-#define LOGG_DEPOL true 		// Defines whether depolarization is to be logged by the auroSim
-#define LOGG_KAPPA true// ... same for Kappa
+#define LOG_DEPOL true 		// Defines whether depolarization is to be logged by the auroSim
+#define LOGG_KAPPA false 		// ... same for Kappa
 #define LOGG_RESOLUTION 10000
+
+#define OCTAVE_SLEEP_AFTER_PLOTTING 0
 
 
 /*************************
 ** 	Debug print level 	**
 *************************/
-#define DEBUG_PRINT_LEVEL 		2 	// Debug print level: 0 means that no additional information is printed.
+#define DEBUG_PRINT_LEVEL 			0 	// Debug print level: 0 means that no additional information is printed.
 #define DEBUG_PRINT_DESCTRUCTOR 	0 	// Print in destructors if this is set to true (=1)
 #define DEBUG_PRINT_CONSTRUCTOR 	0 	// Print in constructors if this is set to true (=1)
+
 
 /***** DEBUG_L?(<<text): prints [text] if DEBUG_PRINT_LEVEL is ? or larger *******/  
 /***  :  ***/

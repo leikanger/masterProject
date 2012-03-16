@@ -30,76 +30,45 @@
 #include "../andreKildefiler/main.h"
 #include "../neuroElements/synapse.h"
 #include "../neuroElements/auron.h"
-//#include "../andreKildefiler/aktivitetsObj.h"
 
-
-//Deklarasjoner:
+// Declarations:
 class i_synapse;
 class s_synapse;
 class K_synapse;
 class i_auron;
 class s_auron;
 class K_auron;
-
 class s_axon;
 
-/* <<interface>> */
+/* abstract class */
 class i_axon : public timeInterface{
-	// XXX XXX XXX Utsetter doCalculation() for alle axon: (definerer den til å gjøre ingenting her for å unngå at klassene under blir abstract..)
-	virtual void doCalculation() {}
+	// Abstract because doTask() have not been overloaded.
+	virtual void doCalculation(){} // To declare avoid that derivatives need to define doCalculation(). Not needed for axon.
 	
-	// Desse overlagres i de modell-speisfikke elementa (s_axon), for å gi mulighet til å kalle modellspesifikke funksjoner og variabler for s_axon.
-	i_auron* pElementOfAuron; 		 // Flytta til i_axon
-	std::list<i_synapse*> pUtSynapser; // Flytta til i_axon
-
-//	protected:
-//	inline void doTask();
+	// The i_auron* is overloaded with a pointer to objects of classes derived from i_auron (s_auron or K_auron).
+	// -same for the synapses.
+	i_auron* pElementOfAuron;
+	std::list<i_synapse*> pUtSynapser;
 
 	public:
 	i_axon(std::string sKlasseNavn /*="dendrite"*/);
 	~i_axon();
-	
-	
-	
-	//friend std::ostream & operator<< (std::ostream & ut, axon );
-	friend std::ostream & operator<< (std::ostream & ut, s_axon* );
-	friend int main(int, char**); //TODO SLETT
-
-	friend class i_synapse;
-	friend class i_auron;
-	friend class i_dendrite;
-
-	friend class K_auron;
-	friend class K_synapse;
-	
-
-	friend class s_synapse;
-	friend class s_axon;
-	friend class s_auron;
-	friend class s_dendrite;
 };
 
 class s_axon : public i_axon{
-	inline void doTask();
+	inline void doTask(); // Defined in neuroElements.cpp
 
-	// Desse overlagres i de modell-speisfikke elementa (s_axon), for å gi mulighet til å kalle modellspesifikke funksjoner og variabler for s_axon.
+	// Overloaded from the i_auron* pElementOfAuron and list<i_synapse*> pOutputAxon from i_axon:
 	s_auron* pElementOfAuron;
 	std::list<s_synapse*> pUtSynapser;
 
 	public:
-	/**************************************************
-	****     axon::axon()  - constructor           ****
-	****        -pElementOfAuron(pAuronArg)        ****
-	****        -timeInterface("axon")              ****
-	****                                           ****
-	**************************************************/
 	s_axon(s_auron* pAuronArg);
 	~s_axon();
 
-	friend class i_auron;
 	friend class s_synapse;
+
 	friend std::ostream & operator<< (std::ostream & ut, s_axon* );
-	friend int main(int, char**);
 };
 
 

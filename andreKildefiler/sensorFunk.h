@@ -88,13 +88,14 @@ inline double sensorFunk_TEST1_s2()
 	else
 		return 0.5*FIRING_THRESHOLD; //Dette gir samme resultat som 0. Tester det..
 }
+/*
 inline double sensorFunk_TEST1_s3()
 {
 	if( 4800 < time_class::getTime() < 5100 )
 		return 1.5*FIRING_THRESHOLD;
 	else
 		return 0.1*FIRING_THRESHOLD;
-}
+} */
 inline double sensorFunk_TEST1_s4()
 {
 	return 1.3*FIRING_THRESHOLD;
