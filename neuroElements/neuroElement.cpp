@@ -1077,6 +1077,8 @@ void K_auron::doCalculation()
 	estimateFiringTimes(time_class::getTime()); // doCalculation() skjer alltid først i kvar iter. 		id:est490@neuroElement.cpp
 	//estimateFiringTimes(); //Bruker ulTime
 
+	writeDepolToLog();
+
 	// XXX Dette er nytt!
 	// FETT! Dette gjør at størrelsen på comp. time step bare gir kor ofte kappa skal oppdateres. Fyring, og init av time window kan skje heilt separat fra dette!
 	// Sjekker om den skal fyre denne iter: (før neste iter)
@@ -1146,100 +1148,59 @@ inline void K_auron::estimateFiringTimes(const double& dTimeInstant_arg)
 	} //slutt if( dAktivitetsVariabel > FIRING_THRESHOLD ){X}else{ ... }
 } //}
 
-// Gammel variant, uten float-tid: KOMMENTERT UT!
-#if 0
+// Ny variant, uten float-tid:
 inline void K_auron::estimateFiringTimes()
 { //{
-	//cout<<"\n\nGAMMEL K_auron::estimateFiringTimes(). IKKJE BRUK!\n[\e[31mTERMINERER\e[0m]\n\n\n\n\n"; exit(0);
-	 
-	//***********************************************
-	//*  Beregn estimert fyringstid:   				*
-	//***********************************************
-	if( dAktivitetsVariabel > FIRING_THRESHOLD){
-		DEBUG_L1(<<"FEIL plass. Ikkje fiksa, heilt..\nasdf234@neuroElement.cpp\nTERMINERER");
-		exit(EXIT_FAILURE);
-
-		static double dPeriodInverse_static_local;
+	if( dAktivitetsVariabel > FIRING_THRESHOLD ){
 
 		// Berenger dPeriodINVERSE og dChangeInPeriodINVERSE:
 		// dLastCalculatedPeriod gir synaptisk overføring. Perioden er uavhengig av spatiotemporal effekts. Dermed: +A simulerer en refraction time på A tidssteg. ref:asdf5415@neuroElement.cpp
 		dLastCalculatedPeriod  = (( log( dAktivitetsVariabel / (dAktivitetsVariabel - (double)FIRING_THRESHOLD) ) / (double)LEAKAGE_CONST)) 	;	//							+1 	
+#if 0 // kommenterer ut 13.03 Vettafaen om eg trenger det..
+		static double dPeriodInverse_static_local;
+
 		dPeriodInverse_static_local = 1/dLastCalculatedPeriod;
 		dChangeInPeriodINVERSE = dPeriodInverse_static_local - dPeriodINVERSE;
 		dPeriodINVERSE = dPeriodInverse_static_local;
 
-		double tempDouble = getCalculateDepol(); //For tid: ulTime
-		cout<<"estimatedPeriod(): \t[t_0, K, v_0]: \t[" <<dStartOfTimeWindow <<", " <<dAktivitetsVariabel <<", " <<dDepolAtStartOfTimeWindow <<"]:\t\e[1;39m" <<dLastCalculatedPeriod <<"\e[0;0m"
-			<<"\t\tog tilslutt getCalculateDepol(ulTime): \e[1;39m" <<tempDouble <<"\e[0;0m\n";
+		// Beregner v_0 og fyringstid P_d(K)
+		DEBUG_L3(
+				<<"estimatedPeriod(): \t[t_0, K, v_0]: \t[" <<dStartOfTimeWindow <<", " <<dAktivitetsVariabel <<", " <<dDepolAtStartOfTimeWindow <<"]:\t"
+				<<"\t\tand finally getCalculateDepol(" <<time_class::getTime() <<") = \e[33;1m" <<getCalculateDepol(time_class::getTime()) <<"\e[0;0m\n"
+				);
+#endif
 
-		dEstimatedTaskTime = ( dStartOfTimeWindow 	+ log( (dAktivitetsVariabel-dDepolAtStartOfTimeWindow)/(dAktivitetsVariabel-(double)FIRING_THRESHOLD) )   /  ((double)ALPHA/(double)ulTemporalAccuracyPerSensoryFunctionPeriod));
+// TODO XXX Denne er diskret tid? Fra starten av denne iter?
+		// Oppdaterer dEstimatedTaskTime! 
+		dEstimatedTaskTime = ( dStartOfTimeWindow 	+ log( (dAktivitetsVariabel-dDepolAtStartOfTimeWindow)/(dAktivitetsVariabel-(double)FIRING_THRESHOLD) )   / (double)LEAKAGE_CONST );
+		//DEBUG_L2(<<"\t\t\e[32mdEstimatedTaskTime\e[0m for neuron " <<sNavn <<", time:" <<time_class::getTime() <<" = \e[39;1m" <<dEstimatedTaskTime <<"\e[0;0m");
 
-		// GÅR HER UT IFRA AT Kappa endres kvar iterasjon! Seier at [no] er samme som dStartOfTimeWindow: dette er bare rett dersom vi oppdaterer start of time window kvar iter!
-																										
-		/*
-		* 	Her er eit problem:
-		* 		Refraction time: Dersom vi bare legger til en, så vil oppladning starte umiddelbart. Når kappa blir endra, så vil oppladninga (som starter for tidlig) være det einaste som er viktig. Dette skaper problemer.
-		* 		XXX XXX XXX
-		*       ? ? ? ? ? ? 
-		*/
-
-	
-		// Propagerer aktivitetsnivå. Gjør umiddelbart doTransmission(). Denne tar hand om spatiotemporale effekter!
-		doTransmission();
-
-		// For else-biten når det skjer (sjå ned)
-		bAuronHarPropagertAtDenErInaktiv = false;
-
-	}else{
-		cout<<"\n\nadf52908i@neuroElement.cpp \e[33mIkkje implementert ferdig estimatedPeriod(dTime) for K<T\e[0m\n\n";
+	}else{ // Kommer hit dersom dAktivitetsVariabel <= FIRING_THRESHOLD
+		//cout<<"\n\nadf52908i@neuroElement.cpp \e[33mIkkje implementert ferdig estimatedPeriod(dTime) for K<T\e[0m\n\n";
+		//exit(EXIT_FAILURE);
 
 		// Set period (close) to infty.
 		dLastCalculatedPeriod  = DBL_MAX;
+#if 0 // kommenterer ut 13.03 Trur ikkje eg trenger det til rapporten (først nyttig når syn.trans)
 		dChangeInPeriodINVERSE = -dPeriodINVERSE;
 		dPeriodINVERSE = 0;
 
 		// Set estimated firing time to the maximal value(ca. 10^308)
 		dEstimatedTaskTime = DBL_MAX;
 
-		//exit(0);
-
-
-
-		if(time_class::getTime() == 0){return;}
-		cout<<"estimateFiringTimes() når \tK < T   (id: asdf23r4)\t" <<sNavn <<"\n";
-		cout<<"\n\nadf52908i@neuroElement.cpp Ikkje implementert estimatedPeriod(dTime) for K<T\n\e[31mAVLUTTER\e[0m\n\n"; 
-		exit(EXIT_FAILURE); //XXX MERK! EXIT()!
-		//{
-
-
-		// setter planlagt task time til no, slik at den aldri vil fyre pga. dEstimatedTaskTime. (når den sjekker nest gang, så vil [no] være i fortida..)
-		// TODO TODO TODO TODO TODO TODO UTESTET, men å sette den til null(som før) vil ikkje gå bra!
-//		dEstimatedTaskTime = 1E99; //(double)time_class::getTime();
-		
-		// Setter dLastCalculatedPeriod, dChangeInPeriodINVERSE, dPeriodINVERSE.
-		dLastCalculatedPeriod = 0; 	// Er dette greit?    SKUMMELT! (men funker).
-		dChangeInPeriodINVERSE = -dPeriodINVERSE; 
-		dPeriodINVERSE = 0;
-		
-		#if DEBUG_PRINT_LEVEL > 4
-			cout<<"Kappa er mindre enn Tau. Setter dEstimatedTaskTime = [no] (vil ikkje ha noko å sei for fyringa).\n";
-			cerr<<"Setter [dPeriodINVERSE, dPeriodInverse_static_local, dChangeInPeriodINVERSE, dLastCalculatedPeriod] til [ "
-			 	<<dPeriodINVERSE <<","
-				<<dChangeInPeriodINVERSE <<", "
-				<<dLastCalculatedPeriod <<" ]\n ";
-		#endif
-		
-		if( !bAuronHarPropagertAtDenErInaktiv )
-		{
-			// Propagerer resultatet:
-			doTransmission();
-	 		
-			bAuronHarPropagertAtDenErInaktiv = true;
-		}
-		//}
-	}
-} //}
+		DEBUG_L2(
+				<<"estimatedPeriod(): \t[t_0, K, v_0, t^f]: \t[" <<dStartOfTimeWindow <<", " <<dAktivitetsVariabel <<", " <<dDepolAtStartOfTimeWindow <<", "
+			   	<<dEstimatedTaskTime	<<"]:\t"
+				<<"\t\tand finally getCalculateDepol(" <<time_class::getTime() <<") = \e[31;0m" <<getCalculateDepol() <<"\e[0;0m\n"
+				);
 #endif
+
+		//exit(0);
+	} //slutt if( dAktivitetsVariabel > FIRING_THRESHOLD ){X}else{ ... }
+} //}
+
+
+
 	
 /**************************************************************
 ****** 		K_sensory_auron - update sensor funktions  	******* 			XXX ok XXX

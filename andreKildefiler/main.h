@@ -93,7 +93,7 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 /*************************
 ** 	Debug print level 	**
 *************************/
-#define DEBUG_PRINT_LEVEL 			0 	// Debug print level: 0 means that no additional information is printed.
+#define DEBUG_PRINT_LEVEL 			1 	// Debug print level: 0 means that no additional information is printed.
 #define DEBUG_PRINT_DESCTRUCTOR 	0 	// Print in destructors if this is set to true (=1)
 #define DEBUG_PRINT_CONSTRUCTOR 	0 	// Print in constructors if this is set to true (=1)
 
