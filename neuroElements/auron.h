@@ -339,7 +339,7 @@ class K_auron : public i_auron
 
 
 	protected:
-	inline void changeKappa_derivedArg( const double& );
+	inline void changeKappa_diffArg( const double& );
 	inline void changeKappa_absArg( const double&);
 
 	// Sjå @asdf1515

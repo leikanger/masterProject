@@ -234,9 +234,9 @@ K_auron::K_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartKappa_arg /*
 	//p OutputAxon = new K_axon(this);
  	pInputDendrite = new K_dendrite(this);
 
-	// Initialiserer aktivitetsvariablene kappa til å være verdien dStartKappa_arg: Lagrer dit, så kaller eg changeKappa_derivedArg(0) for å få gjort det som skal gjøres. Trenger at K>T når dette gjøres..
+	// Initialiserer aktivitetsvariablene kappa til å være verdien dStartKappa_arg: Lagrer dit, så kaller eg changeKappa_diffArg(0) for å få gjort det som skal gjøres. Trenger at K>T når dette gjøres..
 	dAktivitetsVariabel = dStartKappa_arg;
-	changeKappa_derivedArg( 0 );
+	changeKappa_diffArg( 0 );
 
 	// Initierer første 'time window':
 	dStartOfTimeWindow = (double)time_class::getTime();
@@ -643,10 +643,10 @@ inline void K_dendrite::newInputSignal( double dNewSignal_arg )
 
 	// TODO TODO TODO ESTIMER Tidspunk for overføring. No setter eg bare oppdateringstidsspunkt for kappa til starten av tidsiterasjonen.. TODO TODO TODO
 	pElementOfAuron->dStartOfTimeWindow = (double)time_class::getTime();
-	pElementOfAuron->changeKappa_derivedArg( dNewSignal_arg );
+	pElementOfAuron->changeKappa_diffArg( dNewSignal_arg );
 } //}2
 
-inline void K_auron::changeKappa_derivedArg( const double& dInputDerived_arg)//int derivedInput_arg )
+inline void K_auron::changeKappa_diffArg( const double& dInputDerived_arg)//int derivedInput_arg )
 {
 	// Arg legges til Kappa no, og effektene av endringa kalkuleres i .doCalculation().
 	dChangeInKappa_this_iter +=  dInputDerived_arg ;
@@ -662,7 +662,7 @@ inline void K_auron::changeKappa_derivedArg( const double& dInputDerived_arg)//i
 
 //TODO TODO TODO Her er en debug-sak, som ikkje har innvirkning på resten av programmet:
 //	if( getCalculateDepol() > FIRING_THRESHOLD ){
-//		cerr<<"K_auron::changeKappa_derivedArg()\tFEIL: v(t)>Tau :\tv(t)=" <<getCalculateDepol() <<endl ;
+//		cerr<<"K_auron::changeKappa_diffArg()\tFEIL: v(t)>Tau :\tv(t)=" <<getCalculateDepol() <<endl ;
 //	}
 //TODO TODO TODO ... til hit.
 
@@ -714,7 +714,7 @@ inline void s_dendrite::newInputSignal( double dNewSignal_arg )
 // VIKTIG123@neuroElement.cpp :  LEAKAGE_CONST for SANN: Sjå LEAKAGE_CONST under..
 
 	// Bli heilt sikker på LEAKAGE_CONST: XXX XXX XXX LEAKAGE_CONST XXX XXX xxx XXX
-	pElementOfAuron->dAktivitetsVariabel +=  dNewSignal_arg * LEAKAGE_CONST;  //SJEKKA FOR MOTSATT: at K_auron::changeKappa_derivedArg(..) delte på \alpha før endring av kappa. Dette vil (teoretisk) gi samme resultat. 
+	pElementOfAuron->dAktivitetsVariabel +=  dNewSignal_arg * LEAKAGE_CONST;  //SJEKKA FOR MOTSATT: at K_auron::changeKappa_diffArg(..) delte på \alpha før endring av kappa. Dette vil (teoretisk) gi samme resultat. 
 																		// Eg har ikkje gjort det om, fordi eg allerede har gjort alle forsøka til artikkelen med slik det er no..
 										// TODO TODO TODO FIKS DETTE: SJå asdf1235 (over)
 
@@ -1262,8 +1262,8 @@ inline void K_sensory_auron::updateSensoryValue()
 	dSensedValue =  (*pSensorFunction)();
 
 	// Save time for initiation of new time window(define this to happen at start of iteration for sensory aurons)
-	dStartOfNextTimeWindow = (double)time_class::getTime(); // Set it to [now] before result is computed in changeKappa_derivedArg(-)
-	changeKappa_derivedArg(   (dSensedValue-dLastSensedValue) );  
+	dStartOfNextTimeWindow = (double)time_class::getTime(); // Set it to [now] before result is computed in changeKappa_diffArg(-)
+	changeKappa_diffArg(   (dSensedValue-dLastSensedValue) );  
 } //}
 	
 
