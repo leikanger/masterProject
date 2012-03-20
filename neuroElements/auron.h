@@ -490,7 +490,7 @@ class K_auron : public i_auron
 
 class s_sensor_auron : public s_auron{
 	// Function pointer:
-	double (*pSensorFunction)(void);
+	const double& (*pSensorFunction)(void);
 
 	static std::list<s_sensor_auron*> pAllSensoryAurons;
 
@@ -498,7 +498,7 @@ class s_sensor_auron : public s_auron{
 	static void updateAllSensorAurons();
 	
 	public:
-		s_sensor_auron( std::string sNavn_Arg ,   double (*pFunk_arg)(void) );
+		s_sensor_auron( std::string sNavn_Arg ,  const double& (*pFunk_arg)(void) );
 
 		// To be used for debugging.
 		double getSensedValue()
@@ -511,7 +511,7 @@ class s_sensor_auron : public s_auron{
 
 class K_sensory_auron : public K_auron{
 	// Function pointer:
-	double (*pSensorFunction)(void);
+	const double& (*pSensorFunction)(void);
 
 	// Need two values to find the change(for calculation of edge transmisison)
 	double dSensedValue;
@@ -536,7 +536,7 @@ class K_sensory_auron : public K_auron{
 
 	public:
 		// Constructor take funtion pointer as argument
-		K_sensory_auron( std::string sNavn_Arg ,   double (*pFunk_arg)(void) );
+		K_sensory_auron( std::string sNavn_Arg ,  const double& (*pFunk_arg)(void) );
 
 		// To be used for debugging.
 		double getSensedValue()

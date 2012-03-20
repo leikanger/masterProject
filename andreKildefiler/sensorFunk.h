@@ -7,23 +7,45 @@
 // 	Experiment 1 in the report considers staticSensoryFunc()
 
 // Experiment 1
-inline double staticSensoryFunc()
+inline const double& staticSensoryFunc()
 {
-	return 1.100000000000*(double)FIRING_THRESHOLD ;
+	// Optimalization: Because this funtion is called every time step, optimalization is imporant.
+	// Instead of making a new variable and returning that var.'s value, make a static variable and returt the reference to it.
+	static double retVal;
+	retVal = 1.100000000000*(double)FIRING_THRESHOLD ;
+	return retVal;
 }
 // Experiment 2
-inline double dynamicSensoryFunc()
+inline const double& dynamicSensoryFunc()
 {
-	return (2.1+sin( 2*PI * ( (double)time_class::getTime() / ((double)ulTemporalAccuracyPerSensoryFunctionPeriod) ))   )* (double)FIRING_THRESHOLD;
+//	return (2.1+sin( 2*PI * ( (double)time_class::getTime() / ((double)ulTemporalAccuracyPerSensoryFunctionPeriod) ))   )* (double)FIRING_THRESHOLD;
+// ELLER:
+	static double retVal;
+	retVal = (2.1+sin( 2*PI * ( (double)time_class::getTime() / ((double)ulTemporalAccuracyPerSensoryFunctionPeriod) ))   )* (double)FIRING_THRESHOLD;
+	return retVal;
 }
 // Used to illustrate the sensor funtion in sec. 3.4.1 The Sensory Function
-inline double sensoryFunctionExample()
+inline const double& sensoryFunctionExample()
 {
+	static double retVal;
 	if( time_class::getTime() <2000)
-	 	return  (2*FIRING_THRESHOLD *  (1 - cos( 1*3.14*(float)time_class::getTime()/1000 )) );
+	 	retVal = (2*FIRING_THRESHOLD *  (1 - cos( 1*3.14*(float)time_class::getTime()/1000 )) );
 	else 
-	 	return  (FIRING_THRESHOLD *  (1 - cos( 2*3.14*(float)time_class::getTime()/1000 )) );
+	 	retVal = (FIRING_THRESHOLD *  (1 - cos( 2*3.14*(float)time_class::getTime()/1000 )) );
+
+	return retVal;
 }
+
+
+// Denne skaper ikkje større arbeidsmengde for SANN(motsatt av antatt). Dette er nok fordi SANN ikkje får inn synaptisk input enda, men beregner input som KANN gjør det(ved hjelp av sensory funtion ca= kappa)
+inline const double& dynamicSensoryFuncWith10Xactivity()
+{
+	static double retVal;
+	retVal = 10* dynamicSensoryFunc();
+	return retVal;
+}
+
+
 
 inline double staticSensoryFuncWithHighActivity(){
 	return 3.0*(double)FIRING_THRESHOLD;

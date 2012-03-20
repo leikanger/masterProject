@@ -52,7 +52,7 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 
 // Defines whether KANN(kappa M-ANN) is used, and if SANN(NIM-ANN) is used for next compilation of auroSim
 #define KANN 1
-#define SANN 0
+#define SANN 1
 
 // Debug print level and the printing of time:
 #define DEFAULT_NUMBER_OF_SENSORY_FUNCTION_PERIODS 1.5 // number of forcing funtion periods.

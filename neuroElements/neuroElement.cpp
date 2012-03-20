@@ -308,7 +308,7 @@ K_auron::~K_auron()
 }
 //}2
 //{2 *** K_sensory_auron
-K_sensory_auron::K_sensory_auron( std::string sNavn_Arg , double (*pFunk_arg)(void) ) : K_auron(sNavn_Arg, (*pFunk_arg)() ) //Setter init-K for K_auron til returen fra (pFunk_arg)()..
+K_sensory_auron::K_sensory_auron( std::string sNavn_Arg , const double& (*pFunk_arg)(void) ) : K_auron(sNavn_Arg, (*pFunk_arg)() ) //Setter init-K for K_auron til returen fra (pFunk_arg)()..
 {
 	// Assign the sensor function:
 	pSensorFunction = pFunk_arg;
@@ -327,7 +327,7 @@ K_sensory_auron::K_sensory_auron( std::string sNavn_Arg , double (*pFunk_arg)(vo
 }
 //}2
 //{2 *** s_sensor_auron
-s_sensor_auron::s_sensor_auron( std::string sNavn_Arg , double (*pFunk_arg)(void) ) : s_auron(sNavn_Arg)
+s_sensor_auron::s_sensor_auron( std::string sNavn_Arg , const double& (*pFunk_arg)(void) ) : s_auron(sNavn_Arg)
 {
 	// Assign the sensor function:
 	pSensorFunction = pFunk_arg;
@@ -978,8 +978,6 @@ void time_class::doTask()
 	// Push self-pointer to back of pWorkTaskQueue:
 	pWorkTaskQueue.push_back(this);	
 
-	// Iterate t_n:
-	ulTime++;
 
 	/*************************************************
 	* Push scheduled tasks to back of pWorkTaskQueue *  	DEPRECATED
@@ -1021,6 +1019,8 @@ void time_class::doTask()
 	doCalculation();
 
 
+	// Iterate t_n:
+	ulTime++;
 
 }//}1
 
@@ -1074,8 +1074,8 @@ void K_auron::doCalculation()
 	dChangeInKappa_this_iter = 0;
 
 	// Beregner periode og estimert fyringstid for neste spike:
-	estimateFiringTimes(time_class::getTime()); // doCalculation() skjer alltid først i kvar iter. 		id:est490@neuroElement.cpp
-	//estimateFiringTimes(); //Bruker ulTime
+	//estimateFiringTimes(time_class::getTime()); // doCalculation() skjer alltid først i kvar iter. 		id:est490@neuroElement.cpp
+	estimateFiringTimes(); //Bruker ulTime
 
 	writeDepolToLog();
 
@@ -1084,7 +1084,7 @@ void K_auron::doCalculation()
 	// Sjekker om den skal fyre denne iter: (før neste iter)
 	// dEstimatedTaskTime RUNDES ALLTID NED!! Skal ikkje sjekke om den er over eller under halvegs, bare kva steg den har starta på..
 
-	if( dEstimatedTaskTime < time_class::getTime()+1 ){ //TODO
+	if( dEstimatedTaskTime < time_class::getTime()+2 ){ //TODO
 		DEBUG_L4(<<"K_auron::doCalc()\tK_auron schduled to fire this iteration:\t[TID, dEstimatedTaskTime] :\t[" <<time_class::getTime() <<", " <<dEstimatedTaskTime <<"]");
 		time_class::addTaskInPresentTimeIteration( this );
 		#if DEBUG_PRINT_LEVEL>3

@@ -241,40 +241,37 @@ int main(int argc, char *argv[])
 		cout<<"Could not remove old log files. Please do this manually to avoid plotting old results.\n";
 
 
-	// The experiments:
 
-	#if 1 // Tests for a single sensory neuron:
-		// Experiment 1:
-		#if 0
-			new K_sensory_auron("sKN", &staticSensoryFunc);
-			new s_sensor_auron("sSN", &staticSensoryFunc);
+
+	// Tests for a single sensory neuron:
+	// Experiment 1:
+	#if 0
+		new K_sensory_auron("sKN", &staticSensoryFunc);
+		new s_sensor_auron("sSN", &staticSensoryFunc);
+	#endif
+
+	// Experiment 2:
+	#if 1
+		#if KANN
+		new K_sensory_auron("dKN", &dynamicSensoryFunc);
 		#endif
-
-		// Experiment 2:
-		#if 1
-			#if KANN
-			new K_sensory_auron("dKN", &dynamicSensoryFunc);
-			#endif
-			#if SANN
-			new s_sensor_auron("dSN", &dynamicSensoryFunc);
-			#endif
+		#if SANN
+		new s_sensor_auron("dSN", &dynamicSensoryFunc);
 		#endif
+	#endif
 
-		// Illustration of sensory funtion (fig. 3.6 in the report when auroSim is called with arguments [./auroSim.out -r1000 -n4] )
-		//new K_sensory_auron("dKN2", &sensoryFunctionExample);
-	#else
-
+	// Illustration of sensory funtion (fig. 3.6 in the report when auroSim is called with arguments [./auroSim.out -r1000 -n4] )
+	#if 0
+		new K_sensory_auron("dKN2", &sensoryFunctionExample);
+	#endif
+			
 
 
 			// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO RENSET tekst til hit!
-
 // Lage ANN fra ei kant-matrise, og evt. send inn en vektor med vilkårlig antall auron (mindre enn dim(matrisa)). Kan også sende inn null auron. Vektoren med auron-peikere brukes for å la nokre auron være sensor-auron!
 #if 0
 	cout<<"\n\n\n\tFORTSETTER\n\n";
-
-
 	cout<<"Try to construct ANN with K_auron-matrix:\n";
-
 		// TRENGER IKKJE MATRISE: bruk heller std::vector<K_auron*>
 	cout<<"\tInitialize K_auron*-vector:\n";
 		std::vector<K_auron*> AlleAuron(3);
@@ -285,18 +282,12 @@ int main(int argc, char *argv[])
 		QuadraticMatrix<double> KMat(3);
 		KMat(0,1) = 50;
 		KMat(2,1) = -50;
-
 	cout<<"\tInitialize ANN from K_auron*-vector and dEdgeMatrix:\n";
 		ANN<K_auron> Ktest2(KMat, AlleAuron);
-
 	cerr<<"\n\nSkriver ut kant-matrise:\n";
 		Ktest2.printEdgeMatrix();
-
 	cerr<<"OK\n";
 #endif	
-
-	
-	#endif //Avslutter #if som starter over 1-aurons-testen (dette over er else..)
 
 //{ KOMMENTERT UT
 //  BARE KAPPA:
