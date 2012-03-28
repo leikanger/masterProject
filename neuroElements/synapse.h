@@ -45,7 +45,8 @@ class K_auron;
 class i_synapse : public timeInterface{
 
 	// virtual inline void doTask() =0;   -- i_synapse remains abstract.
-	virtual void doCalculation() {} 	//-- doCalculation() is not used for the synapse...yet. Might be important when synaptic plasticity is introduced.
+	void doCalculation() {} 	//-- doCalculation() is not used for the synapse...yet. 
+	//							// 		- Might be important when synaptic plasticity is introduced.
 	
 	protected:
 	// Defines whether the synapse is inhibitory or not
@@ -62,8 +63,11 @@ class i_synapse : public timeInterface{
 
 	public:
 	i_synapse(double dSynVekt_Arg, bool bInhibEffekt_Arg, std::string sKlasseNavn /*="synapse"*/ );
+	//virtual ~i_synapse(); // Define to be virtual. 
+	// Not implemented for i_synapse, but can not be pure virtual as it is called for derefereced i_auron pointers.
 	
-	double getSynWeight(){ return dSynapticWeight; }
+	double getSynWeight() const{ return dSynapticWeight; }
+	bool getInhibitoryEffect() const{return bInhibitoryEffect; }
 
 	friend std::ostream & operator<< (std::ostream & ut, i_axon* );
  	friend std::ostream & operator<< (std::ostream & ut, s_axon* pAxonArg );
@@ -103,12 +107,12 @@ class K_synapse : public i_synapse{
 
 	// For recalculation of Kappa(by the postsynaptic neuron)
 	double dPresynPeriodINVERSE;
-	const inline double getDerivedTransmission();
+	const inline double getDerivativeOfTransmission();
 	const inline double getTotalTransmission();
 
 	public:
 	K_synapse(K_auron*, K_auron*, double dSynVekt_Arg =1, bool bInhibEffekt_Arg =false) ;
-	~K_synapse();
+	virtual ~K_synapse();
 	
 	K_dendrite* getPostNodeDendrite(){
 		return pPostNodeDendrite;

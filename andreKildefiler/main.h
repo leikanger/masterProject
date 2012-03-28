@@ -44,11 +44,12 @@ extern unsigned long ulTemporalAccuracyPerSensoryFunctionPeriod;
 extern int nNumberOfSensorFunctionOscillations;
 extern unsigned long ulTotalNumberOfTimeSteps;
 extern unsigned uNumberOfIterationsBetweenWriteToLog;
+extern unsigned uNumberOfIterationsBetweenPrintToScreen;
 
 
 //Defines:
 
-#define GCC false // iomanip.h can not be used with compiler clang++. Define flag GCC when gcc is used: this enables the use of setprecision() for cout of floats.
+#define GCC true // iomanip.h can not be used with compiler clang++. Define flag GCC when gcc is used: this enables the use of setprecision() for cout of floats.
 
 // Defines whether KANN(kappa M-ANN) is used, and if SANN(NIM-ANN) is used for next compilation of auroSim
 #define KANN 1
@@ -59,7 +60,7 @@ extern unsigned uNumberOfIterationsBetweenWriteToLog;
 #define DEFAULT_NUMBERofTIMESTEPS 	1000000 				 // default temporal resolution, each forcing funtion period.
 
 #define PRINT_TIME_ITERATION 		true  //means [true]
-#define PRINT_TIME_EVERY_Nth_ITER 	20000
+#define NUMBER_OF_TIME_PRINTS 		150
 
 
 // Define the form of K-recalculation-curve (appendix B3 in the technical report)

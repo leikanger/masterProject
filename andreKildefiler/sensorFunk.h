@@ -45,6 +45,12 @@ inline const double& dynamicSensoryFuncWith10Xactivity()
 	return retVal;
 }
 
+inline const double& dynamicSensoryFunc3()
+{
+	static double retVal;
+	retVal = (1.5+sin( 2*PI * ( (double)time_class::getTime() / ((double)ulTemporalAccuracyPerSensoryFunctionPeriod) ))   )* (double)FIRING_THRESHOLD;
+	return retVal;
+}
 
 
 inline double staticSensoryFuncWithHighActivity(){
@@ -69,14 +75,16 @@ inline double sensorFunk1a()
 	#undef SVINGNINGS_AMP
 }
 
-inline double dynamicSensoryFunc2()
+inline const double& dynamicSensoryFunc2()
 {
+	static double retVal;
 	if( time_class::getTime() < 2000)
-		return (  FIRING_THRESHOLD * 1.50 * (1 - sin( 10* 3.14*(float)time_class::getTime()/1000 )) );
+		retVal = (  FIRING_THRESHOLD * 1.50 * (1 - sin( 10* 3.14*(float)time_class::getTime()/1000 )) );
 	else // At time t_n=2000, swith to an other period/amplitude.
 	{
-		return  (FIRING_THRESHOLD * 2 * 1.5 * (1 - cos( 1*3.14*(float)time_class::getTime()/1000 )) );
+		retVal = (FIRING_THRESHOLD * 2 * 1.5 * (1 - cos( 1*3.14*(float)time_class::getTime()/1000 )) );
 	}
+	return retVal;
 }
 
 inline double sensorFunk3a()

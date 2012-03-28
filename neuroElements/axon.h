@@ -48,10 +48,10 @@ class i_axon : public timeInterface{
 	// The i_auron* is overloaded with a pointer to objects of classes derived from i_auron (s_auron or K_auron).
 	// -same for the synapses.
 	i_auron* pElementOfAuron;
-	std::list<i_synapse*> pUtSynapser;
+	std::list<i_synapse*> pOutputSynapses;
 
 	public:
-	i_axon(std::string sKlasseNavn /*="dendrite"*/);
+	i_axon(std::string sKlasseNavn ="axon");
 	~i_axon();
 };
 
@@ -60,11 +60,11 @@ class s_axon : public i_axon{
 
 	// Overloaded from the i_auron* pElementOfAuron and list<i_synapse*> pOutputAxon from i_axon:
 	s_auron* pElementOfAuron;
-	std::list<s_synapse*> pUtSynapser;
+	std::list<s_synapse*> pOutputSynapses;
 
 	public:
 	s_axon(s_auron* pAuronArg);
-	~s_axon();
+	virtual ~s_axon();
 
 	friend class s_synapse;
 

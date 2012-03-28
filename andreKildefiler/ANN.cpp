@@ -76,10 +76,10 @@ template <> ANN<K_auron>::ANN(QuadraticMatrix<double> dEdgeMatrix, std::vector<K
 		tempAuronNavn<<"K" <<i;
 
 		if(pAuronVector[i]==0){
-			cout<<"K_matrix-vector does not contain the " <<i <<"'th element. Construct one.\n";
+			cout<<"K_matrix-vector does not contain the " <<i <<"'th element. \e[33mConstruct one\e[0m.\n";
 			addNodeInANN( new K_auron(tempAuronNavn.str() ) );
 		}else{
-			cout<<"Element nr. " <<i <<" contains an auron pointer. Assigns neuron " <<i <<" of ANN to be this auron.\n";
+			cout<<"Element nr. " <<i <<" contains an auron pointer. \e[34mAssigns\e[0m neuron " <<i <<" of ANN to be this auron.\n";
 			addNodeInANN( pAuronVector[i] );
 		}
 	}
@@ -93,7 +93,7 @@ template <> ANN<K_auron>::ANN(QuadraticMatrix<double> dEdgeMatrix, std::vector<K
 				new K_synapse(pAllNodesInANN[i1], pAllNodesInANN[i2], dEdgeMatrix(i1, i2), false); 
 				cout<<"Create excitatory synapse: [j,i] " <<i1<<", " <<i2 <<" = " <<dEdgeMatrix(i1, i2) <<endl;
 			}else if(dEdgeMatrix(i1, i2) < 0){
-				cout<<"Create excitatory synapse: [j,i] " <<i1<<", " <<i2 <<" = " <<dEdgeMatrix(i1, i2) <<endl;
+				cout<<"Create inhibitory synapse: [j,i] " <<i1<<", " <<i2 <<" = " <<dEdgeMatrix(i1, i2) <<endl;
 				new K_synapse(pAllNodesInANN[i1], pAllNodesInANN[i2], (dEdgeMatrix(i1, i2)), true); 
 			}else{ 
 				//matrise-elementet er lik 0: Drit i det!
@@ -103,6 +103,9 @@ template <> ANN<K_auron>::ANN(QuadraticMatrix<double> dEdgeMatrix, std::vector<K
 	}
 	cout<<"\nFerdig med å konstruere KANN med kantmatrise:\n";
 	dEdgeMatrix.printMatrix();
+
+	cout<<"\nAlle periodic elements:\n";
+	time_class::printAllElementsOf_pPeriodicElements();
 }
 
 
@@ -139,7 +142,7 @@ template <> ANN<s_auron>::ANN(QuadraticMatrix<double> dEdgeMatrix){
 
 
 // Skriver ut alle synapsene med vekt: Har ikkje laga til ei matrise enda, men no finner den verdiene!
-template <> const void ANN<K_auron>::printEdgeMatrix(){
+template <> void ANN<K_auron>::printEdgeMatrix() const{
 
 	//cout<<"lager matrise i størrelse " <<pAllNodesInANN.size() <<endl;
 	QuadraticMatrix<double> tempMatrix(pAllNodesInANN.size(), "tempW");
@@ -152,7 +155,11 @@ template <> const void ANN<K_auron>::printEdgeMatrix(){
 			for(unsigned i=0; i<pAllNodesInANN.size(); i++){
 				if( pAllNodesInANN[i] == pPostSynAuron ){
 					// Dette er funky! Matrise-labels er feil veil: i burde stått først (Jmf. Rolls/Treves-konvensjonen).
-					tempMatrix(n, i) = (*iter)->getSynWeight();
+					if( (*iter)->getInhibitoryEffect())
+						tempMatrix(n, i) = -(*iter)->getSynWeight();
+					else
+						tempMatrix(n, i) = (*iter)->getSynWeight();
+				
 					//cout<<"n->i: \t"  <<n <<" "<<i <<", " <<(*iter)->getSynWeight() <<endl; 
 					break;
 				}

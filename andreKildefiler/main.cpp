@@ -90,7 +90,7 @@ extern std::list<timeInterface*> 				time_class::pPeriodicElements;
 extern std::list<i_auron*> i_auron::pAllAurons;
 extern std::list<K_auron*> K_auron::pAllKappaAurons;
 extern std::list<K_sensory_auron*> K_sensory_auron::pAllSensoryAurons;
-extern std::list<s_sensor_auron*> s_sensor_auron::pAllSensoryAurons;
+extern std::list<s_sensory_auron*> s_sensory_auron::pAllSensoryAurons;
 
 extern unsigned long time_class::ulTime;
 
@@ -98,6 +98,7 @@ unsigned long ulTemporalAccuracyPerSensoryFunctionPeriod 	=	DEFAULT_NUMBERofTIME
 float fNumberOfSensoryFunctionPeriods 						=	DEFAULT_NUMBER_OF_SENSORY_FUNCTION_PERIODS;
 unsigned long ulTotalNumberOfTimeSteps 						= 	ulTemporalAccuracyPerSensoryFunctionPeriod*fNumberOfSensoryFunctionPeriods;
 unsigned uNumberOfIterationsBetweenWriteToLog;
+unsigned uNumberOfIterationsBetweenPrintToScreen;
 
 // The program exits gracefully when bContinueExecution is set to [false]:
 bool bContinueExecution = true;
@@ -220,6 +221,9 @@ int main(int argc, char *argv[])
 	ulTotalNumberOfTimeSteps = fNumberOfSensoryFunctionPeriods * ulTemporalAccuracyPerSensoryFunctionPeriod;
 	cout<<"Giving a total of \e[0;1m" <<ulTotalNumberOfTimeSteps<<"\e[0;0m time steps for this run of auroSim.\n\n";
 
+	// Set number of iterations between print to screen:
+	uNumberOfIterationsBetweenPrintToScreen = ulTotalNumberOfTimeSteps / NUMBER_OF_TIME_PRINTS;
+
 	// Set uNumberOfIterationsBetweenWriteToLog (to restrict number of points in log file)
 	if(ulTemporalAccuracyPerSensoryFunctionPeriod > LOGG_RESOLUTION){
 		uNumberOfIterationsBetweenWriteToLog = (int)(((float)ulTemporalAccuracyPerSensoryFunctionPeriod / (float)LOGG_RESOLUTION) +0.5);
@@ -247,7 +251,7 @@ int main(int argc, char *argv[])
 	// Experiment 1:
 	#if 0
 		new K_sensory_auron("sKN", &staticSensoryFunc);
-		new s_sensor_auron("sSN", &staticSensoryFunc);
+		new s_sensory_auron("sSN", &staticSensoryFunc);
 	#endif
 
 	// Experiment 2:
@@ -256,7 +260,7 @@ int main(int argc, char *argv[])
 		new K_sensory_auron("dKN", &dynamicSensoryFunc);
 		#endif
 		#if SANN
-		new s_sensor_auron("dSN", &dynamicSensoryFunc);
+		new s_sensory_auron("dSN", &dynamicSensoryFunc);
 		#endif
 	#endif
 
@@ -267,6 +271,13 @@ int main(int argc, char *argv[])
 			
 
 
+
+	#if 0 //ANNA:
+	new s_sensory_auron("dSN", &dynamicSensoryFunc3);
+	new K_sensory_auron("dKN", &dynamicSensoryFunc3);
+	#endif
+
+
 			// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO RENSET tekst til hit!
 // Lage ANN fra ei kant-matrise, og evt. send inn en vektor med vilkårlig antall auron (mindre enn dim(matrisa)). Kan også sende inn null auron. Vektoren med auron-peikere brukes for å la nokre auron være sensor-auron!
 #if 0
@@ -274,19 +285,24 @@ int main(int argc, char *argv[])
 	cout<<"Try to construct ANN with K_auron-matrix:\n";
 		// TRENGER IKKJE MATRISE: bruk heller std::vector<K_auron*>
 	cout<<"\tInitialize K_auron*-vector:\n";
-		std::vector<K_auron*> AlleAuron(3);
+		std::vector<K_auron*> AlleAuron(2);
+		//std::vector<K_auron*> AlleAuron(3);
 		//AlleAuron[0] = new K_sensory_auron("Ksensor1",staticSensoryFuncWithHighActivity);
-		AlleAuron[0] = new K_sensory_auron("K0Sensor", dynamicSensoryFunc);
-		AlleAuron[2] = new K_sensory_auron("K2Sensor", dynamicSensoryFunc2);
+		AlleAuron[0] = new K_sensory_auron("K0Sensor", &dynamicSensoryFunc);
+		AlleAuron[1] = new K_auron("asd");
+		//AlleAuron[1] = new K_auron("test");
+//		AlleAuron[2] = new K_sensory_auron("K2Sensor", &dynamicSensoryFunc2);
 	
-		QuadraticMatrix<double> KMat(3);
-		KMat(0,1) = 50;
-		KMat(2,1) = -50;
+		QuadraticMatrix<double> KMat(2);
+		//QuadraticMatrix<double> KMat(3);
+		//KMat(0,1) = -.005;
+		//KMat(2,1) = -.05;
 	cout<<"\tInitialize ANN from K_auron*-vector and dEdgeMatrix:\n";
 		ANN<K_auron> Ktest2(KMat, AlleAuron);
 	cerr<<"\n\nSkriver ut kant-matrise:\n";
 		Ktest2.printEdgeMatrix();
 	cerr<<"OK\n";
+//exit(0);
 #endif	
 
 //{ KOMMENTERT UT
@@ -543,12 +559,12 @@ std::ostream & operator<< (std::ostream & ut, i_auron* pAuronArg )
 //	ut<<"| " <<pAuronArg->getNavn() <<"  | verdi: " <<pAuronArg->getAktivityVar();// <<" \t|\tMed utsynapser:\n";
 	
 	// Innsynapser:
-	//for( std::vector<synapse*>::iterator iter = neuroArg.pInnSynapser.begin(); iter != neuroArg.pInnSynapser.end(); iter++ ){
+	//for( std::vector<synapse*>::iterator iter = neuroArg.pInputSynapses.begin(); iter != neuroArg.pInputSynapses.end(); iter++ ){
 	// 	ut 	<<"\t" <<(*iter)->pPreNode->navn <<" -> " <<neuroArg.navn <<"\t|" <<endl;
 	// }
 
 	// Utsynapser:
-	//for( std::vector<synapse*>::iterator iter = neuroArg.pUtSynapser.begin(); iter != neuroArg.pUtSynapser.end(); iter++ ){
+	//for( std::vector<synapse*>::iterator iter = neuroArg.pOutputSynapses.begin(); iter != neuroArg.pOutputSynapses.end(); iter++ ){
 	// 	ut 	<<"\t\t\t|\t" <<neuroArg.navn <<" -> " <<(*iter)->pPostNode->navn <<endl;
 	//		//<< (*iter)->ulAntallSynapticVesiclesAtt <<" antall syn.vesicles att.  TIL "
 	// }
@@ -566,7 +582,7 @@ std::ostream & operator<< (std::ostream & ut, s_axon* pAxonArg ) //XXX Skal gjø
 
 	// Utsynapser:
 		//			TODO gjør om x++ til ++x, siden ++x slepper å lage en "temporary".
-	for( std::list<s_synapse*>::iterator iter = pAxonArg->pUtSynapser.begin(); iter != pAxonArg->pUtSynapser.end(); iter++ ){
+	for( std::list<s_synapse*>::iterator iter = pAxonArg->pOutputSynapses.begin(); iter != pAxonArg->pOutputSynapses.end(); iter++ ){
 	 	ut 	<<"\t\t\t|\t" <<(pAxonArg->pElementOfAuron)->sNavn <<" -> "    <<(*iter)->pPostNodeDendrite->pElementOfAuron->sNavn <<"\t\t|\n";
 	}
 

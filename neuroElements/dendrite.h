@@ -40,7 +40,7 @@
 class i_dendrite : public timeInterface{
 	// Pointers to the next and previous element. Are overloaded to the model specific vertions in derived classes(s_dendrite and K_dendrite)
 	i_auron* pElementOfAuron;
-	std::list<i_synapse*> pInnSynapser;
+	std::list<i_synapse*> pInputSynapses;
 
  	//virtual inline void doTask() =0; -- Stays pure virtual..
 	// Define doCalculation() to do nothing. Not used for dendrite, yet.
@@ -59,9 +59,9 @@ class i_dendrite : public timeInterface{
 class s_dendrite : public i_dendrite{
 	inline void doTask(); 				// Defined in neuroElements.cpp
 
-	// Overload i_dendrite::pElementOfAuron and i_dendrite::pInnSynapser to be modelspecific for the NIM simulation model:
+	// Overload i_dendrite::pElementOfAuron and i_dendrite::pInputSynapses to be modelspecific for the NIM simulation model:
 	s_auron* pElementOfAuron;
-	std::list<s_synapse*> pInnSynapser;
+	std::list<s_synapse*> pInputSynapses;
 
 	inline void newInputSignal( double /*nNewSignal*/ );
 	inline void calculateLeakage(); 		// Only for NIM dendrites.
@@ -71,10 +71,10 @@ class s_dendrite : public i_dendrite{
 
 	public:
 	s_dendrite( s_auron* pPostSynAuron_Arg );
-	~s_dendrite();
+	virtual ~s_dendrite();
 
 	// Friend declarations:
-	friend class s_sensor_auron;
+	friend class s_sensory_auron;
 	friend class s_synapse;
 	friend std::ostream & operator<< (std::ostream & ut, s_axon* );
 };
@@ -82,9 +82,9 @@ class s_dendrite : public i_dendrite{
 class K_dendrite : public i_dendrite{
  	inline void doTask(); // Defined in neuroElements.cpp
 
-	// Overload i_dendrite::pElementOfAuron and i_dendrite::pInnSynapser, so that these point to model specific variants.
+	// Overload i_dendrite::pElementOfAuron and i_dendrite::pInputSynapses, so that these point to model specific variants.
 	K_auron* pElementOfAuron;
-	std::list<K_synapse*> pInnSynapser;
+	std::list<K_synapse*> pInputSynapses;
 	
 	// called by auron::recalculateKappa() and does the actual recalculation. Most efficient this way.
 	inline double recalculateKappa();
@@ -93,7 +93,7 @@ class K_dendrite : public i_dendrite{
 
 	public:
 	K_dendrite( K_auron* );
-	~K_dendrite();
+	virtual ~K_dendrite();
 
 	K_auron* getElementOfAuron(){ return pElementOfAuron; }
 

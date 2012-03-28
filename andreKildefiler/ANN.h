@@ -116,7 +116,7 @@ public:
 	ANN(QuadraticMatrix<double> dEdgeMatrix, std::vector<C*> pAuronVector =std::vector<C*>(0)  );
 
 
-	const void printEdgeMatrix();
+	void printEdgeMatrix() const;
 
 
 

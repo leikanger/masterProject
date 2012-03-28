@@ -15,6 +15,8 @@ run: auroSim.out
 
 kjoerOgPlott: auroSim.out 
 	make auroSim.out && sh kjør.sh -r100 -n1.5 && octave -q sammenligningKmedFileneFraDatafilesForEvaluation.m
+kjoerOgPlott2: auroSim.out 
+	make auroSim.out && sh kjør.sh -r100 -n1.5 && octave -q sammenligningKmedFileneFraDatafilesForEvaluation2.m
 
 
 gprof:

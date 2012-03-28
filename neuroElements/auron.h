@@ -90,7 +90,7 @@ class i_auron : public timeInterface
 	// Not strictly necessary, but enables a smoother implementation.
 	unsigned long ulTimestampLastInput;
 	// For error check. Does not concern KM any longer. Remove or move to SN.
-	unsigned long ulTimestampForrigeFyring;
+	unsigned long ulTimestampPreviousFiring;
 
 	// TODO: Try to implement dopamine(or other factor to define synaptic plasticity amplification. Inspired by nature..
 	// Also here, Kappa mathematics can be utilized.
@@ -153,18 +153,18 @@ class i_auron : public timeInterface
 	//static mdl. funk som destruerer alle i denne lista, men først de modellspesifikke K_auron og s_auron.
 	static void callDestructorForAllAurons();
 
-	// aktivitetsobjekt: Om dette er KANN eller SANN er avhengig av kva dAktivitetsVariabel skal bety (kappa eller depol..).
-	double dAktivitetsVariabel;
+	// aktivitetsobjekt: Om dette er KANN eller SANN er avhengig av kva dActivityVariable skal bety (kappa eller depol..).
+	double dActivityVariable;
 
 	public:
 	i_auron(std::string sNavn_Arg ="unnamed", double dStartAktVar = 0);
-	~i_auron();
+	virtual ~i_auron();
 
 	// For utskrift / debugging:
 	std::string sNavn;
 	const std::string getNavn(){ return sNavn; }
 
-	int getAktivityVar(){ return dAktivitetsVariabel; }
+	int getAktivityVar(){ return dActivityVariable; }
 
 	// Overlagres forskjellig i s_auron og K_auron for å finne depol.
 	virtual inline void writeDepolToLog() =0;
@@ -213,7 +213,7 @@ class s_auron : public i_auron
 
 	public:
 	s_auron(std::string sNavn_Arg ="s_auron", int nStartDepol = 0); 
-	~s_auron();
+	virtual ~s_auron();
 
 	inline const double getCalculateDepol();
 
@@ -228,7 +228,7 @@ class s_auron : public i_auron
 			// Unless it is time for writing to log, return.
 			// (GÅR UT FRA AT DEN SKRIVER TIL LOG KVAR ITER. TODO Vurder å skrive om dette til å bare være eit tidspunkt som blir sammenligna med nå-tid! TODO
 			if( (++uIterationsSinceLastWrite > uNumberOfIterationsBetweenWriteToLog) ){
-				depol_logFile 	<<time_class::getTime() <<"\t" <<dAktivitetsVariabel <<"; \t #Depolarization\n" ;
+				depol_logFile 	<<time_class::getTime() <<"\t" <<dActivityVariable <<"; \t #Depolarization\n" ;
 				// Reset counter
 				uIterationsSinceLastWrite = 0;
 			}else{
@@ -252,7 +252,7 @@ class K_auron : public i_auron
 { // {
 
 	// Fra axon: 
-	std::list<K_synapse*> pUtSynapser;
+	std::list<K_synapse*> pOutputSynapses;
 	//protected:
 	void doTransmission();
 	
@@ -280,7 +280,7 @@ class K_auron : public i_auron
 	double dPeriodINVERSE;
 	double dChangeInPeriodINVERSE;
 
-	inline const double& getKappa() const{ return dAktivitetsVariabel; }
+	inline const double& getKappa() const{ return dActivityVariable; }
 	
 
 	// For debugging: trenger ei liste over alle K_auron, slik at eg kan skrive log for depol kvar tidsiterasjon:
@@ -340,7 +340,7 @@ class K_auron : public i_auron
 
 	protected:
 	inline void changeKappa_diffArg( const double& );
-	inline void changeKappa_absArg( const double&);
+	//inline void changeKappa_absArg( const double&);
 
 	// Sjå @asdf1515
 	double dStartOfNextTimeWindow; 	// Start-tidspunkt for neste time window (brukes til å finne start-depol. for neste time window).
@@ -360,7 +360,7 @@ class K_auron : public i_auron
 
 	public:
 	K_auron(std::string sNavn_Arg ="K_auron", double dStartKappa_arg = 0); 	
-	~K_auron();
+	virtual ~K_auron();
 
 
 
@@ -368,12 +368,12 @@ class K_auron : public i_auron
 	inline double getCalculateDepol() const
 	{
 
-		// GAMMEL: return (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-(double)LEAKAGE_CONST  * (time_class::getTime() - ulStartOfTimewindow )) + dAktivitetsVariabel ;
+		// GAMMEL: return (dDepolAtStartOfTimeWindow - dActivityVariable)*exp(-(double)LEAKAGE_CONST  * (time_class::getTime() - ulStartOfTimewindow )) + dActivityVariable ;
 
 		static double dDepolStatic;
 
-		//dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEAKAGE_CONST  * (time_class::getTime() - dStartOfTimeWindow )) + dAktivitetsVariabel; 
-		dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEAKAGE_CONST  * (dStartOfNextTimeWindow - dStartOfTimeWindow )) + dAktivitetsVariabel ;
+		//dDepolStatic = (dDepolAtStartOfTimeWindow - dActivityVariable)*exp(-LEAKAGE_CONST  * (time_class::getTime() - dStartOfTimeWindow )) + dActivityVariable; 
+		dDepolStatic = (dDepolAtStartOfTimeWindow - dActivityVariable)*exp(-LEAKAGE_CONST  * (dStartOfNextTimeWindow - dStartOfTimeWindow )) + dActivityVariable ;
 	   	//v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
 
 		// Next line makes this funtion non-const. Comment and mark funtion const for optimalization
@@ -399,7 +399,7 @@ class K_auron : public i_auron
 		static double dDepolStatic;
 
 		// Går over til bedre tidssoppløysing: double-precition float number format!
-		dDepolStatic = (dDepolAtStartOfTimeWindow - dAktivitetsVariabel)*exp(-LEAKAGE_CONST  * (dForTimeInstant_arg - dStartOfTimeWindow )) + dAktivitetsVariabel; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
+		dDepolStatic = (dDepolAtStartOfTimeWindow - dActivityVariable)*exp(-LEAKAGE_CONST  * (dForTimeInstant_arg - dStartOfTimeWindow )) + dActivityVariable; //v(t)=K(1-e^-at)-v_+e^-at = (v_0 - K) e^-at + K   !
 
 		//writeDepolToLog( dForTimeInstant_arg, dDepolStatic); // Tar vekk denne, for å få lov til å definere funksjonen som const.
 		return dDepolStatic;
@@ -472,12 +472,12 @@ class K_auron : public i_auron
 				// Reset counter and write to log
 				uIterationsSinceLastWrite = 0;
 				// Write dDepolAtStartOfTimeWindow to log:
-				kappa_logFile 	<<time_class::getTime() <<"\t" <<dAktivitetsVariabel <<"; \t #Kappa\n" ;
+				kappa_logFile 	<<time_class::getTime() <<"\t" <<dActivityVariable <<"; \t #Kappa\n" ;
 			}
 		#endif
 	}
 
-	const std::list<K_synapse*> getUtSynapserP(){ return pUtSynapser; }
+	const std::list<K_synapse*> getUtSynapserP(){ return pOutputSynapses; }
 
 
 	friend class i_auron; 		// For i_auron to be able to call K_auron::callDestructorForAllKappaAurons()
@@ -488,17 +488,17 @@ class K_auron : public i_auron
 	friend void* taskSchedulerFunction(void* );
 }; // }
 
-class s_sensor_auron : public s_auron{
+class s_sensory_auron : public s_auron{
 	// Function pointer:
 	const double& (*pSensorFunction)(void);
 
-	static std::list<s_sensor_auron*> pAllSensoryAurons;
+	static std::list<s_sensory_auron*> pAllSensoryAurons;
 
 	inline void updateSensoryValue();
 	static void updateAllSensorAurons();
 	
 	public:
-		s_sensor_auron( std::string sNavn_Arg ,  const double& (*pFunk_arg)(void) );
+		s_sensory_auron( std::string sNavn_Arg ,  const double& (*pFunk_arg)(void) );
 
 		// To be used for debugging.
 		double getSensedValue()
