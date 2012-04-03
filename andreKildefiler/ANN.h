@@ -27,9 +27,9 @@ template <class C> class QuadraticMatrix{
 // ALLTERNATIVT med TEMPLATE: template <class C, unsigned uDim> class QuadraticMatrix{   FUNKER ENDA BEDRE!
 	unsigned uDim;
 	C m[MAX_NEURON][MAX_NEURON];
-	string sNavn;
+	string sName;
 	public:
-		QuadraticMatrix(unsigned uDimArg, string sNavnArg = "QuadM") : uDim(uDimArg), sNavn(sNavnArg)
+		QuadraticMatrix(unsigned uDimArg, string sNameArg = "QuadM") : uDim(uDimArg), sName(sNameArg)
 		{
 			for(int i1=0; i1<uDim; i1++){
 				for(int i2=0; i2<uDim; i2++){
@@ -71,7 +71,7 @@ template <class C> class QuadraticMatrix{
 			cout<<"PrintMatrix:\n";
 			for(int i=0; i<uDim; i++){
 				if(i == (uDim)/2){
-					cout<<sNavn 	<<" =";
+					cout<<sName 	<<" =";
 				}
 
 				for(int i2=0; i2<uDim; i2++){

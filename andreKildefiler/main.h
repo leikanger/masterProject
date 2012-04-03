@@ -49,8 +49,6 @@ extern unsigned uNumberOfIterationsBetweenPrintToScreen;
 
 //Defines:
 
-#define GCC true // iomanip.h can not be used with compiler clang++. Define flag GCC when gcc is used: this enables the use of setprecision() for cout of floats.
-
 // Defines whether KANN(kappa M-ANN) is used, and if SANN(NIM-ANN) is used for next compilation of auroSim
 #define KANN 1
 #define SANN 1
@@ -60,7 +58,8 @@ extern unsigned uNumberOfIterationsBetweenPrintToScreen;
 #define DEFAULT_NUMBERofTIMESTEPS 	1000000 				 // default temporal resolution, each forcing funtion period.
 
 #define PRINT_TIME_ITERATION 		true  //means [true]
-#define NUMBER_OF_TIME_PRINTS 		150
+// Neste er bytta med uNumberOfTimePrintsPerSensoryfPeriod
+#define DEFAULT_NUMBER_OF_TIME_PRINTS 		50
 
 
 // Define the form of K-recalculation-curve (appendix B3 in the technical report)
@@ -85,7 +84,7 @@ extern unsigned uNumberOfIterationsBetweenPrintToScreen;
 ** 	Set which var. is logged**
 *****************************/
 #define LOG_DEPOL true 		// Defines whether depolarization is to be logged by the auroSim
-#define LOGG_KAPPA false 		// ... same for Kappa
+#define LOGG_KAPPA true 		// ... same for Kappa
 #define LOGG_RESOLUTION 10000
 
 #define OCTAVE_SLEEP_AFTER_PLOTTING 0
@@ -133,9 +132,7 @@ extern unsigned uNumberOfIterationsBetweenPrintToScreen;
 #endif
 
 
-#if GCC
-	#include <iomanip> // For setprecision()   FUNKER IKKJE FOR clang++-kompilatoren..
-#endif
+#include <iomanip> // For setprecision()   FUNKER IKKJE FOR clang++-kompilatoren..
 
 
 #ifndef MAIN_H_

@@ -67,6 +67,15 @@ class time_class : public timeInterface {
 	// 	All elements are checked each time step: If an element have dEstimatedTaskTime during the next iteration, it is inserted into pWorkTaskQueue.
 	static std::list<timeInterface*> pPeriodicElements;
 
+	// Funtion to push task to pWorkTaskQueue in present time iteration(only possible for a KM node).
+	static inline void addTaskInPresentTimeStep(timeInterface* pObjWithTask_arg);
+
+	// Funtion to schedule calculation
+	static inline void addCalculationIn_pCalculatationTaskQueue( timeInterface* pObject_arg)
+	{
+	 	pCalculatationTaskQueue.push_back( pObject_arg );
+	}
+
 	protected:
 	void doTask(); 			// Defined in neuroElement.cpp
 	void doCalculation()	// Conduct calculations on all calculation tasks in pCalculatationTaskQueue.
@@ -100,15 +109,6 @@ class time_class : public timeInterface {
 			pCalculatationTaskQueue.pop_front();
 		}
 	} //}
-
-	// Funtion to push task to pWorkTaskQueue in present time iteration(only possible for a KM node).
-	static inline void addTaskInPresentTimeIteration(timeInterface* pTimeClassArg_withTask);
-
-	// Funtion to schedule calculation
-	static inline void addCalculationIn_pCalculatationTaskQueue( timeInterface* pObject_arg)
-	{
-	 	pCalculatationTaskQueue.push_back( pObject_arg );
-	}
 
 	public:
 	time_class() : timeInterface("time"){}

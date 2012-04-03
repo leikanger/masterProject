@@ -57,11 +57,11 @@ void i_auron::callDestructorForAllAurons()
 		// If dEstimatedTaskTime = 0, this variable has not been used, and "---" is written to screen
 		// If dEstimatedTaskTime = DBL_MAX, Kappa<Tau and the neuron will never fire. Print "NaN"
 		if((*iter)->dEstimatedTaskTime == 0)
-			cout<<"\t[ " <<(*iter)->sNavn <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<"\e[34m---\e[0m" <<endl;
+			cout<<"\t[ " <<(*iter)->sName <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<"\e[34m---\e[0m" <<endl;
 		else if((*iter)->dEstimatedTaskTime == DBL_MAX)
-			cout<<"\t[ " <<(*iter)->sNavn <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<"\e[34mNaN\e[0m" <<endl;
+			cout<<"\t[ " <<(*iter)->sName <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<"\e[34mNaN\e[0m" <<endl;
 		else
-			cout<<"\t[ " <<(*iter)->sNavn <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<(*iter)->dEstimatedTaskTime <<endl;
+			cout<<"\t[ " <<(*iter)->sName <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<(*iter)->dEstimatedTaskTime <<endl;
 	}
 	cout<<"\n";
 
@@ -73,7 +73,7 @@ void i_auron::callDestructorForAllAurons()
 	while( ! i_auron::pAllAurons.empty() )
 	{
 		#if DEBUG_PRINT_LEVEL > 2
-		cout<<"Call destructor for auron " <<i_auron::pAllAurons.front()->sNavn <<endl;
+		cout<<"Call destructor for auron " <<i_auron::pAllAurons.front()->sName <<endl;
 		#endif
 		// delete (call destructor for) first element. The destructor removes element's pointer from pAllAurons.
 	 	delete (*i_auron::pAllAurons.begin());
@@ -86,7 +86,7 @@ void K_auron::callDestructorForAllKappaAurons()
 	while( ! K_auron::pAllKappaAurons.empty() )
 	{
 		#if DEBUG_PRINT_LEVEL > 2
-		cout<<"Call destructor for K_auron " <<K_auron::pAllKappaAurons.front()->sNavn <<endl;
+		cout<<"Call destructor for K_auron " <<K_auron::pAllKappaAurons.front()->sName <<endl;
 		#endif
 
 		// delete first element(call destructor). The destructor removes element's pointer from pAllKappaAurons and also from pAllAurons
@@ -95,14 +95,14 @@ void K_auron::callDestructorForAllKappaAurons()
 }
 //}2
 //{2 *** i_auron   
-i_auron::i_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartAktVar /*=0*/) 
-	: timeInterface("auron"), dActivityVariable(dStartAktVar), sNavn(sNavn_Arg)
+i_auron::i_auron(std::string sName_Arg /*="unnamed"*/, double dStartAktVar /*=0*/) 
+	: timeInterface("auron"), dActivityVariable(dStartAktVar), sName(sName_Arg)
 {
 	#if LOG_DEPOL
 		// Print to log file is set. Initiation of file stream(.oct file that is executable in octave.):
 		// 	 (datafiles_for_evaluation is created at the initiation of auronSim. See int main(int,char**) )
 		std::ostringstream tempDepolLoggFileAdr;
-		tempDepolLoggFileAdr<<"./datafiles_for_evaluation/log_auron_" <<sNavn <<"-depol" <<".oct";
+		tempDepolLoggFileAdr<<"./datafiles_for_evaluation/log_auron_" <<sName <<"-depol" <<".oct";
 	
 		// Need c-style string for open() function:
 		std::string tempStr( tempDepolLoggFileAdr.str() );
@@ -117,7 +117,7 @@ i_auron::i_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartAktVar /*=0*
 
 		// Initiation of log file that shows spikes as a vertical line (from 1.05*Tau to 1.2*Tau)
 		std::ostringstream tempFilAdr2;
-		tempFilAdr2<<"./datafiles_for_evaluation/log_auron_" <<sNavn <<"-depolSPIKES" <<".oct";
+		tempFilAdr2<<"./datafiles_for_evaluation/log_auron_" <<sName <<"-depolSPIKES" <<".oct";
 	
 		// need c-style string for open() function:
 		std::string tempStr2( tempFilAdr2.str() );
@@ -132,7 +132,7 @@ i_auron::i_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartAktVar /*=0*
 
 	// Make a log file where the neuron's firing times are logged.
 	std::ostringstream tempFilAdr3;
-	tempFilAdr3<<"./datafiles_for_evaluation/log_auron_" <<sNavn <<"-firingTimes" <<".oct";
+	tempFilAdr3<<"./datafiles_for_evaluation/log_auron_" <<sName <<"-firingTimes" <<".oct";
 
 
 	// need c-style string for open() function:
@@ -150,7 +150,7 @@ i_auron::i_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartAktVar /*=0*
 i_auron::~i_auron()
 {
 	#if DEBUG_PRINT_DESCTRUCTOR
-		cout<<"\tDESTRUCTOR: \ti_auron::~i_auron() : \t" <<sNavn <<"\t * * * * * * * * * * * * * * * * * * * * * * * * * \n";
+		cout<<"\tDESTRUCTOR: \ti_auron::~i_auron() : \t" <<sName <<"\t * * * * * * * * * * * * * * * * * * * * * * * * * \n";
 	#endif
 
 	// remove auron from pAllAurons:
@@ -161,7 +161,7 @@ i_auron::~i_auron()
 			// depolarization log file:
 		depol_logFile 	<<"];\n\n"
 						<<"plot( data([1:end],1), data([1:end],2), \"@;Depolarization;\");\n"
-						<<"title \"Depolarization for auron " <<sNavn <<"\"\n"
+						<<"title \"Depolarization for auron " <<sName <<"\"\n"
 						<<"xlabel Time\n" <<"ylabel \"Activity variable\"\n"
 						//<<"axis([0 data(end,1) 0 1400 ]);\n"
 						<<"sleep(" <<OCTAVE_SLEEP_AFTER_PLOTTING <<"); "
@@ -184,7 +184,7 @@ i_auron::~i_auron()
 }
 //}2
 //{2 *** s_auron
-s_auron::s_auron(std::string sNavn_Arg /*="unnamed"*/, int nStartDepol /*=0*/) : i_auron(sNavn_Arg, nStartDepol)
+s_auron::s_auron(std::string sName_Arg /*="unnamed"*/, int nStartDepol /*=0*/) : i_auron(sName_Arg, nStartDepol)
 {
 	// for debugging
 	sClassName = "s_auron";
@@ -216,7 +216,7 @@ s_auron::~s_auron() // ~s_auron is not run at the end of auroSim, only i_auron::
 } 
 //}2
 //{2 *** K_auron
-K_auron::K_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartKappa_arg /*= 0*/) : i_auron(sNavn_Arg), kappaRecalculator(this)
+K_auron::K_auron(std::string sName_Arg /*="unnamed"*/, double dStartKappa_arg /*= 0*/) : i_auron(sName_Arg), kappaRecalculator(this)
 { //{
 	// for debugging
 	sClassName = "K_auron";
@@ -246,7 +246,7 @@ K_auron::K_auron(std::string sNavn_Arg /*="unnamed"*/, double dStartKappa_arg /*
 	#if LOGG_KAPPA
 		// Make kappa-log. Same as other log files: octave-executable log file.
 		std::ostringstream tempFilAdr;
-		tempFilAdr<<"./datafiles_for_evaluation/log_auron_" <<sNavn <<"-kappa" <<".oct";
+		tempFilAdr<<"./datafiles_for_evaluation/log_auron_" <<sName <<"-kappa" <<".oct";
 		std::string tempStr( tempFilAdr.str() );
 
 		// Need c-style string for the function upen():
@@ -294,7 +294,7 @@ K_auron::~K_auron()
 						<<"axis([0," <<time_class::getTime() <<"])\n"
 						<<"plot( data([1:end],1), data([1:end],2), \"@;Kappa;\");\n"
 
-						<<"title \"Activity variable for K-auron " <<sNavn <<"\"\n"
+						<<"title \"Activity variable for K-auron " <<sName <<"\"\n"
 						<<"xlabel Time\n" <<"ylabel \"Activity variable\"\n"
 						//<<axis([0 data(end,1) 0 1400 ]);\n"
 						<<"sleep(" <<OCTAVE_SLEEP_AFTER_PLOTTING <<"); "
@@ -324,7 +324,7 @@ K_sensory_auron::K_sensory_auron( std::string sName_Arg , const double& (*pFunk_
 }
 //}2
 //{2 *** s_sensory_auron
-s_sensory_auron::s_sensory_auron( std::string sNavn_Arg , const double& (*pFunk_arg)(void) ) : s_auron(sNavn_Arg)
+s_sensory_auron::s_sensory_auron( std::string sName_Arg , const double& (*pFunk_arg)(void) ) : s_auron(sName_Arg)
 {
 	// Assign the sensor function:
 	pSensorFunction = pFunk_arg;
@@ -353,8 +353,8 @@ s_synapse::s_synapse(s_auron* pPresynAuron_arg, s_auron* pPostsynAuron_arg, doub
 {
 
 	#if DEBUG_PRINT_CONSTRUCTOR
-		cerr<<"Call s_synapse::s_synapse("  <<pPreNodeAxon->pElementOfAuron->sNavn 
-			<<".pOutputAxon, " <<pPostNodeDendrite->pElementOfAuron->sNavn <<".pInputDendrite, ...)\n";
+		cerr<<"Call s_synapse::s_synapse("  <<pPreNodeAxon->pElementOfAuron->sName 
+			<<".pOutputAxon, " <<pPostNodeDendrite->pElementOfAuron->sName <<".pInputDendrite, ...)\n";
 	#endif
 
 	// Insert synapse as output synapse in presyn. axon and input synapse in postsyn. dendrite:
@@ -364,7 +364,7 @@ s_synapse::s_synapse(s_auron* pPresynAuron_arg, s_auron* pPostsynAuron_arg, doub
 	// Initialize synapse's log-file:
 	//{4 make a .oct - file, and make it ready for execution in octave:
 	std::ostringstream tempFilAdr;
-	tempFilAdr<<"./datafiles_for_evaluation/log_s_synapse_" <<pPresynAuron_arg->sNavn <<"-"  <<pPostsynAuron_arg->sNavn ;
+	tempFilAdr<<"./datafiles_for_evaluation/log_s_synapse_" <<pPresynAuron_arg->sName <<"-"  <<pPostsynAuron_arg->sName ;
 	if(bInhibitoryEffect){ tempFilAdr<<"_inhi"; }
 	else{ 			  tempFilAdr<<"_eksi"; }
 	tempFilAdr<<".oct";
@@ -392,7 +392,7 @@ s_synapse::~s_synapse()
 				iter != (pPreNodeAxon->pOutputSynapses).end() ; iter++ ){
 			if( *iter == this ){
 				#if DEBUG_PRINT_DESCTRUCTOR
-					cout<<"\t~( [" <<pPreNodeAxon->pElementOfAuron->sNavn <<"] -> "; 						// Printing part 1
+					cout<<"\t~( [" <<pPreNodeAxon->pElementOfAuron->sName <<"] -> "; 						// Printing part 1
 				#endif
 				(pPreNodeAxon->pOutputSynapses).erase( iter );
 				bPreOk = true;
@@ -406,7 +406,7 @@ s_synapse::~s_synapse()
 			   	iter != pPostNodeDendrite->pInputSynapses.end() ; iter++ ){
 			if( *iter == this ){ 
 				#if DEBUG_PRINT_DESCTRUCTOR
-					cout<<"[" <<pPostNodeDendrite->pElementOfAuron->sNavn <<"] )\t"; 						// Printing part 2
+					cout<<"[" <<pPostNodeDendrite->pElementOfAuron->sName <<"] )\t"; 						// Printing part 2
 				#endif
 				(pPostNodeDendrite->pInputSynapses).erase( iter );
 				bPostOk = true;
@@ -420,8 +420,8 @@ s_synapse::~s_synapse()
 		/// ERROR!!!:
 		std::cerr<<"\n\n\n\n\nERROR ERROR ERROR\nat neuroEnhet.cpp id:asdf250@neuronElement.cpp."
 				<<"Error in s_synapse destruction\n"
-				<<"bPreOk (" <<pPreNodeAxon->pElementOfAuron->sNavn <<"):" <<bPreOk 
-				<<"  ->  bPostOk (" <<pPostNodeDendrite->pElementOfAuron->sNavn <<"): " <<bPostOk 
+				<<"bPreOk (" <<pPreNodeAxon->pElementOfAuron->sName <<"):" <<bPreOk 
+				<<"  ->  bPostOk (" <<pPostNodeDendrite->pElementOfAuron->sName <<"): " <<bPostOk 
 				<<"\nNot deleted from the corresponding neuron if it has the value \"0\"\n"
 				<<"TERMINATING";
 		exit(EXIT_FAILURE);	
@@ -432,8 +432,8 @@ s_synapse::~s_synapse()
 	// Finalize transmission log:
 	synTransmission_logFile<<"];\n"
 					<<"plot( data([1:end],1), data([1:end],2), \";Synaptic weight;\");\n"
-					<<"title \"Synaptic weight for s_synapse: " <<pPreNodeAxon->pElementOfAuron->sNavn 
-					<<" -> " <<pPostNodeDendrite->pElementOfAuron->sNavn <<"\"\n"
+					<<"title \"Synaptic weight for s_synapse: " <<pPreNodeAxon->pElementOfAuron->sName 
+					<<" -> " <<pPostNodeDendrite->pElementOfAuron->sName <<"\"\n"
 					<<"xlabel Time\n" <<"ylabel syn.w.\n"
 					<<"sleep(" <<OCTAVE_SLEEP_AFTER_PLOTTING <<"); ";
 	synTransmission_logFile.close();
@@ -445,7 +445,7 @@ K_synapse::K_synapse(K_auron* pPresynAuron_arg, K_auron* pPostsynAuron_arg, doub
    	, pPreNodeAuron(pPresynAuron_arg), pPostNodeDendrite(pPostsynAuron_arg->pInputDendrite)
 {
 	#if DEBUG_PRINT_CONSTRUCTOR
-		cout<<"Constructor :\tK_synapse::K_synapse(" <<pPreNodeAuron->sNavn <<", " <<pPostNodeDendrite->pElementOfAuron->sNavn
+		cout<<"Constructor :\tK_synapse::K_synapse(" <<pPreNodeAuron->sName <<", " <<pPostNodeDendrite->pElementOfAuron->sName
 		   	<<".pInputDendrite, ...)\n";
 	#endif
 
@@ -462,7 +462,7 @@ K_synapse::K_synapse(K_auron* pPresynAuron_arg, K_auron* pPostsynAuron_arg, doub
 	// Create log file stream for logging synaptic transmissions:
 	// 	The name of the log either ends on inhibitory or excitatory to make it possible to log more than one synapse from j to i.
 	std::ostringstream tempFilAdr;
-	tempFilAdr<<"./datafiles_for_evaluation/log_transmission_K_synapse_" <<pPresynAuron_arg->sNavn <<"-"  <<pPostsynAuron_arg->sNavn ;
+	tempFilAdr<<"./datafiles_for_evaluation/log_transmission_K_synapse_" <<pPresynAuron_arg->sName <<"-"  <<pPostsynAuron_arg->sName ;
 	if(bInhibitoryEffect){ tempFilAdr<<"_inhibitory"; }
 	else{ 			  tempFilAdr<<"_excitatory"; }
 	tempFilAdr<<".oct";
@@ -495,7 +495,7 @@ K_synapse::~K_synapse()
 				iter != pPreNodeAuron->pOutputSynapses.end() ; iter++ ){
 			if( *iter == this ){
 				#if DEBUG_PRINT_DESCTRUCTOR
-				cout<<"\t~( [" <<pPreNodeAuron->sNavn <<"] -> "; 				 // Print to screen, part 1
+				cout<<"\t~( [" <<pPreNodeAuron->sName <<"] -> "; 				 // Print to screen, part 1
 				#endif
 				(pPreNodeAuron->pOutputSynapses).erase( iter );
 				bPreOk = true;
@@ -509,7 +509,7 @@ K_synapse::~K_synapse()
 				iter != pPostNodeDendrite->pInputSynapses.end() ; iter++ ){
 			if( *iter == this ){ 
 				#if DEBUG_PRINT_DESCTRUCTOR
-				cout<<"[" <<pPostNodeDendrite->pElementOfAuron->sNavn <<"] )\t"; // Print to screen, part 2
+				cout<<"[" <<pPostNodeDendrite->pElementOfAuron->sName <<"] )\t"; // Print to screen, part 2
 				#endif
 				(pPostNodeDendrite->pInputSynapses).erase( iter );
 				bPostOk = true;
@@ -522,8 +522,8 @@ K_synapse::~K_synapse()
 	if( (!bPreOk) || (!bPostOk) ){
 		/// ERROR:
 		std::cerr<<"\n\n\n\n\nERROR ERROR ERROR\nIn neuroElement.cpp id#asdf250@neuroElement.cpp\n"
-				<<"bPreOk (" <<pPreNodeAuron->sNavn <<"):" <<bPreOk <<"  ->  bPostOk ("
-			   	<<pPostNodeDendrite->pElementOfAuron->sNavn <<"): " <<bPostOk 
+				<<"bPreOk (" <<pPreNodeAuron->sName <<"):" <<bPreOk <<"  ->  bPostOk ("
+			   	<<pPostNodeDendrite->pElementOfAuron->sName <<"): " <<bPostOk 
 				<<"\nOk unless value is zero..\nTERMINATING\n\n";
 		exit(-9);	
 	}
@@ -533,11 +533,11 @@ K_synapse::~K_synapse()
 	// 	(make log script executable in octave)
 	synTransmission_logFile<<"];\n"
 					<<"plot( data([1:end],1), data([1:end],2), \".r;Synaptic transmission;\");\n"
-					<<"title \"Synaptic transmission from s_synapse: " <<pPreNodeAuron->sNavn 
-					<<" to " <<pPostNodeDendrite->pElementOfAuron->sNavn <<"\"\n"
+					<<"title \"Synaptic transmission from s_synapse: " <<pPreNodeAuron->sName 
+					<<" to " <<pPostNodeDendrite->pElementOfAuron->sName <<"\"\n"
 					<<"xlabel Time\n" <<"ylabel Syn.Transmission\n"
-					//<<"print ./eps/eps_transmission_" <<pPreNodeAuron->sNavn <<"->" 
-					// 			<<pPostNodeDendrite->pElementOfAuron->sNavn <<".eps -deps -color\n"
+					//<<"print ./eps/eps_transmission_" <<pPreNodeAuron->sName <<"->" 
+					// 			<<pPostNodeDendrite->pElementOfAuron->sName <<".eps -deps -color\n"
 					<<"sleep(" <<OCTAVE_SLEEP_AFTER_PLOTTING <<"); ";
 	synTransmission_logFile.close();
 }
@@ -569,14 +569,14 @@ s_axon::s_axon(s_auron* pAuronArg) : i_axon("s_axon"), pElementOfAuron(pAuronArg
 s_axon::~s_axon()
 {
 	#if DEBUG_PRINT_DESCTRUCTOR
-		cout<<"\tDESTRUCTOR :\ts_axon::~s_axon() for auron \t" <<pElementOfAuron->sNavn <<"\n";
+		cout<<"\tDESTRUCTOR :\ts_axon::~s_axon() for auron \t" <<pElementOfAuron->sName <<"\n";
 	#endif
 }
 //}2
 //}1
 //{1 * DENDRITE
 //{2 *** i_dendrite
-i_dendrite::i_dendrite( std::string sNavn /*="dendrite"*/) : timeInterface(sNavn)
+i_dendrite::i_dendrite( std::string sName /*="dendrite"*/) : timeInterface(sName)
 {}
 i_dendrite::~i_dendrite()
 {
@@ -594,12 +594,12 @@ s_dendrite::s_dendrite( s_auron* pPostSynAuron_Arg ) : i_dendrite("s_dendrite"),
 		cout<<"\tConstructor :\ts_dendrite::s_dendrite( s_auron* )\n";
 	#endif
 
-	bBlockInput_refractionTime = false;
+	//bBlockInput_refractionTime = false;
 }
 s_dendrite::~s_dendrite()
 {
  	#if DEBUG_PRINT_DESCTRUCTOR
-		cout<<"\tDesructor :\ts_dendrite::~s_dendrite() \t for auron \t" <<pElementOfAuron->sNavn <<"\n";
+		cout<<"\tDesructor :\ts_dendrite::~s_dendrite() \t for auron \t" <<pElementOfAuron->sName <<"\n";
 	#endif
 }
 //}2 s_dendrite 
@@ -614,7 +614,7 @@ K_dendrite::K_dendrite( K_auron* pPostSynAuron_Arg ) : i_dendrite("K_dendrite" )
 K_dendrite::~K_dendrite()
 {
 	#if DEBUG_PRINT_DESCTRUCTOR
-		cout<<"\tDestructor :\tK_dendrite::~K_dendrite() \t\t for auron \t" <<pElementOfAuron->sNavn <<"\n";
+		cout<<"\tDestructor :\tK_dendrite::~K_dendrite() \t\t for auron \t" <<pElementOfAuron->sName <<"\n";
 	#endif
 	// Destruct synapses by deleting the deallocated pointer
 	while( !pInputSynapses.empty() ){
@@ -658,7 +658,7 @@ inline void K_auron::changeKappa_diffArg( const double& dInputDerived_arg)//int 
 	writeKappaToLog();
 	#endif
 
-	DEBUG_L3( <<sNavn <<"\t:\tTid:\t" <<time_class::getTime() <<" ,\tKappa :\t" <<dActivityVariable );
+	DEBUG_L3( <<sName <<"\t:\tTid:\t" <<time_class::getTime() <<" ,\tKappa :\t" <<dActivityVariable );
 }
 //}1
 
@@ -704,155 +704,145 @@ inline void s_dendrite::newInputSignal( double dNewSignal_arg )
 	//pElementOfAuron->writeDepolToLog();
 } //}2
 
-//TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO HER ER EG TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 inline void s_dendrite::calculateLeakage()
 { //{2 /** Only for SANN:  ***/
-
+	// Check whether it is done already, this iter:
 	if( pElementOfAuron->ulTimestampLastInput != time_class::getTime() )
 	{
-		// regner ut, og trekker fra lekkasje av depol til postsyn neuron.
+		// Compute leakage, and subtract from neuron's depolarization 
 	 	pElementOfAuron->dActivityVariable *= pow( (double)(1-LEAKAGE_CONST), (double)(time_class::getTime() - pElementOfAuron->ulTimestampLastInput) );
 	
+		// Write depol to log after leakage is subtracted:
 		pElementOfAuron->writeDepolToLog();
-		// Gjøres i s_dendrite::newInputSignal(): 
-		//ulTimestampLastInput = time_class::getTime(); 
 	}
 } //}2
-
 //}1
 
 
 
 /*************************************************************
 ****** 													******
-******  		doTask() -- samla på en plass. 			******
+******  		doTask() -- collected in one place		******
 ****** 													******
 *************************************************************/
 
 //  		* 	SANN
-
-/* 	s_auron::doTask() 	:  		Fyrer A.P. */
+//{1
+/* 	s_auron::doTask() 	:  		Fire A.P. */
 inline void s_auron::doTask()
 { //{ ** AURON
 
 	if( ulTimestampPreviousFiring == time_class::getTime() )
 	{
-		DEBUG_L1(<<"\n\n************************\nFeil?\nTo fyringer på en iterasjon? \nFeilmelding au#103 @ auron.h\n************************\n\n");
+		DEBUG_L1(
+			<<"\n\n*********************\t\e[31mError\e[0m?\nTwo firings in one time step? \n"
+			<<"Error msg: au#103 @ neuroElement.cpp\n*********************\n\n");
 		return;
 	}
 
  	#if DEBUG_PRINT_LEVEL>0
-	cout<<"\t* \e[34ms\e[0m *\t\e[4;32mAction Potential\e[0;0m for neuron " <<sNavn <<"\t\t\t\t[time step] = [\e[1;33m" <<time_class::getTime() <<"\e[0m]\n";
+	cout<<"\t* \e[34ms\e[0m *\t\e[4;32mAction Potential\e[0;0m for auron " 
+		<<sName <<"\t\t\t\t[time step] = [\e[1;33m" <<time_class::getTime() <<"\e[0m]\n";
  	#endif
-	// FYRER A.P.:
-//	#if DEBUG_PRINT_LEVEL > 1
-//		cout	<<"\tS S " <<sNavn <<" | S | " <<sNavn <<" | S | S | S | | " <<sNavn <<" | S | | " <<sNavn <<" | S | | " <<sNavn <<"| S | S | S | S |\t"
-//				<<sNavn <<".doTask()\t\e[33mFYRER\e[0m neuron " <<sNavn <<".\t\t| S S | \t  | S |  \t  | S |\t\tS | " <<time_class::getTime() <<" |\n";
-//	#endif
 
-	//Axon hillock: send aksjonspotensial 	-- innkapsling gir at a xon skal ta hånd om all output:
-	// bestiller at a xon skal fyre NESTE tidsiterasjon. Simulerer tidsdelay i a xonet.
+	// Schedule axon hillock: Simulate action potential propagation in axon. Starts, next iteration.
 	time_class::addTaskIn_pWorkTaskQueue( pOutputAxon );
 
-
-	// Registrerer fyringstid (for feisjekk (over) osv.) 
+	// Save time of firing to ulTimestampPreviousFiring:
 	ulTimestampPreviousFiring = time_class::getTime();
 
-
-	//Resetter depol.verdi 
+	// Reset depol. value:
 	dActivityVariable = 0; 
 
+	// Log action potential time and vertical line in depol. plot
 	writeAPtoLog();
-
 } //}
-/* 	s_axon::doTask()   	:		Simulerer delay i axonet 	*/
+/* 	s_axon::doTask()   	:		Simulate spatiotemporal delay in the axon 	*/
 inline void s_axon::doTask()
 { //{ ** AXON
 
-	// Avblokkerer dendritt. Opner den for meir input. Foreløpig er dette måten 'refraction time' funker på.. (etter 2 ms-dendrite og auron overføring..)
-	// XXX id:asdf21344@neuroElement.cpp
+	// Unblock dendrite: when action potential reach the axon, the absolute refraction time of 1ms is over.
 	//pElementOfAuron->pInputDendrite ->bBlockInput_refractionTime = false;
 
 	#if DEBUG_PRINT_LEVEL > 3
- 	cout<<"s_axon::doTask()\tLegger inn alle outputsynapser i arbeidskø. Mdl. av auron: " <<pElementOfAuron->sNavn <<" - - - - - - - - - - - - - - - \n";
+	DEBUG_L3(
+			<<"s_axon::doTask()\tInserts all its output synapses to pWorkTaskQueue. Part of auron: "
+		   	<<pElementOfAuron->sName <<" - - - - - - - - - - - - - - - \n";
 	#endif
 
-	// Legger til alle utsynapser i pWorkTaskQueue:
+	// Push all output synapses to pWorkTaskQueue:
  	for( std::list<s_synapse*>::iterator iter = pOutputSynapses.begin(); iter != pOutputSynapses.end(); iter++ )
-	{ // Legger alle pOutputSynapses inn i time_class::pWorkTaskQueue: (FIFO-kø)
+	{ // Push to the back of pWorkTaskQueue: FIFO queue
 		time_class::addTaskIn_pWorkTaskQueue( *iter );
 	}
 
-	 //Skriver til logg etter refraction-period.
-	 //pElementOfAuron->writeDepolToLog();
+	// Print to log after refraction period:
+	//pElementOfAuron->writeDepolToLog();
 } //}
-/*  s_synapse::doTask() : 		Simulerer overføring i synapse */
+/*  s_synapse::doTask() : 		Simulate transmission in synapse */
 inline void s_synapse::doTask()
-{ //{2 ** SYNAPSE
+{ //{ ** SYNAPSE
 
-	// Dersom synapsen har inhibitorisk effekt: send inhibitorisk signal (subtraksjon). Ellers: eksiter postsyn. auron.
+	// If the synapse has inhibitory effect, send inhibitory signal (subtraction).
+	// This is done by multiplying with the factor (1-2*bInhibitoryEffect)
  	pPostNodeDendrite->newInputSignal( (1-2*bInhibitoryEffect) * 	( 1000 * dSynapticWeight )   );
 
-	// XXX Kalkulere syn.p.?
+	// Compute synaptic plasticity, here.
 
-	// Loggfører syn.weight
+	// Log synaptic transmission (will be imporant when synaptic plasticity is introduced):
 	synTransmission_logFile 	<<"\t" <<time_class::getTime() <<"\t" <<(1-2*bInhibitoryEffect) * dSynapticWeight
-						<<" ;   \t#Synpaptic weight\n" ;
-//	synTransmission_logFile.flush();
-
-} //}2
-/* s_dendrite::doTask() : 		Simulerer delay for input ved dendrite */
+								<<" ;   \t#Synaptic transmission\n" ;
+} //}
+/* s_dendrite::doTask() is a way of simulating spatiotemporal delay for the neuron */
 inline void s_dendrite::doTask()
-{ //{1 DENDRITE
-	// s_dendrite::doTask() er en metode for å få inn spatiotemporal delay for neuronet (simulere ikkje-instant overføring)
+{ //{ DENDRITE
+	// Insert next element in the signal path(the auron) to pWorkTaskQueue
 	time_class::addTaskIn_pWorkTaskQueue( pElementOfAuron );
-} //}1
+} //}
+//}1
 
 //			* 	KANN
-
-/* K_auron::doTask() 	: 		Fyrer A.P. */
+//{1
+/* K_auron::doTask() 	: 		Fire A.P. */
 inline void K_auron::doTask()
-{ //{1 ** AURON
-	//DEBUG_L2(<<"before:\tK_auron::doTask() \tgetCalculateDepol(\e[33m" <<dEstimatedTaskTime <<"\e[33m): " <<getCalculateDepol(dEstimatedTaskTime) <<"\n\n");
-	
+{ //{2 ** AURON
 	if( (unsigned)dEstimatedTaskTime == time_class::getTime() ){
-		// Not an error to fire:
-#if DEBUG_PRINT_LEVEL>2
-		cout<<"\t* \e[35mK\e[0m *\t\e[4;32mAction Potential\e[0;0m for neuron " <<sNavn <<"\t\t\t\t[time step, est.t.time] = [" 
+		// It is correct to fire, this instant:
+#if DEBUG_PRINT_LEVEL>2 // Print additional debug info if DEBUG_PRINT_LEVEL is more than 2
+		cout<<"\t* \e[35mK\e[0m *\t\e[4;32mAction Potential\e[0;0m for auron " <<sName <<"\t\t\t\t[time step, est.t.time] = [" 
 			<<time_class::getTime() <<"\e[0m,\e[32m " <<dEstimatedTaskTime <<"\e[0m]\n";
-#else
-		cout<<"\t* \e[35mK\e[0m *\t\e[4;32mAction Potential\e[0;0m for neuron " <<sNavn <<"\t\t\t\t[time step] = ["
+#else 					// Else, only print that it fires (same form as s_auron::doTask() )
+		cout<<"\t* \e[35mK\e[0m *\t\e[4;32mAction Potential\e[0;0m for auron " <<sName <<"\t\t\t\t[time step] = ["
 		   	<<time_class::getTime() <<"\e[0m]\n";
 #endif
-	}else if( dEstimatedTaskTime < time_class::getTime() ) //Dersom dEstimatedTaskTime er < enn nå-tid: at den skulle fyre forrige iter..
+	}else if( dEstimatedTaskTime < time_class::getTime() ) // If dEstimatedTaskTime is less than [now] means that this is a late firing!
 	{
-		// Error to fire at this time:
+		// Error to fire at this instant:
 		#if DEBUG_PRINT_LEVEL>0
-		cout<<"\t* * *\t\e[4;32mFIRING\e[31m ERROR\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t[time > (int)est.time]: [\e[1;33m" <<time_class::getTime() <<"\e[0m>\e[1;31m " <<dEstimatedTaskTime <<"\e[0m]\n";
+		cout<<"\t* * *\t\e[4;32mFIRING\e[31m ERROR\e[0;0m auron "
+		   	<<sName <<"\t\t\t\t\t[time > (int)est.time]: [\e[1;33m" 
+			<<time_class::getTime() <<"\e[0m>\e[1;31m " <<dEstimatedTaskTime <<"\e[0m]\n";
 		#endif
-	}else //if( dEstimatedTaskTime > time_class::getTime()+1 ) //Dersom dEstimatedTaskTime < nå-tid: at den skulle fyre forrige iter..
+	}else //if( dEstimatedTaskTime > time_class::getTime()+1 ) //Means that this is an early firing. Pring error message, and continue..
 	{
-		cout<<"\t* * *\t\e[4;32mFIRING\e[31m ERROR\e[0;0m neuron " <<sNavn <<"\t\t\t\t\t[est.t.time != [now] : [tid, (int)est.tid] = [\e[1;33m" <<time_class::getTime() <<"\e[0m<\e[1;31m " <<dEstimatedTaskTime <<"\e[0m]\n";
+		cout<<"\t* * *\t\e[4;32mFIRING\e[31m ERROR\e[0;0m auron " 
+			<<sName <<"\t\t\t\t\t[time < (int)est.time]: [\e[1;33m" 
+			<<time_class::getTime() <<"\e[0m<\e[1;31m " <<dEstimatedTaskTime <<"\e[0m]\n";
 		DEBUG_L2( <<"Depol.:\t" <<getCalculateDepol());
-		exit(2); // XXX Terminate
+		cerr<<"TERMINATES\n";
+		exit(EXIT_FAILURE); // XXX Terminate
 	}
 
-
-
-	//Utskrift til skjerm:
+	// Print to screen:
 	DEBUG_L2(
-			<<sNavn <<".doTask()" <<"\t[t=" <<time_class::getTime() <<" est.tt:" <<dEstimatedTaskTime <<"]\t[v(t),v(t_n)=[\e[01;31m" 
+			<<sName <<".doTask()" <<"\t[t=" <<time_class::getTime() <<" est.tt:" <<dEstimatedTaskTime <<"]\t[v(t),v(t_n)=[\e[01;31m" 
 			<<getCalculateDepol(dEstimatedTaskTime) <<"\e[0m, " <<getCalculateDepol()
-			<<"\t | K=" <<dActivityVariable  <<"\tSiste v_0:" <<dDepolAtStartOfTimeWindow 
+			<<"\t | K=" <<dActivityVariable  <<"\tLast v_0:" <<dDepolAtStartOfTimeWindow 
 			);
 
-
 	#if LOG_DEPOL
-		// For more accurate depol.-curves (log files) //{
-		#if GCC
-			// Set precision for output: only works with #include <iomanip>, that does not work for clang++ compiler..
-			depol_logFile.precision(11);
-		#endif
+		// For higher precision on depol. log: Set precision for logging of double-variable: //{
+		depol_logFile.precision(11);
 	
 		// Write action action-potential log entry: one at Firing Thread and one at x-axis at time dEstimatedTaskTime:
 		depol_logFile 	<<dEstimatedTaskTime <<"\t" <<FIRING_THRESHOLD <<"; \t #Action potential \t\tAPAPAP\n" ;
@@ -863,43 +853,41 @@ inline void K_auron::doTask()
 
 
 	// Initialize new 'time window':
-	// 	(Set dStartOfTimeWindow to dEstimatedTaskTime)
+	// 	 (Set dStartOfTimeWindow to dEstimatedTaskTime)
 	dDepolAtStartOfTimeWindow = 0; 
-	dStartOfTimeWindow = dEstimatedTaskTime; // IMPORTANT: use dEstimatedTaskTime instead of dStartOfNextTimeWindow for firing. 
+	dStartOfTimeWindow = dEstimatedTaskTime; // IMPORTANT: use dEstimatedTaskTime when firing. 
 
 	// Save time of firing: When the period is recalculated, the exact start of time window is imporant. 
-	// 	- Do not use ulTime because it is always less than the exact firing time: ln(-X) -> \infty
+	// 	- Do not use ulTime because it is always less than the exact firing time: ln(-X) = imaginary number
 	dLastFiringTime = dEstimatedTaskTime;
 
-	// It is important that the esimatedPeriod is computed after dEstimatedTaskTime += dLastCalculatedPeriod !
-	// 	If I run estimateFiringTimes() or doCalculation() before, a large error is the result.
+	// It is important that estimatedPeriod is computed after dEstimatedTaskTime += dLastCalculatedPeriod !
+	// 	If estimateFiringTimes() or doCalculation() is executed first, a large error is the result.
 
-	// Logger AP (vertikal strek)
-	writeAPtoLog(); //Viktig: Må gjøres etter at dLastFiringTime er skrevet til!
+	// Log AP (vertical line in depol. plot and also log time of firing)
+	writeAPtoLog(); // Important: Have to be executed after dLastFiringTime is written to.
+	
+	// Because of the new mechanism that enables multiple firings every time step:
+	// TODO Do not think estimateFiringTimes(double) is different from estimateFiringTimes(void) TODO Check and fix!
+	// estimateFiringTimes(dLastFiringTime); 
+	estimateFiringTimes();
 
-	// Pga. nye mekansimen som gjør det mulig å fyre denne iter: (estimateFiringTimes(double) oppdaterer dEstimatedTaskTime)
-	// TODO Trur ikkje denne gjør noko spesiellt: samme som estimateFiringTimes(void)! XXX Sjekk og fiks! TODO
-	estimateFiringTimes(dLastFiringTime); // Kan også bruke dLastFiringTime 			id:est490@neuroElement.cpp
-	//estimateFiringTimes(); // bruker ulTime..
-
-	// Sjekker om den skal fyre igjen denne iter:
-	if( dEstimatedTaskTime < time_class::getTime()+1 )
-		time_class::addTaskInPresentTimeIteration(this);
-
-	DEBUG_L2(<<"AFTER\tK_auron::doTask() \tgetCalculateDepol(\e[33m" <<dLastFiringTime <<"\e[0m): " <<getCalculateDepol(dEstimatedTaskTime) );
-} //}1
-/* K_synapse::doTask() 	: 		Simulerer overføring i synapsen */
+	// Check if the next estimated firing time is in the present time step:
+	//if( dEstimatedTaskTime < time_class::getTime()+1 )
+	if( (int)dEstimatedTaskTime == time_class::getTime() )
+		time_class::addTaskInPresentTimeStep(this);
+} //}2
+/* K_synapse::doTask() 	: 		Simulates transmission in the synapse */
 inline void K_synapse::doTask()
-{ //{1 ** SYNAPSE
-
-	// Istedenfor å sende inn pos. eller neg. signal avhengig av bInhibitoryEffect: [ 1-2*bInhibitoryEffect ]  Gir enten +1 eller -1. 
+{ //{2 ** SYNAPSE
+	// Instead of having an if-sentence, one call is used to enable more pipelining
+	// 	(Multiply signal with [ 1-2*bInhibitoryEffect ] to get the right transmission)
 	pPostNodeDendrite->newInputSignal( (1-2*bInhibitoryEffect) * dSynapticWeight * pPreNodeAuron->dChangeInPeriodINVERSE );
 
-	
 	double dPresynDeltaPeriodeINVERSE_temp =  pPreNodeAuron->dChangeInPeriodINVERSE;
 	#if DEBUG_PRINT_LEVEL > 2
  	cout<<"K_synapse::doTask()\tdSynapticWeight: " <<dSynapticWeight 
-		<<", preNode->dChangeInPeriodINVERSE: " <<dPresynDeltaPeriodeINVERSE_temp <<"\tOverføring: "
+		<<", preNode->dChangeInPeriodINVERSE: " <<dPresynDeltaPeriodeINVERSE_temp <<"\tTransmission: "
 		<<(1-2*bInhibitoryEffect) * dSynapticWeight * dPresynDeltaPeriodeINVERSE_temp
 		<<endl;
 	#endif
@@ -909,23 +897,23 @@ inline void K_synapse::doTask()
 		<<(1-2*bInhibitoryEffect) * dSynapticWeight * dPresynDeltaPeriodeINVERSE_temp
 		<<" ; \n";
 //	synTransmission_logFile.flush();
-} //}1
+} //}2
 
-// TODO SKAL VEKK: 
+// Brutal error check. For further work: remove K_dendrite!
 inline void K_dendrite::doTask()
-{ // DENDRITE (ikkje i bruk)
-	// TODO Trur ikkje denne skal være med lenger. Legger til brutal feilsjekk: exit(-1);
-	cout<<"\n\nBrutal feilsjekk @ K_dendrite::doTask() : exit(-1);\n\n";
+{ // DENDRITE (not in use)
+	// XXX Brutal error check: This funtion is never to be called..
+	cout<<"\n\nBrutal feilsjekk @ K_dendrite::doTask() : exit(EXIT_FAILURE);\n\n";
 
-	exit(-1);
+	exit(EXIT_FAILURE);
 } 
 
-//}1            *       KANN slutt
+//}1            *       KANN end
 
 // 		* 	time_class
-/* time_class::doTask() 	: 		Organiserer tid: doTask() itererer tid og holder pWorkTaskQueue og tid i orden etter definerte regler */
+/* time_class::doTask()	: 	Organize time: iterate time and ceep pWorkTaskQueue and time organized according to defined rules */
 void time_class::doTask()
-{ 	//{1 
+{ 	//{2
 	// Check whether simulation is complete: in this case, initialize graceful termination.
 	if( ulTime >= ulTotalNumberOfTimeSteps )
 	{
@@ -935,39 +923,16 @@ void time_class::doTask()
 
 	#if PRINT_TIME_ITERATION
 	// Increase by one (ulTime+1) to show t_n for the new time step.
-	if(ulTime % uNumberOfIterationsBetweenPrintToScreen  == 0)		
-		cout<<"\e[33m"	<<ulTime <<"\e[0m" <<"\t TIME \t- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - = "<<ulTime <<"\n";
+	if((ulTime+1) % uNumberOfIterationsBetweenPrintToScreen  == 0)		
+		cout<<"\e[33m"	<<ulTime+1 <<"\e[0m" <<"\t TIME\t- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - = "<<ulTime <<"\n";
 	#if DEBUG_PRINT_LEVEL>3
-	if(ulTime % PRINT_TIME_EVERY_Nth_ITER  == 0)		
-		cout<<"\n\t- - - In time_class::doTask() - Increase time from :   - - - - = \e[4;39m"	<<ulTime <<" -> " <<ulTime+1 <<"\e[0m :\n";
+	cout<<"\e[33m"	<<ulTime <<"->" <<ulTime+1 <<"\e[0m" <<"\t- - -  time_class::doTask() - Increase time from :   - - - - = \e[4;39m"
+		<<ulTime <<" -> " <<ulTime+1 <<"\e[0m :\n";
 	#endif
 	#endif
-
 
 	// Push self-pointer to back of pWorkTaskQueue:
 	pWorkTaskQueue.push_back(this);	
-
-
-	/*************************************************
-	* Push scheduled tasks to back of pWorkTaskQueue *  	DEPRECATED
-	*************************************************/
-// Kommentert ut fordi dette ordnes i doCalculation()
-// XXX Trur dette er deprecated! Kommenterer ut! //{
-#if 0 
-	for( std::list<timeInterface*>::iterator pPE_iter = pPeriodicElements.begin() ; pPE_iter != pPeriodicElements.end() ; pPE_iter++ )
-	{
-		// Typekonverderer dEstimatedTaskTime til unsigned long, og sjekker om elementet er planlagt å gjennomføre noe neste iter (legger til 0.5 for å få rett avrunding):
-		if( (unsigned long)( (*pPE_iter)->dEstimatedTaskTime) == ulTime )
-		{
-			cout<<"dEstimatedTaskTime == ulTime: \e[1;34mlegger\e[0m til " <<(*pPE_iter)->sClassName <<" i pWorkTaskQueue\n";
-			//Denne legger til elementet på slutten. Det er litt feil.
-			//addTaskIn_pWorkTaskQueue( (*pPE_iter) );
-			addTaskInPresentTimeIteration( (*pPE_iter) );
-			//Skal difor heller bruke addTaskInPresentTimeIteration() TODO Da må eg også flytte pWorkTaskQueue.push_back(this) til toppen (heilt i toppen?)
-		}
- 	}
-#endif //}
-
 
 	/******************************
 	* Update all K_sensory_aurons *
@@ -983,17 +948,13 @@ void time_class::doTask()
 	s_sensory_auron::updateAllSensorAurons();
 	#endif
 
-
-// XXX Denne sto over #ifKANN og #ifSANN. Tenker at dette er meir rett..
 	// Commence scheduled computations:
 	doCalculation();
 
 	// Iterate t_n:
 	ulTime++;
-}//}1
-
-
-
+}//}2
+//}1
 
 
 /******************************************************************
@@ -1001,201 +962,61 @@ void time_class::doTask()
 ****** 			doCalculation() -- samla på en plass 		*******
 ****** 														*******
 ******************************************************************/
-// TODO Vurder å ta inn double-format tid.
 void K_auron::doCalculation()
 { //{
- 	DEBUG_L3(<<"K_auron " <<sNavn <<".doCalculation()\t\t" <<sNavn <<".doCalculation()\t\tTid: " <<time_class::getTime() );
+ 	DEBUG_L3(<<"K_auron " <<sName <<".doCalculation()\t\t" <<sName <<".doCalculation()\t\tTime: " <<time_class::getTime() );
  	DEBUG_L4(<<"[K, T] = " <<dActivityVariable <<", " <<FIRING_THRESHOLD );
 
-	// Lagrer v_0 og t_0 for neste 'time window':
-	//dDepolAtStartOfTimeWindow = getCalculateDepol(time_class::getTime());
+	// Initialize new time window: Save v_0 and t_0 at time of initiation
 	dDepolAtStartOfTimeWindow = getCalculateDepol();
 	dStartOfTimeWindow = time_class::getTime();
 
-#if 0 //{ UTKOMMENTERT
-	// Skal gjøre slik at dette er redundant test: DEFINERER AT ALLE AURON OPPDATERES KVAR ITER! TODO TODO
-	if( (unsigned)dStartOfTimeWindow < time_class::getTime()+1 ){
-		// Viktig å kalkulere depol med GAMMEL Kappa! Ellers får vi hopp i depol!
-		// Lagrer v_0 og t_0 for neste 'time window':
-		dDepolAtStartOfTimeWindow = getCalculateDepol();
-		// TODO Dette må endres når eg begynner med synaptisk input for nodene! Da blir det litt annaleis ?
-		//dStartOfTimeWindow = dStartOfNextTimeWindow; 
-		dStartOfTimeWindow = time_class::getTime();
-	}else{
-		// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-		// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-		
-		// Tar bort feilene fra 0'te iter:
-		if( time_class::getTime() > 0){
-			cerr<<"ELSE: dStartOfTimeWindow > TID :\t" <<dStartOfTimeWindow <<" > " <<time_class::getTime() <<"\t\tDette skal aldri skje!\tsleep(5) asdf235@neuroElement.cpp\n";
-			sleep(5);
-		}
-	}
-#endif	//}
+	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+	// Do not use edge transmission. This does not make the implementation more effective because a floating point variable is used.
+	// 	(edge transmission as the derivative is intended to make implementation more effective, as only those with changed transmission
+	// 		have to be computed. When utilizing double--variable, this is always. Edge transmission only makes impl. more complex)
+	// TODO remove dChangeInKappa_this_iter - mechanism!
+	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 
-	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-	// DEPRECATED!
-	// Linja under, dActivityVariable += dChangeInKappa_this_iter SKAL VEKK!
-	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-
-	// Oppdaterer Kappa
+	// Update Kappa
 	dActivityVariable += dChangeInKappa_this_iter;
 	dChangeInKappa_this_iter = 0;
 
-	// Beregner periode og estimert fyringstid for neste spike:
-	//estimateFiringTimes(time_class::getTime()); // doCalculation() skjer alltid først i kvar iter. 		id:est490@neuroElement.cpp
-	estimateFiringTimes(); //Bruker ulTime siden dette skjer først, kvar iter..
+	// Estimate period and next firing time
+	estimateFiringTimes(); // Use ulTime-variant, as this always happens first every iter.
 
 	writeDepolToLog();
 
-	// XXX Dette er nytt!
-	// FETT! Dette gjør at størrelsen på comp. time step bare gir kor ofte kappa skal oppdateres. Fyring, og init av time window kan skje heilt separat fra dette!
-	// Sjekker om den skal fyre denne iter: (før neste iter)
-	// dEstimatedTaskTime RUNDES ALLTID NED!! Skal ikkje sjekke om den er over eller under halvegs, bare kva steg den har starta på..
-
-	// Hugs at eg ser på neste iter: dEstimatedTaskTime < t+2 istadenfor +1, skriver derfor ut [TID, ..]=[getTime()+1,..]
-	if( dEstimatedTaskTime < time_class::getTime()+2 ){ //TODO
+	// Check whether auron fires before next iteration ( estTt<t+1+1 because time is iterated after doCalculation() )
+	if( dEstimatedTaskTime < time_class::getTime()+2 ){
 		DEBUG_L2(<<"K_auron::doCalc()\tK_auron schduled to fire this iteration:\n\t\t[TID, dEstimatedTaskTime] :\t[" 
 				 <<time_class::getTime()+1 <<", " <<dEstimatedTaskTime <<"]");
-		time_class::addTaskInPresentTimeIteration( this );
-//cerr<<"K_auron::doCalc(): Legger til fyring\t" <<"\t[TID, dEstimatedTaskTime] :\t[" <<time_class::getTime()	<<", " <<dEstimatedTaskTime <<"]\n";
+		time_class::addTaskInPresentTimeStep( this );
 	}
 }
 
-
-
-
-
-
-inline void K_auron::estimateFiringTimes(const double& dTimeInstant_arg)
-{ //{
-	if( dActivityVariable > FIRING_THRESHOLD ){
-
-		// Berenger dPeriodINVERSE og dChangeInPeriodINVERSE:
-		// dLastCalculatedPeriod gir synaptisk overføring. Perioden er uavhengig av spatiotemporal effekts. Dermed: +A simulerer en refraction time på A tidssteg. ref:asdf5415@neuroElement.cpp
-		dLastCalculatedPeriod  = (( log( dActivityVariable / (dActivityVariable - (double)FIRING_THRESHOLD) ) / (double)LEAKAGE_CONST)) 	;	//							+1 	
-#if 0 // kommenterer ut 13.03 Vettafaen om eg trenger det..
-		static double dPeriodInverse_static_local;
-
-		dPeriodInverse_static_local = 1/dLastCalculatedPeriod;
-		dChangeInPeriodINVERSE = dPeriodInverse_static_local - dPeriodINVERSE;
-		dPeriodINVERSE = dPeriodInverse_static_local;
-
-		// Beregner v_0 og fyringstid P_d(K)
-		DEBUG_L3(
-				<<"estimatedPeriod(): \t[t_0, K, v_0]: \t[" <<dStartOfTimeWindow <<", " <<dActivityVariable <<", " <<dDepolAtStartOfTimeWindow <<"]:\t"
-				<<"\t\tand finally getCalculateDepol(" <<dTimeInstant_arg <<") = \e[33;1m" <<getCalculateDepol(dTimeInstant_arg) <<"\e[0;0m\n"
-				);
-#endif
-
-// TODO XXX Denne er diskret tid? Fra starten av denne iter?
-		// Oppdaterer dEstimatedTaskTime! 
-		dEstimatedTaskTime = ( dStartOfTimeWindow 	+ log( (dActivityVariable-dDepolAtStartOfTimeWindow)/(dActivityVariable-(double)FIRING_THRESHOLD) )   / (double)LEAKAGE_CONST );
-		//DEBUG_L2(<<"\t\t\e[32mdEstimatedTaskTime\e[0m for neuron " <<sNavn <<", time:" <<dTimeInstant_arg <<" = \e[39;1m" <<dEstimatedTaskTime <<"\e[0;0m");
-
-	}else{ // Kommer hit dersom dActivityVariable <= FIRING_THRESHOLD
-		//cout<<"\n\nadf52908i@neuroElement.cpp \e[33mIkkje implementert ferdig estimatedPeriod(dTime) for K<T\e[0m\n\n";
-		//exit(EXIT_FAILURE);
-
-		// Set period (close) to infty.
-		dLastCalculatedPeriod  = DBL_MAX;
-		dEstimatedTaskTime = DBL_MAX;
-#if 0 // kommenterer ut 13.03 Trur ikkje eg trenger det til rapporten (først nyttig når syn.trans)
-		dChangeInPeriodINVERSE = -dPeriodINVERSE;
-		dPeriodINVERSE = 0;
-
-		// Set estimated firing time to the maximal value(ca. 10^308)
-		dEstimatedTaskTime = DBL_MAX;
-
-		DEBUG_L2(
-				<<"estimatedPeriod(): \t[t_0, K, v_0, t^f]: \t[" <<dStartOfTimeWindow <<", " <<dActivityVariable <<", " <<dDepolAtStartOfTimeWindow <<", "
-			   	<<dEstimatedTaskTime	<<"]:\t"
-				<<"\t\tand finally getCalculateDepol(" <<dTimeInstant_arg <<") = \e[31;0m" <<getCalculateDepol(dTimeInstant_arg) <<"\e[0;0m\n"
-				);
-#endif
-
-		//exit(0);
-	} //slutt if( dActivityVariable > FIRING_THRESHOLD ){X}else{ ... }
-} //}
-
-// Ny variant, uten float-tid:
+/* estimateFiringTimes() - estimates period and next firing time */
 inline void K_auron::estimateFiringTimes()
 { //{
-
 	if( dActivityVariable < FIRING_THRESHOLD ){
 		DEBUG_L3(
-				<<"\n\nadf52908i@neuroElement.cpp \e[33mIkkje implementert ferdig\e[0m estimatedPeriod(dTime) for K<T\n\n"
+				<<"\n\nadf52908i@neuroElement.cpp \e[33mestimatedPeriod(dTime) for K<T\e[0m\n\n"
 				);
 		// Set isi-period to max:
 		dLastCalculatedPeriod  = DBL_MAX;
 		dEstimatedTaskTime = DBL_MAX;
 	}else{
-		dLastCalculatedPeriod =((log( dActivityVariable / (dActivityVariable - (double)FIRING_THRESHOLD) ) / (double)LEAKAGE_CONST));	//							+1 	
+		dLastCalculatedPeriod =((log( dActivityVariable / (dActivityVariable - (double)FIRING_THRESHOLD) ) / (double)LEAKAGE_CONST));
 		dEstimatedTaskTime = ( dStartOfTimeWindow 	+ log( (dActivityVariable-dDepolAtStartOfTimeWindow)/(dActivityVariable 
 														- (double)FIRING_THRESHOLD) )   / (double)LEAKAGE_CONST );
 	}
-
-#if 0
-	if( dActivityVariable > FIRING_THRESHOLD ){
-
-		// Berenger dPeriodINVERSE og dChangeInPeriodINVERSE:
-		// dLastCalculatedPeriod gir synaptisk overføring. Perioden er uavhengig av spatiotemporal effekts. Dermed: +A simulerer en refraction time på A tidssteg. ref:asdf5415@neuroElement.cpp
-		dLastCalculatedPeriod  = (( log( dActivityVariable / (dActivityVariable - (double)FIRING_THRESHOLD) ) / (double)LEAKAGE_CONST)) 	;	//							+1 	
-#if 0 // kommenterer ut 13.03 Vettafaen om eg trenger det..
-		static double dPeriodInverse_static_local;
-
-		dPeriodInverse_static_local = 1/dLastCalculatedPeriod;
-		dChangeInPeriodINVERSE = dPeriodInverse_static_local - dPeriodINVERSE;
-		dPeriodINVERSE = dPeriodInverse_static_local;
-
-		// Beregner v_0 og fyringstid P_d(K)
-		DEBUG_L3(
-				<<"estimatedPeriod(): \t[t_0, K, v_0]: \t[" <<dStartOfTimeWindow <<", " <<dActivityVariable <<", " <<dDepolAtStartOfTimeWindow <<"]:\t"
-				<<"\t\tand finally getCalculateDepol(" <<time_class::getTime() <<") = \e[33;1m" <<getCalculateDepol(time_class::getTime()) <<"\e[0;0m\n"
-				);
-#endif
-
-// TODO XXX Denne er diskret tid? Fra starten av denne iter?
-		// Oppdaterer dEstimatedTaskTime! 
-		dEstimatedTaskTime = ( dStartOfTimeWindow 	+ log( (dActivityVariable-dDepolAtStartOfTimeWindow)/(dActivityVariable-(double)FIRING_THRESHOLD) )   / (double)LEAKAGE_CONST );
-		//DEBUG_L2(<<"\t\t\e[32mdEstimatedTaskTime\e[0m for neuron " <<sNavn <<", time:" <<time_class::getTime() <<" = \e[39;1m" <<dEstimatedTaskTime <<"\e[0;0m");
-
-	}else{ // Kommer hit dersom dActivityVariable <= FIRING_THRESHOLD
-		DEBUG_L2(
-				<<"\n\nadf52908i@neuroElement.cpp \e[33mIkkje implementert ferdig\e[0m estimatedPeriod(dTime) for K<T\n\n"
-				);
-		//exit(EXIT_FAILURE);
-
-		// Set period (close) to infty.
-		dLastCalculatedPeriod  = DBL_MAX;
-		dEstimatedTaskTime = DBL_MAX;
-#if 0 // kommenterer ut 13.03 Trur ikkje eg trenger det til rapporten (først nyttig når syn.trans)
-		dChangeInPeriodINVERSE = -dPeriodINVERSE;
-		dPeriodINVERSE = 0;
-
-		// Set estimated firing time to the maximal value(ca. 10^308)
-		dEstimatedTaskTime = DBL_MAX;
-
-		DEBUG_L2(
-				<<"estimatedPeriod(): \t[t_0, K, v_0, t^f]: \t[" <<dStartOfTimeWindow <<", " <<dActivityVariable <<", " <<dDepolAtStartOfTimeWindow <<", "
-			   	<<dEstimatedTaskTime	<<"]:\t"
-				<<"\t\tand finally getCalculateDepol(" <<time_class::getTime() <<") = \e[31;0m" <<getCalculateDepol() <<"\e[0;0m\n"
-				);
-#endif
-
-		//exit(0);
-	} //slutt if( dActivityVariable > FIRING_THRESHOLD ){X}else{ ... }
-#endif
 } //}
 
-
-
-	
 /**************************************************************
-****** 		K_sensory_auron - update sensor funktions  	******* 			XXX ok XXX
+****** 		K_sensory_auron - update sensor funktions  	*******
 **************************************************************/
 void K_sensory_auron::updateAllSensorAurons()
-{ //{
+{ //{1
 	// Iterate through list pAllSensoryAurons and call updateAllSensorAurons() for each element
 	for( std::list<K_sensory_auron*>::iterator sensorIter = pAllSensoryAurons.begin(); sensorIter != pAllSensoryAurons.end(); sensorIter++)
 	{
@@ -1218,12 +1039,13 @@ inline void K_sensory_auron::updateSensoryValue()
 	
 
 /**************************************************************
-****** 		s_sensory_auron - update sensor funktions  	******* 		XXX almost ok XXX
+****** 		s_sensory_auron - update sensor funktions  	*******
 **************************************************************/
 inline void s_sensory_auron::updateAllSensorAurons()
 { //{
 	// Iterate through list pAllSensoryAurons and call updateAllSensorAurons() for each element
-	for( std::list<s_sensory_auron*>::iterator sensorIter = pAllSensoryAurons.begin() 	; 	sensorIter != pAllSensoryAurons.end() ; sensorIter++)
+	for( std::list<s_sensory_auron*>::iterator sensorIter = pAllSensoryAurons.begin() ;
+		 sensorIter != pAllSensoryAurons.end() ; sensorIter++)
 	{
 		(*sensorIter)->updateSensoryValue();
 	}
@@ -1231,96 +1053,77 @@ inline void s_sensory_auron::updateAllSensorAurons()
 
 inline void s_sensory_auron::updateSensoryValue()
 { //{
-//	static double sdLastValue = 0;
-//	static double sdValue = 0;
-//	sdLastValue = sdValue;
-//	sdValue = (*pSensorFunction)();
-//	pInputDendrite->newInputSignal( ( sdValue ));
 	pInputDendrite->newInputSignal( ( (*pSensorFunction)() )); 
 } //}
-
 
 /******************************
 **   Recalculate Kappa :     **
 ******************************/
 void recalcKappaClass::doTask()
 { //{
+	// Recalculate Kappa for the associated K_auron.
+	// 	 - calls K_auron::recalculateKappa() that recalculates kappa for that K_auron object and returns new Kappa
+	double dError = pKappaAuron_obj->recalculateKappa();
 
-	// Rekalkuler Kappa.
-	// Trenger en funksjon K_auron::recalculateKappa() som
-	// 	- rekalkulerer kappa for auronet.
-	// 	- returnerer rekalkulert kappa.
-	double dFeil;
-
-	dFeil = pKappaAuron_obj->recalculateKappa();
-
+	// Use a FIR filter to compute next calculation
 	static double sdSecondLastValue =0;
 	static double sdLastValue 		=0;
 	static double sdValue 			=0;
 	static double sdTemp;
 
-	// Beregner når neste oppdatering av recalcKappaClass-kjøring:
-	// Med sigmoid-kurve (beskrevet i FDP-rapport, med 3-ledds FIR-effekt)
+	// Compute when next run of recalcKappaClass.doTask()
+	// 	 (from the altered sigmoid curve, described in MS report, with FIR effect -- moving average)
 	sdTemp = sdValue;
-	sdValue = ( (RECALC_c1+RECALC_c2) - (RECALC_c2 / ( 1+exp(-(RECALC_c4*dFeil - RECALC_c3)) )) 		+ 	sdLastValue + sdSecondLastValue )  / 3 ;
+	sdValue = ( (RECALC_c1+RECALC_c2) - (RECALC_c2 / ( 1+exp(-(RECALC_c4*dError - RECALC_c3)) )) 
+				+ 	sdLastValue + sdSecondLastValue )  / 3 ;
 	sdSecondLastValue = sdLastValue;
 	sdLastValue = sdTemp;
 	
 	#if DEBUG_PRINT_LEVEL > 2
-	cout<<pKappaAuron_obj->sNavn <<" - recalcKappaClass::doTask() :\tny periode for recalc kappa: \t" <<sdValue <<"\t\tfor feil: " <<dFeil <<"\t\tTid:\t" <<time_class::getTime() <<endl;
+	cout<<pKappaAuron_obj->sName <<" - recalcKappaClass::doTask() :\tNew period for recalcKappaClass: \t"
+	   	<<sdValue <<"\t\tfor error: " <<dError <<"\t\tTime:\t" <<time_class::getTime() <<endl;
 	#endif
 
-	// Schedule recalcKappaClass til å kjøre på kalkulert tid:
+	// Schedule recalcKappaClass to run at the computed time:
 	dEstimatedTaskTime = (double)time_class::getTime() + sdValue;
-
 } //}
 
+/****************************************
+* K_auron::recalculateKappa() 			*
+* 	-ret: Error from old kappa to new. 	*
+****************************************/
 inline double K_auron::recalculateKappa()
 { //{
-	// Plan:
-	//  - Rekalkulerer kappa for dendrite.
-	// 		- skal hente ut K_ij fra alle innsynapsene. Dette kan den gjøre ved å kalle K_synapse::getWij();
+	// recalcKappaClass::doTask() calls the associated K_auron's recalculateKappa() function.
+	// 	 This funtion goes through all input synapses, and sums their transmission K_ij from K_synapse::getWij()
+
+	// Find new kappa by calling pInputDendrite's recalculateKappa() function.
 	double dKappa_temp = pInputDendrite->recalculateKappa();
+	// Find error: to be used to schedule next calculation
 	double dKappaFeil_temp = dActivityVariable - dKappa_temp;
 
-	// TESTER: Blir bare bullshit! XXX
-	// Test på nytt! (skrevet: 22.10.2011)
-	double dKappa_derived_temp = 0;
- 	for( std::list<K_synapse*>::iterator iter = pInputDendrite->pInputSynapses.begin() ; iter!=pInputDendrite->pInputSynapses.end() ; iter++)
-	{
-		#if DEBUG_PRINT_LEVEL > 2
-		cout<<"Derived Transmission: " <<(*iter)->getDerivativeOfTransmission() <<endl;
-		#endif
- 		dKappa_derived_temp += (*iter)->getDerivativeOfTransmission();
-	}
-	// TIL her.
-
-	#if DEBUG_PRINT_LEVEL > 2
-	cout<<"[Kappa, dKappa_temp, dKappaFeil_temp] : " <<dActivityVariable <<", " <<dKappa_temp <<", " <<dKappaFeil_temp <<"\tderived-transmission: " <<dKappa_derived_temp
-		<<" => Kappa+transmission = " <<dActivityVariable+dKappa_derived_temp
-		<<endl;
-	#endif
+	// Set K_auron's Kappa to be the value found by K_dendrite
 	dActivityVariable = dKappa_temp;
-
 
 	return dKappaFeil_temp;	
 } //}
 
+/* K_sensory_auron have been defined to receive no synapses in this work */
 inline double K_sensory_auron::recalculateKappa()
 {
 	// In this work, a sensory auron does not receive input from other neurons.
 
-	// TODO No er dette bare en sensor (Har ikkje muligheten for å få input fra andre neuron. Dette kan eg kanskje implementere om eg har tid..)
-	#if 0
-	static double dOldActivityVariable;
-	dOldActivityVariable = dActivityVariable;
-	updateSensoryValue();
-	// Er dette rett :
-	return dActivityVariable-dOldActivityVariable;
-	#endif
 	return 0;
 }
-// SKAL VEKK:
+
+/****************************************************
+* K_dendrite::recalculateKappa() 					*
+* 	-arg: 	void 									*
+* 	-ret: 	double, new kappa 						*
+* 													
+* K_dendrite handles the recalculation of kappa 	*
+*	(sums size of all input transmissions)  		*
+ ***************************************************/
 inline double K_dendrite::recalculateKappa()
 { //{
 	double dKappa_temp = 0;
@@ -1340,86 +1143,53 @@ inline double K_dendrite::recalculateKappa()
 *******************/
 
 
-inline void time_class::addTaskInPresentTimeIteration(timeInterface* pTimeClassArg_withTask)
+inline void time_class::addTaskInPresentTimeStep(timeInterface* pObjWithTask_arg)
 {
-	DEBUG_L3(<<"Inne i time_class::addTaskInPresentTimeIteration(..)");
+	DEBUG_L3(<<"time_class::addTaskInPresentTimeStep(..)");
 
-	// Finner rett plass for nye elementet (sortert etter dEstimatedTaskTime)
+	// Finds right place for the new element. Insert at right place according to dEstimatedTaskTime
 	for( std::list<timeInterface*>::iterator iter = pWorkTaskQueue.begin(); iter != pWorkTaskQueue.end(); iter++ )
 	{
-		//cout<<"\e[35mSJEKKER\e[0m om det er type: time_class*\t[sCName, typeid().name()] = [" <<(*iter)->sClassName <<", " <<typeid(iter).name() <<"]\t\nid_asdf452@neuroElement.cpp\n";
 
-/*********** (BARE UTSKRIFT) ************/
-#if 0	//{ Sjekker alle K_auron:
-		if((*iter)->sClassName =="K_auron"){
-			cout<<"\e[31mdEstimatedTT\e[0m for [(*iter) pArg] = [" <<(*iter)->dEstimatedTaskTime <<", " <<pTimeClassArg_withTask->dEstimatedTaskTime <<"]\t\tAv type ["
-				<<(*iter)->sClassName <<" " <<(*iter)->sClassName <<"]\n";
-			if(iter == pWorkTaskQueue.end()){
-				cout<<"iter == pWorkTaskQueue.end()\n\n";
-			}
-		}
-#endif
-		//}
-/*********/
-
-
-		// Dersom iter-elementets dEstimatedTaskTime er etter det nye elementets dEstimatedTaskTime, er dette første oppføring som skal fyre etter (*iter). Legger dermed til elementet før dette.
-		if( (*iter)->dEstimatedTaskTime > pTimeClassArg_withTask->dEstimatedTaskTime){
- 			DEBUG_L3(<<"insert element in right place in in pWorkTaskQueue(in the present iteration)");
-			pWorkTaskQueue.insert(iter, pTimeClassArg_withTask); 	//"insert()" inserts element before [iter].
+		// If the iter-element's dEstimatedTaskTime if after the new element's, insert element immediately after iter
+		if( (*iter)->dEstimatedTaskTime > pObjWithTask_arg->dEstimatedTaskTime){
+ 			DEBUG_L3(<<"insert element at the right place in pWorkTaskQueue(in the present iteration)");
+			pWorkTaskQueue.insert(iter, pObjWithTask_arg); 	//"insert()" inserts element before [iter].
 			return;
 		}
 
-		// Sjekker om gjeldende element er av type time_class. Isåfall er vi på siste element, og elementet skal inn før det(insert() sørger for dette).
+		// Check if iter points at the time separation object. In this case, insert element here.
  		if( (*iter)->sClassName == "time" )
 		{
-			// Har kommet til siste elementet. Nye elementet skal dermed ligge heilt sist!
-			pWorkTaskQueue.insert(iter, pTimeClassArg_withTask); 	//insert legger til elementet før [iter]!
-			DEBUG_L3(<<"insert element " <<pTimeClassArg_withTask->sClassName <<" at the end of pWorkTaskQueue!");
+			// This is the last element in the present time iteration. Insert element last.
+			pWorkTaskQueue.insert(iter, pObjWithTask_arg); 	//"insert()" inserts element before [iter].
+			DEBUG_L3(<<"insert element " <<pObjWithTask_arg->sClassName <<" at the end of pWorkTaskQueue!");
 			return;
 		}
 	}
 
-	
-	// Foreløpig legger eg den bare til først i denne iter: (etter nåværande elem.) TODO TODO TODO TODO TODO  DET ER FEIL Å GJØRE! Fiks! TODO TODO TODO
-	//pWorkTaskQueue.push_front(pTimeClassArg_withTask);
 	#if DEBUG_PRINT_LEVEL>4
 	printAllElementsOf_pWorkTaskQueue();
 	#endif
 }
 
 
-
-
-
-
-// Delte opp for å kunne skille mellom å propagere kappa, og å fyre AP, for å kunne ha refraction period.
+/* A funtion to simulate transmissions. To be done at every new time window(new kappa) */
 inline void K_auron::doTransmission()
 {
 	#if DEBUG_PRINT_LEVEL > 3
- 	cout<<"K_auron::doTransmission()\tLegger inn alle outputsynapser i arbeidskø. Auron: " <<sNavn <<" - - - - - - - - - - - - - - - \n";
+ 	cout<<"K_auron::doTransmission()\tInsert all output synapses in pWorkTaskQueue. For auron: "<<sName <<" - - - - - - - - - - - - - - - \n";
 	#endif
 
-
-	/* TODO Flytt overføringsdelay over hit: fra K_auron::doCalculation() - i ligninga av estimert fyringstid: plusser på en for dendrite og en for axon. 
-	Ta vekk den siste, og legg delay inn som element i kvar synapse. Ordner delay her.
-	Delay kan dermed være forskjellig for kvar synapse!
-	TODO */
-
-	// Legg til alle utsynapser i pWorkTaskQueue:
+	// Insert all output synapses into pWorkTaskQueue:
  	for( std::list<K_synapse*>::iterator iter = pOutputSynapses.begin(); iter != pOutputSynapses.end(); iter++ )
-	{ // Legger alle pOutputSynapses inn i time_class::pWorkTaskQueue: (FIFO-kø)
+	{
 		time_class::addTaskIn_pWorkTaskQueue( *iter );
 	}
 }
 
 
-
-const double K_synapse::getDerivativeOfTransmission()
-{
-	return pPreNodeAuron->dChangeInPeriodINVERSE * dSynapticWeight;
-}
-const double K_synapse::getTotalTransmission()
+const double K_synapse::getTotalTransmission() const
 {
 	return (1-2*bInhibitoryEffect)*(pPreNodeAuron->dPeriodINVERSE)*dSynapticWeight;
 }

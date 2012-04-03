@@ -44,6 +44,10 @@ class K_auron;
 // abstract class i_synapse:
 class i_synapse : public timeInterface{
 
+	// Overloaded in the model specific derived classes
+ 	i_axon* pPreNodeAxon;
+	i_dendrite* pPostNodeDendrite; 
+
 	// virtual inline void doTask() =0;   -- i_synapse remains abstract.
 	void doCalculation() {} 	//-- doCalculation() is not used for the synapse...yet. 
 	//							// 		- Might be important when synaptic plasticity is introduced.
@@ -57,9 +61,6 @@ class i_synapse : public timeInterface{
 	// Log file, for logging synaptic transmission
 	std::ofstream synTransmission_logFile;
 
-	// Overloaded in the model specific derived classes
- 	i_axon* pPreNodeAxon;
-	i_dendrite* pPostNodeDendrite; 
 
 	public:
 	i_synapse(double dSynVekt_Arg, bool bInhibEffekt_Arg, std::string sKlasseNavn /*="synapse"*/ );
@@ -83,6 +84,10 @@ class s_synapse : public i_synapse{
  	s_axon* pPreNodeAxon;
 	s_dendrite* pPostNodeDendrite; 
 
+	// Make copy constructor private to disable copying:
+	s_synapse(const s_synapse& arg);
+	// Same with assignment:
+	s_synapse& operator=(const s_synapse& arg);
 
 	public:
 	s_synapse(s_auron*, s_auron*, double dSynVekt_Arg =1, bool bInhibEffekt_Arg =false) ;
@@ -107,8 +112,14 @@ class K_synapse : public i_synapse{
 
 	// For recalculation of Kappa(by the postsynaptic neuron)
 	double dPresynPeriodINVERSE;
-	const inline double getDerivativeOfTransmission();
-	const inline double getTotalTransmission();
+	//const inline double getDerivativeOfTransmission() const;
+	const inline double getTotalTransmission() const;
+
+
+	// Make copy constructor private to disable copying:
+	K_synapse(const K_synapse& arg);
+	// Same with assignment:
+	K_synapse& operator=(const K_synapse& arg);
 
 	public:
 	K_synapse(K_auron*, K_auron*, double dSynVekt_Arg =1, bool bInhibEffekt_Arg =false) ;

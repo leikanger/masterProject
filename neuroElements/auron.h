@@ -25,16 +25,15 @@
 //}
 
 
-// TODO Make all copy construcors private to disable copying. See line 536..
+// Notes:
+// 	- have made all copy constructors private to disable copying. Same with assignment
 
 #include <fstream> //file streams
 
 #ifndef AURON_H_
 #define AURON_H_
 
-#if GCC
-	#include <iomanip> // For setprecision()   FUNKER IKKJE FOR clang++-kompilatoren..
-#endif
+#include <iomanip> // For setprecision()
 
 #include "../andreKildefiler/main.h"
 #include "../andreKildefiler/time.h"
@@ -47,14 +46,15 @@ using std::cout;
 /*****************************************************
 ** class recalculateKappa : public timeInterface 	**
 ** 	Used for recalculating K-node's activation level**
-** 	  to avoid to large numerical errors. 			**
+** 	  to avoid large numerical errors. 				**
 *****************************************************/
 class recalcKappaClass : public timeInterface
 {
 	public:
+	/* constructor */
 	recalcKappaClass(K_auron* pConectedToKappaAuron_arg) : timeInterface("Kappa-recalc. obj."), pKappaAuron_obj(pConectedToKappaAuron_arg){
 		// Set initial period between recalculation to a small number.
-		dEstimatedTaskTime = 1; // Overwritten by first doTask() run.
+		dEstimatedTaskTime = 1; // Set to new value at first .doTask() run
 
 		// Insert self-pointer to pPeriodicElements:
 		time_class::addElementIn_pPeriodicElements( this );
@@ -93,7 +93,7 @@ class i_auron : public timeInterface
 	unsigned long ulTimestampPreviousFiring;
 
 	// TODO: Try to implement dopamine(or other factor to define synaptic plasticity amplification. Inspired by nature..
-	// Also here, Kappa mathematics can be utilized.
+	// The Kappa formalism might be especially good for implementing DA neurons.
 
 	// Create file stream for depol. log, if LOG_DEPOL is defined to true in main.h
 	#if LOG_DEPOL 
@@ -102,131 +102,84 @@ class i_auron : public timeInterface
 	#endif
 	std::ofstream actionPotential_logFile;
 	
-	// For å lage fin vertikal "strek" ved AP:
+	// Log that writes a fine vertikal line at AP:
 	inline virtual void writeAPtoLog()
 	{
-		// XXX Kommenterer ut for å lettere sjå gjennom log-fil:
-		
-		// Logger fyringstidspunkt:
+		// Log firing time:
 		actionPotential_logFile<<time_class::getTime() <<";\n";
-		//actionPotential_logFile.flush();
 
-		
-/*			// Lager en vertikal "strek" fra v=0 til v=Terskel*(110%)
-			for(float fTerkelProsent_temp = 1.35; fTerkelProsent_temp>1.1; fTerkelProsent_temp-=0.001)
-			{
-				// TID: endre fra present time iteration til å være gitt av dEstimatedTaskTime i K_auron!
-				depol_logFile 	<<time_class::getTime() <<"\t" <<fTerkelProsent_temp*FIRING_THRESHOLD <<"; \t #Action potential\n" ;
-			}
-*/
-
-		// SKriver en enkelt linje med tidspunktet:
+		// Log firing time by vertical line in depol-log
 		#if LOG_DEPOL
-//			depol_logFile 	<<time_class::getTime() <<"\t" <<0*FIRING_THRESHOLD <<"; \t #Action potential - APAPAP\n" ;
-			// Logger depol-strek fra 1050 til 1200.
+			// Write depol line from 1050 to 1200
 			for(int i = 1050; i<1200; i++){
 				actionPotential_depolLogFile<<time_class::getTime() <<", " 		<<i <<";\n";
 			}
-			//actionPotential_depolLogFile.flush();
-		#endif
-
-
-	}
-	inline void DEBUTsettMerkeIPlott()
-	{
-		#if LOG_DEPOL  
-			// Lager en vertikal "strek" fra v=0 til v=Terskel*(110%)
-			for(float fTerkelProsent_temp = 1.4; fTerkelProsent_temp<1.7; fTerkelProsent_temp+=0.001)
-			{
-				depol_logFile 	<<time_class::getTime() <<"\t" <<fTerkelProsent_temp*FIRING_THRESHOLD <<"; \t #Action potential\n" ;
-			}
-	 		//depol_logFile.flush();
 		#endif
 	}
 
+	// Making copy constructor private to disable copying:
+	i_auron(const i_auron& arg);
+	// Same with assignment operator:
+	i_auron& operator=(const i_auron& arg);
 
 	protected:
-	virtual inline void doTask() =0;
-
-	//container som inneholder alle auron som har vore til ila. programkjøringa:
+	// container for all aurons:
 	static std::list<i_auron*> pAllAurons;
-	//static mdl. funk som destruerer alle i denne lista, men først de modellspesifikke K_auron og s_auron.
+	// Static member function that calls destructor for all aurons in this list(after the model specific K_auron and s_auron).
 	static void callDestructorForAllAurons();
 
-	// aktivitetsobjekt: Om dette er KANN eller SANN er avhengig av kva dActivityVariable skal bety (kappa eller depol..).
+	// dActivityVariable hold different variables for KM and NIM (kappa or depol.)
 	double dActivityVariable;
 
 	public:
-	i_auron(std::string sNavn_Arg ="unnamed", double dStartAktVar = 0);
+	i_auron(std::string sName_Arg ="unnamed", double dStartAktVar = 0);
 	virtual ~i_auron();
 
-	// For utskrift / debugging:
-	std::string sNavn;
-	const std::string getNavn(){ return sNavn; }
+	// For printing / debugging:
+	std::string sName;
+	const std::string& getName() const{ return sName; }
 
-	int getAktivityVar(){ return dActivityVariable; }
-
-	// Overlagres forskjellig i s_auron og K_auron for å finne depol.
+	// Overloaded differently in class s_auron and class K_auron. Writes depol to log
 	virtual inline void writeDepolToLog() =0;
-
-	//testfunksjon:
-	void exiterNeuronTilFyringGjennomElectrode()
-	{
-		doTask(); //gjør samme som gamle: auron::fyr();
-	}
-
 
 	friend class s_auron;
 	friend class K_auron;
 
-	friend class i_axon; // VEKK med den?
-	friend class s_axon;
-
-	friend class i_synapse;
-	friend class s_synapse;
-	friend class K_synapse;
-	
 	friend class i_dendrite;
 	friend class s_dendrite;
 	friend class K_dendrite;
-
-	friend std::ostream & operator<< (std::ostream & ut, i_axon* );
-
-	friend int main(int, char**);
 };  //}
 
 class s_auron : public i_auron
 { //{
 
 	inline void doTask();
-	inline void doCalculation() { cout<<"s_auron::doCalculation()\n";} 		//XXX UTSETTER. Foreløpig gjør denne ingenting (anna enn å gjøre at s_auron ikkje er abstract)
+	inline void doCalculation() { cout<<"s_auron::doCalculation()\tNOT IN USE\n";} // Does nothing, yet.
 
 	static void callDestructorForAllSpikingAurons();
 
+	// Make copy constructor private to disable copying:
+	s_auron(const s_auron& arg);
+	// Same with assignment:
+	s_auron& operator=(const s_auron& arg);
+
 	protected:
-	/* TODO:
-	* 	- gjør om slika at det ikkje finnes i i_auron: vil dermed ikkje lenger være overlagra. Definer først her..
-	*/
-	//Deler av auronet: 		OVERLAGRA fra i_auron
-	s_axon* pOutputAxon; 			// Overlagrer i_auron::i_axon til s_auron::s_axon. Dette er alternativ til å caste pOutputAxon ved accessering til s_auron::pOutputAxon
- 	s_dendrite* pInputDendrite;  	// Samme for pInputDendrite.
+	// Parts of the node, designed as in the biological neuron. OVERLOADED FROM i_auron
+	s_axon* pOutputAxon; 			// Overload from <i_auron::i_axon> to <s_auron::s_axon>.
+ 	s_dendrite* pInputDendrite;  	// Same for pInputDendrite.
 
 	public:
-	s_auron(std::string sNavn_Arg ="s_auron", int nStartDepol = 0); 
+	s_auron(std::string sName_Arg ="s_auron", int nStartDepol = 0); 
 	virtual ~s_auron();
 
-	inline const double getCalculateDepol();
-
-	inline virtual void writeDepolToLog()
+	virtual void writeDepolToLog()
 	{
-
-		// Plasserer all kode som har med å skrive depol til logg.
-		#if LOG_DEPOL  // Kan sette om depol. skal skrives til logg i main.h
-			// Handle accuracy for the depol-logfile:
+		#if LOG_DEPOL  // Defined in main.h
+			// Handle resolution for the depol-logfile:
 			static unsigned long uIterationsSinceLastWrite = 0;
 
-			// Unless it is time for writing to log, return.
-			// (GÅR UT FRA AT DEN SKRIVER TIL LOG KVAR ITER. TODO Vurder å skrive om dette til å bare være eit tidspunkt som blir sammenligna med nå-tid! TODO
+			// Return unless it is time for a new log entry..
+			// (based on write to log every iteration. Not so important that this is entirely correct)
 			if( (++uIterationsSinceLastWrite > uNumberOfIterationsBetweenWriteToLog) ){
 				depol_logFile 	<<time_class::getTime() <<"\t" <<dActivityVariable <<"; \t #Depolarization\n" ;
 				// Reset counter
@@ -237,72 +190,51 @@ class s_auron : public i_auron
 	
 		#endif
 	}
-//{friend
-	friend class s_axon;
-	friend class s_synapse;
-	friend class s_dendrite;
-	friend std::ostream & operator<< (std::ostream & ut, i_axon* );
 
-	friend int main(int, char**);
-//}
+// FRIENDS
+	friend class s_synapse;
+	friend int main(int, char**); // To be able to run callDestructorForAllSpikingAurons()
 
 }; //}
 
 class K_auron : public i_auron
 { // {
-
-	// Fra axon: 
+	// Have stared to remove axon and dendrite:
+	// From axon: 
 	std::list<K_synapse*> pOutputSynapses;
-	//protected:
+	//(protected:)
 	void doTransmission();
 	
-
-	// TA VEKK:
-	//                  		OVERLAGRA fra i_auron
-	//K_axon* pOutputAxon; 			// Overlagrer i_auron::i_axon til K_auron::K_axon. Dette er alternativ til å caste pOutputAxon ved accessering til K_auron::pOutputAxon
- 	K_dendrite* pInputDendrite;  	// Samme for pInputDendrite.
+	// TO BE REMOVED:
+	//K_axon* pOutputAxon; 		
+ 	K_dendrite* pInputDendrite; 
 	
-	// Kappa - loggfil:
+	// Kappa - logfile:
 	#if LOGG_KAPPA
 		std::ofstream kappa_logFile;
 	#endif
 
-	// Kanskje dendrite skal implementeres i auron? Isåfall lag dette til ei lenka liste, og bruk ved å lese ut første element.
 	double dChangeInKappa_this_iter;
 
-
 	double dDepolAtStartOfTimeWindow;
-	double dStartOfTimeWindow; 		// Start-tidspunkt for dette time window.
-	double dLastFiringTime; 		// Start-tidspunkt for dette time window, dersom fyring var i denne iter..
-	// Flytta til protected (@asdf1515): double dStartOfNextTimeWindow; 	// Start-tidspunkt for neste time window (brukes til å finne start-depol. for neste time window).
+	double dStartOfTimeWindow; 		// Start-time for this time window.
+	double dLastFiringTime; 		// Start-time for this time window, in case of firing this iter..
 
+	// For synaptic transmission
 	double dLastCalculatedPeriod;
 	double dPeriodINVERSE;
 	double dChangeInPeriodINVERSE;
 
-	inline const double& getKappa() const{ return dActivityVariable; }
-	
-
-	// For debugging: trenger ei liste over alle K_auron, slik at eg kan skrive log for depol kvar tidsiterasjon:
-	// Legger til i constructor og fjærner i destructor (akkurat som for i_auron::pAllAurons)
+	// Static elements that keep an overview of all kappa aurons:
 	static std::list<K_auron*> pAllKappaAurons;
 	static void callDestructorForAllKappaAurons();
 
-	bool bAuronHarPropagertAtDenErInaktiv;
-
-
-	// For å lage fin vertikal "strek" ved AP: OVERLAGRER fra i_auron: (for å få eksakt fyringstid!)
-	inline virtual void writeAPtoLog()
+	virtual void writeAPtoLog()
 	{
-		// XXX Kommenterer ut for å lettere sjå gjennom log-fil:
-
-		// Skriver fyringstidspunkt i loggfil for fyringstidspunkt:
-		#if GCC
-			actionPotential_logFile.precision(11);
-		#endif
+		// Log firing time to log
+		actionPotential_logFile.precision(11);
 		actionPotential_logFile<<dLastFiringTime <<";\n";		
-		//actionPotential_logFile.flush();
-
+//TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 		HER ER EG 	 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 		#if LOG_DEPOL 
 			depol_logFile 	<<dLastFiringTime <<"\t" <<FIRING_THRESHOLD <<"; \t #Action potential - APAPAP\n" ;
 			depol_logFile 	<<dLastFiringTime <<"\t" <<0 <<"; \t #Action potential - APAPAP\n" ;
@@ -342,24 +274,24 @@ class K_auron : public i_auron
 	inline void changeKappa_diffArg( const double& );
 	//inline void changeKappa_absArg( const double&);
 
-	// Sjå @asdf1515
-	double dStartOfNextTimeWindow; 	// Start-tidspunkt for neste time window (brukes til å finne start-depol. for neste time window).
+	// See @asdf1515
+	double dStartOfNextTimeWindow; 	// Start-time for next time window. Used to find start-depol. for time window.
+	// Flytta til protected (@asdf1515): double dStartOfNextTimeWindow; 	// Start-tidspunkt for neste time window (brukes til å finne start-depol. for neste time window).
 
-	// Rekalkulering av kappa, for å unngå 'truncation error':
+	// Recalculation of kappa to avoid integration errors:
 	inline virtual double recalculateKappa();
 	recalcKappaClass kappaRecalculator;
 
-	//Liste over alle Kappa auron: 	
-	std::list<K_auron*> pAlleKappaAuron;
+	// List of all Kappa aurons:
+	static std::list<K_auron*> pAlleKappaAuron;
 
 	inline void doTask();
 	inline void doCalculation();
 
-	inline void estimateFiringTimes(const double&);
-	inline void estimateFiringTimes(); // Bruker ulTime..
+	inline void estimateFiringTimes(); 
 
 	public:
-	K_auron(std::string sNavn_Arg ="K_auron", double dStartKappa_arg = 0); 	
+	K_auron(std::string sName_Arg ="K_auron", double dStartKappa_arg = 0); 	
 	virtual ~K_auron();
 
 
@@ -408,10 +340,8 @@ class K_auron : public i_auron
 	inline void writeDepolToLog( const double& dTimeArg, const double& dDepolArg)
 	{
 		#if LOG_DEPOL 
-			#if GCC
-				// Sette precision for output: Funker bare med #include <iomanip>; , som ikkje funker for clang++-compiler..
-				depol_logFile.precision(11);
-			#endif
+			// Set precision for output: Only works when #include <iomanip>;
+			depol_logFile.precision(11);
 	
 			// Handle accuracy for the depol-logfile:
 			static unsigned long uIterationsSinceLastWrite = 0;
@@ -434,10 +364,8 @@ class K_auron : public i_auron
 	inline void writeDepolToLog()
 	{
 		#if LOG_DEPOL 
-			#if GCC
-				// Sette precision for output: Funker bare med #include <iomanip>; , som ikkje funker for clang++-compiler..
-				depol_logFile.precision(11);
-			#endif
+			// Sette precision for output: Funker bare med #include <iomanip>; , som ikkje funker for clang++-compiler..
+			depol_logFile.precision(11);
 	
 			// Handle accuracy for the depol-logfile:
 			static unsigned long uIterationsSinceLastWrite = 0;
@@ -477,6 +405,7 @@ class K_auron : public i_auron
 		#endif
 	}
 
+	// For testing with ANN-matrix--initiation:
 	const std::list<K_synapse*> getUtSynapserP(){ return pOutputSynapses; }
 
 
@@ -496,9 +425,14 @@ class s_sensory_auron : public s_auron{
 
 	inline void updateSensoryValue();
 	static void updateAllSensorAurons();
+
+	// Make copy constructor private to disable copying:
+	s_sensory_auron(const s_sensory_auron& arg);
+	// Same with assignment:
+	s_sensory_auron& operator=(const s_sensory_auron& arg);
 	
 	public:
-		s_sensory_auron( std::string sNavn_Arg ,  const double& (*pFunk_arg)(void) );
+		s_sensory_auron( std::string sName_Arg ,  const double& (*pFunk_arg)(void) );
 
 		// To be used for debugging.
 		double getSensedValue()
@@ -536,7 +470,7 @@ class K_sensory_auron : public K_auron{
 
 	public:
 		// Constructor take funtion pointer as argument
-		K_sensory_auron( std::string sNavn_Arg ,  const double& (*pFunk_arg)(void) );
+		K_sensory_auron( std::string sName_Arg ,  const double& (*pFunk_arg)(void) );
 
 		// To be used for debugging.
 		double getSensedValue()

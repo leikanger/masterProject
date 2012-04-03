@@ -28,25 +28,8 @@
 
 
 
-
-// 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	
-//   Det kan skape feil å legge til eit neuron til neste iter. Dersom den får null input neste iter, blir vil den ikkje fyre neste iter, selv om den er estimert til f.eks. ?.5 (altså midt i iter).
-// 		Løsninga er å kun legge til fyring i gjeldende iter. KUN bruke den nye egenskapen til KANN!
-// 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 
-// a	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 
-// 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 
-// a	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 
-// 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 	TODO 
-
-
-
 //TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-// 			Innfør atexit(&i_auron::callDestructorForAllAurons) ! Dette står i rapporten, og er også veldig lurt!
-// 				Kanskje eg heller skal lage en egen avsluttingsfunksjon, der eg også skriver ut alle viktige element. Isåfall må eg skrive om rapportan!. Dette er bedre!
 // 				Kanskje eg også skal handtere SIGTERM signal? Bare for å briefe litt? JA!
-// 			s_auron funker ikkje lenger! TODO TODO
-// 			lager av en eller anna grunn: to K_auron istadenfor eitt av samme node (med navn [dKN])!
-// 				LAGER DOBBELT OPP for KN: Skriver ivertfall to oppføringer i lista alleAuron. NEI: slik er det: sletter først alle element i K_auron::pAllKappaAurons, så alle i i_auron::pAllAurons. Fiks det slik at dette ikkje skjer(ikkje skrive ut to oppføringer av samme!)
 //TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 
 
@@ -99,6 +82,7 @@ float fNumberOfSensoryFunctionPeriods 						=	DEFAULT_NUMBER_OF_SENSORY_FUNCTION
 unsigned long ulTotalNumberOfTimeSteps 						= 	ulTemporalAccuracyPerSensoryFunctionPeriod*fNumberOfSensoryFunctionPeriods;
 unsigned uNumberOfIterationsBetweenWriteToLog;
 unsigned uNumberOfIterationsBetweenPrintToScreen;
+unsigned uNumberOfTimePrintsPerSensoryfPeriod;
 
 // The program exits gracefully when bContinueExecution is set to [false]:
 bool bContinueExecution = true;
@@ -137,6 +121,13 @@ int main(int argc, char *argv[])
 
 	cout<<"Set default text print style: \e[0;39m Weak text, default terminal text colour.\n\n";
 
+
+
+	// Set default values:
+	ulTemporalAccuracyPerSensoryFunctionPeriod = DEFAULT_NUMBERofTIMESTEPS;
+	uNumberOfTimePrintsPerSensoryfPeriod = DEFAULT_NUMBER_OF_TIME_PRINTS;
+	uNumberOfIterationsBetweenPrintToScreen = ulTotalNumberOfTimeSteps; // Default value is given in main.h. Redundancy to be safe.
+
 	//Read in arguments from shell:  //{1
 	if(argc > 1 ) //{ 	  // (first argument is the program call)
 	{
@@ -153,6 +144,26 @@ int main(int argc, char *argv[])
 						printArgumentConventions(argv[0]);
 						exit(EXIT_SUCCESS);
 						break;
+#if 1
+					case 't':
+						static bool bOK;
+						bOK = false;
+						if(	(uNumberOfTimePrintsPerSensoryfPeriod = atoi( &argv[nInputArgumentPos][2])) ) 	
+							bOK = true;
+						// othervise: see if the number of iterations is written in the next argument
+						else if( 	(uNumberOfTimePrintsPerSensoryfPeriod= atoi( argv[nInputArgumentPos+1]) ) ){
+							++nInputArgumentPos;
+							bOK = true;
+						}
+						if(bOK == true){
+							cerr<<"Number of time printings set to " <<uNumberOfTimePrintsPerSensoryfPeriod <<"\n";
+						}else{
+							cout<<"Can not read argument. Please follow the conventions!\tArgument Ignored." <<endl;
+							bPrintCallingConventions = true;
+							//exit(EXIT_FAILURE);
+						}
+						break;
+#endif
 					case 'r':
 						// Check whether the number of iterations is written in the same argument( like: -r100 )
 						if( 		(ulTemporalAccuracyPerSensoryFunctionPeriod = atoi( &argv[nInputArgumentPos][2])) ) 	
@@ -210,9 +221,9 @@ int main(int argc, char *argv[])
 		cout<<endl;
 
 	}else{ // else, for the statement [if(argc > 1)]
-		ulTemporalAccuracyPerSensoryFunctionPeriod = DEFAULT_NUMBERofTIMESTEPS;
 		//cout<<"No arguments listed. Continue with default values:\tNumber of iterations: " <<DEFAULT_NUMBERofTIMESTEPS <<endl;
-		cout<<"No arguments listed. Continue with default values:\tTemporal accuracy per forcing function: " <<ulTemporalAccuracyPerSensoryFunctionPeriod
+		cout<<"No arguments listed. Continue with default values:\tTemporal accuracy per forcing function: " 
+			<<ulTemporalAccuracyPerSensoryFunctionPeriod
 			<<"\n\t\tNumber of forcing function periods set to be " <<fNumberOfSensoryFunctionPeriods <<"\n";
 		printArgumentConventions(argv[0]);
 	} 
@@ -222,7 +233,12 @@ int main(int argc, char *argv[])
 	cout<<"Giving a total of \e[0;1m" <<ulTotalNumberOfTimeSteps<<"\e[0;0m time steps for this run of auroSim.\n\n";
 
 	// Set number of iterations between print to screen:
-	uNumberOfIterationsBetweenPrintToScreen = ulTotalNumberOfTimeSteps / NUMBER_OF_TIME_PRINTS;
+	if(uNumberOfTimePrintsPerSensoryfPeriod >= ulTemporalAccuracyPerSensoryFunctionPeriod)
+		uNumberOfIterationsBetweenPrintToScreen = 1;
+	else
+		uNumberOfIterationsBetweenPrintToScreen = ulTemporalAccuracyPerSensoryFunctionPeriod / uNumberOfTimePrintsPerSensoryfPeriod;
+	// 					// 					//ulTotalNumberOfTimeSteps / uNumberOfTimePrintsPerSensoryfPeriod;
+
 
 	// Set uNumberOfIterationsBetweenWriteToLog (to restrict number of points in log file)
 	if(ulTemporalAccuracyPerSensoryFunctionPeriod > LOGG_RESOLUTION){
@@ -231,6 +247,7 @@ int main(int argc, char *argv[])
 	}else{
 		cout<<"No nead to restrict number of log entries due to few iterations.\n\n";
 	}
+
 	cout<<"\n\n\n";
 	//}1 Finished reading in arguments.
 	
@@ -255,7 +272,7 @@ int main(int argc, char *argv[])
 	#endif
 
 	// Experiment 2:
-	#if 1
+	#if 0
 		#if KANN
 		new K_sensory_auron("dKN", &dynamicSensoryFunc);
 		#endif
@@ -272,7 +289,7 @@ int main(int argc, char *argv[])
 
 
 
-	#if 0 //ANNA:
+	#if 1 //ANNA:
 	new s_sensory_auron("dSN", &dynamicSensoryFunc3);
 	new K_sensory_auron("dKN", &dynamicSensoryFunc3);
 	#endif
@@ -402,13 +419,12 @@ int main(int argc, char *argv[])
 //		cout<<"\n\n\n\nPrint all elements of i_auron:\n";
 //		for( std::list<i_auron*>::iterator iter = i_auron::pAllAurons.begin() ;  iter != i_auron::pAllAurons.end() ;  iter++ )
 //		{
-//			cout<<"\t[ " <<(*iter)->sNavn <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<(*iter)->dEstimatedTaskTime 
+//			cout<<"\t[ " <<(*iter)->sName <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<(*iter)->dEstimatedTaskTime 
 //				<<endl;
 //		}
 //		cout<<"\n\n";
 	
 	#if DEBUG_PRINT_LEVEL>4
-		/* TODO Lag en egen avsluttingsfunksjon(og registrer den med atexit(void (*)(void)).). Den skal gjøre følgende:*/
 		time_class::printAllElementsOf_pWorkTaskQueue();
 		time_class::printAllElementsOf_pPeriodicElements();
 	#endif
@@ -430,9 +446,11 @@ void printArgumentConventions(std::string programCall)
 { //{
 	cout <<"\nConventions for executing auroSim: \n"
 		 <<"\t"<<programCall <<" [-options]\n"
-		 <<"\t\tOptions: \n\t\t\t-r [n] \t number of iterations per forcing function period."
-		 <<"\t\t\n           \t\t-n [n] \t float number of periods of sensor function(e.g. one half period can be called by -n0.5)"
-		 <<"\n\n\n\n\n";
+		 <<"\t\tOptions:\n" 
+		 <<"\t\t\t-r [n] \t number of iterations per forcing function period.\n"
+		 <<"\t\t\t-n [n] \t float number of periods of sensor function(e.g. one half period can be called by -n0.5)\n"
+		 <<"\t\t\t-t [n] \t unsigned integer number of time steps between printing time t_n to screen\n"
+		 <<"\n\n\n\n";
 } //}
 
 
@@ -492,7 +510,7 @@ void* taskSchedulerFunction(void* )
 	// DEBUG: Print all K_auron-objects:
 	cout<<"Prints all pAlleKappaAuron objects\n";
 	for( std::list<K_auron*>::iterator iter = K_auron::pAllKappaAurons.begin(); iter != K_auron::pAllKappaAurons.end(); iter++ )
-		cout<<"\titer->sNavn: " <<(*iter)->sNavn <<endl;
+		cout<<"\titer->sName: " <<(*iter)->sName <<endl;
 
 	// Initialize first 'time window' for all K_aurons:
 	for( std::list<K_auron*>::iterator K_iter = K_auron::pAllKappaAurons.begin(); K_iter != K_auron::pAllKappaAurons.end(); K_iter++ )
@@ -556,7 +574,7 @@ std::ostream & operator<< (std::ostream & ut, i_auron* pAuronArg )
 	// For now: Print the adress in the i_auron pointer:
 	ut<<(void*)pAuronArg;
 
-//	ut<<"| " <<pAuronArg->getNavn() <<"  | verdi: " <<pAuronArg->getAktivityVar();// <<" \t|\tMed utsynapser:\n";
+//	ut<<"| " <<pAuronArg->getName() <<"  | verdi: " <<pAuronArg->getAktivityVar();// <<" \t|\tMed utsynapser:\n";
 	
 	// Innsynapser:
 	//for( std::vector<synapse*>::iterator iter = neuroArg.pInputSynapses.begin(); iter != neuroArg.pInputSynapses.end(); iter++ ){
@@ -578,12 +596,12 @@ std::ostream & operator<< (std::ostream & ut, i_auron* pAuronArg )
 // TODO TODO  Ta vekk ?
 std::ostream & operator<< (std::ostream & ut, s_axon* pAxonArg ) //XXX Skal gjøres til i_axon* istaden for s_axon* som argument! XXX
 { //{
-	ut<<"Utsynapser fra axon tilhørende neuron " <<(pAxonArg->pElementOfAuron)->sNavn <<endl; 
+	ut<<"Utsynapser fra axon tilhørende neuron " <<(pAxonArg->pElementOfAuron)->sName <<endl; 
 
 	// Utsynapser:
 		//			TODO gjør om x++ til ++x, siden ++x slepper å lage en "temporary".
 	for( std::list<s_synapse*>::iterator iter = pAxonArg->pOutputSynapses.begin(); iter != pAxonArg->pOutputSynapses.end(); iter++ ){
-	 	ut 	<<"\t\t\t|\t" <<(pAxonArg->pElementOfAuron)->sNavn <<" -> "    <<(*iter)->pPostNodeDendrite->pElementOfAuron->sNavn <<"\t\t|\n";
+	 	ut 	<<"\t\t\t|\t" <<(pAxonArg->pElementOfAuron)->sName <<" -> "    <<(*iter)->pPostNodeDendrite->pElementOfAuron->sName <<"\t\t|\n";
 	}
 
 
