@@ -27,18 +27,6 @@
 
 
 
-
-//TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-// 				Kanskje eg også skal handtere SIGTERM signal? Bare for å briefe litt? JA!
-//TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-
-
-
-
-
-
-
-
 /*
  * main.cpp
  *
@@ -51,10 +39,9 @@
 #include "../neuroElements/auron.h"
 #include "../neuroElements/synapse.h"
 #include "time.h"
-#include "sensorFunk.h" 				// TODO TODO TODO Endre til sensoryFuntions.h TODO TODO TODO
+#include "sensorFunk.h"
 
-
-#include "../andreKildefiler/ANN.h" 	// TODO TODO TODO Endre navn på andreKildefiler/ TODO TODO TODO 
+#include "../andreKildefiler/ANN.h"
 
 
 /*** declarations ***/
@@ -90,7 +77,7 @@ bool bContinueExecution = true;
 /*** end: declarations ***/
 
 
-// TODO TODO TODO Skal eg heller bruke referanse-returnerende funksjon (inline), og referere til stroustrup? TODO TODO TODO
+// TODO TODO TODO Skal eg heller bruke referanse-returnerende funksjon (inline)? (I samsvar med Stroustrup's bok) TODO TODO TODO
 //{ Alternativt med referanse-returnerende funk. : 
 /**********************************************************************************
 *** 	int& nAntallTidsiterasjoner()
@@ -295,7 +282,6 @@ int main(int argc, char *argv[])
 	#endif
 
 
-			// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO RENSET tekst til hit!
 // Lage ANN fra ei kant-matrise, og evt. send inn en vektor med vilkårlig antall auron (mindre enn dim(matrisa)). Kan også sende inn null auron. Vektoren med auron-peikere brukes for å la nokre auron være sensor-auron!
 #if 0
 	cout<<"\n\n\n\tFORTSETTER\n\n";
@@ -322,86 +308,6 @@ int main(int argc, char *argv[])
 //exit(0);
 #endif	
 
-//{ KOMMENTERT UT
-//  BARE KAPPA:
-	#if 0
-	K_sensory_auron* Ks1 = new K_sensory_auron("K_sensory_auron", &sensorFunk1a);
-	K_auron* k1 = new K_auron("k1");
-	new K_synapse(Ks1, k1, true);
-
-//	#else 	// 	KANN-Test
-	 	//{ KANN: TEST-oppsett.
-		#if 0
-
-		cout<<"\n\nLAGER KANN\n\n";
-
-		K_auron* K1 = new K_auron("K1" /*, arg2 = 0? */);
-		K_auron* K2 = new K_auron("K2" );
-		K_auron* K3 = new K_auron("K3" );
-	
-		K_sensory_auron* KsStatisk = new K_sensory_auron("KsStatisk", &staticSensoryFunc);
-		new K_synapse(KsStatisk, K1, 200);
-	
-	
-
-		K_sensory_auron* Ks1 = new K_sensory_auron( "Ks1", &sensorFunk1 );
-		new K_synapse( Ks1, K1, 400, false ); 
-	
-		K_sensory_auron* Ks2 = new K_sensory_auron( "Ks2", &sensorFunk2 );
-		new K_synapse( Ks2, K1, 400, false ); 
-		new K_synapse( Ks2, KsStatisk, 333, false);
-
-		new K_synapse( KsStatisk, K1, 300, true );
-
-	
-		new K_synapse( Ks1, K2, 400);
-		new K_synapse( Ks2, K2, 200);
-		new K_synapse( Ks1, K3, 250);
-		new K_synapse( Ks2, K3, 100);
-		new K_synapse( K2, K3, 100);
-		new K_synapse( K1, K3, 200, true);
-		new K_synapse( K3, K1, 100);
-		new K_synapse( K3, K1, 100, true);
-
-		#endif
-
-
-
-
-		#if 0 // Testoppsett 1, KANN
-			K_auron* Ks1 = new K_sensory_auron("Ks1", &sensorFunk_TEST1_s1 );
-			K_auron* Ks2 = new K_sensory_auron("Ks2", &sensorFunk_TEST1_s2 );
-			K_auron* Ks3 = new K_sensory_auron("Ks3", &sensorFunk_TEST1_s3 );
-			K_auron* Ks4 = new K_sensory_auron("Ks4", &sensorFunk_TEST1_s4 );
-			K_auron* Ks5 = new K_sensory_auron("Ks5", &sensorFunk_TEST1_s5 );
-		
-			K_auron* Kt1 = new K_auron("Kt1");
-			new K_synapse(Ks1, Kt1, 100);
-			new K_synapse(Ks2, Kt1, 100);
-			new K_synapse(Ks3, Kt1, 100);
-			new K_synapse(Ks4, Kt1, 100);
-			new K_synapse(Ks5, Kt1, 50, true);
-		
-		
-			K_auron* Kt2 = new K_auron("Kt2");
-			new K_synapse(Ks1, Kt2, 20, true);
-			new K_synapse(Ks2, Kt2, 100);
-			new K_synapse(Ks3, Kt2, 20, true);
-			new K_synapse(Ks4, Kt2, 20, true);
-			new K_synapse(Ks5, Kt2, 50);
-			new K_synapse(Kt1, Kt2, 200);
-			
-			K_auron* Kt3 = new K_auron("Kt3");
-			new K_synapse(Kt1, Kt3, 200);
-			new K_synapse(Kt2, Kt3, 200);
-		#endif
-
-	//} Slutt KANN-testopplegg
-	#endif
-//}
-
-
-
 
 
 
@@ -414,15 +320,6 @@ int main(int argc, char *argv[])
 
 	cout<<"\n\n\nXXXXXX Successful run. Complete log and clean up. XXXXX\n\n\n";
 
-
-
-//		cout<<"\n\n\n\nPrint all elements of i_auron:\n";
-//		for( std::list<i_auron*>::iterator iter = i_auron::pAllAurons.begin() ;  iter != i_auron::pAllAurons.end() ;  iter++ )
-//		{
-//			cout<<"\t[ " <<(*iter)->sName <<" ]\t\t" 		<<"\tdEstimatedTaskTime :\t" <<(*iter)->dEstimatedTaskTime 
-//				<<endl;
-//		}
-//		cout<<"\n\n";
 	
 	#if DEBUG_PRINT_LEVEL>4
 		time_class::printAllElementsOf_pWorkTaskQueue();
