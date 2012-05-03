@@ -78,6 +78,7 @@ void i_auron::callDestructorForAllAurons()
 		// delete (call destructor for) first element. The destructor removes element's pointer from pAllAurons.
 	 	delete (*i_auron::pAllAurons.begin());
 	}
+	// XXX Her kan eg nok heller skrive:  	delete[] i_auron::pAllAurons; ???
 }
 
 void K_auron::callDestructorForAllKappaAurons()
