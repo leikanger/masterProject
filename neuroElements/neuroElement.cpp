@@ -237,7 +237,7 @@ K_auron::K_auron(std::string sName_Arg /*="unnamed"*/, double dStartKappa_arg /*
  	pInputDendrite = new K_dendrite(this);
 
 	// Initialize action variable(kappa) to dStartKappa_arg.
-	// Call changeKappa_diffArg(double) to initialize new time window normally(inserts element to pCalculatationTaskQueue..): 
+	// Call changeKappa_diffArg(double) to initialize new time window normally(inserts element to pCalculationTaskQueue..): 
 	dActivityVariable = dStartKappa_arg;
 	changeKappa_diffArg( 0 );
 
@@ -652,8 +652,8 @@ inline void K_auron::changeKappa_diffArg( const double& dInputDerived_arg)//int 
 	// 		and letting this variable be added to $\kappa$ by .doCalculation()
 	dChangeInKappa_this_iter +=  dInputDerived_arg ;
 
-	// Insert element into pCalculatationTaskQueue, so that its .doCalculation() function is executed after this iteration.
-	time_class::addCalculationIn_pCalculatationTaskQueue( this );
+	// Insert element into pCalculationTaskQueue, so that its .doCalculation() function is executed after this iteration.
+	time_class::addCalculationIn_pCalculationTaskQueue( this );
 
 	#if LOGG_KAPPA
 	writeKappaToLog();

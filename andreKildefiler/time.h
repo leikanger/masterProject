@@ -61,7 +61,7 @@ class time_class : public timeInterface {
 	
 	// Lists for scheduling tasks and recalculation of elements
 	static std::list<timeInterface*> pWorkTaskQueue;
-	static std::list<timeInterface*> pCalculatationTaskQueue;
+	static std::list<timeInterface*> pCalculationTaskQueue;
 
 	// List that contain all periodic elements in the simulation:
 	// 	All elements are checked each time step: If an element have dEstimatedTaskTime during the next iteration, it is inserted into pWorkTaskQueue.
@@ -71,29 +71,29 @@ class time_class : public timeInterface {
 	static inline void addTaskInPresentTimeStep(timeInterface* pObjWithTask_arg);
 
 	// Funtion to schedule calculation
-	static inline void addCalculationIn_pCalculatationTaskQueue( timeInterface* pObject_arg)
+	static inline void addCalculationIn_pCalculationTaskQueue( timeInterface* pObject_arg)
 	{
-	 	pCalculatationTaskQueue.push_back( pObject_arg );
+	 	pCalculationTaskQueue.push_back( pObject_arg );
 	}
 
 	protected:
 	void doTask(); 			// Defined in neuroElement.cpp
-	void doCalculation()	// Conduct calculations on all calculation tasks in pCalculatationTaskQueue.
+	void doCalculation()	// Conduct calculations on all calculation tasks in pCalculationTaskQueue.
 	{ //{
 		// Organize list so that every entry is unique:
-		for( std::list<timeInterface*>::iterator iter = pCalculatationTaskQueue.begin(); iter != pCalculatationTaskQueue.end(); iter++ )
+		for( std::list<timeInterface*>::iterator iter = pCalculationTaskQueue.begin(); iter != pCalculationTaskQueue.end(); iter++ )
 		{
 			static std::list<timeInterface*>::iterator iter2;
 		   	iter2	= iter; 
 			iter2++;
-			while(iter2!=pCalculatationTaskQueue.end()){
+			while(iter2!=pCalculationTaskQueue.end()){
 				// Check if iterators point at same memory address: If so, remove second element:
 			 	if( (*iter2) == (*iter) ){ 
 					// Iterate before iter2 is removed:
 					static std::list<timeInterface*>::iterator pDeleteElement;
 					pDeleteElement = iter2;
 					iter2++;
-					pCalculatationTaskQueue.erase(pDeleteElement);
+					pCalculationTaskQueue.erase(pDeleteElement);
 					continue;
 				}
 				iter2++;
@@ -101,12 +101,12 @@ class time_class : public timeInterface {
 		}
 	
 		// Call first elements .doCalculation() and pop element. Repeat until list is empty:
-		while( !pCalculatationTaskQueue.empty() ){
+		while( !pCalculationTaskQueue.empty() ){
 			// Call first element's doCalculation():
-			pCalculatationTaskQueue.front()->doCalculation();
+			pCalculationTaskQueue.front()->doCalculation();
 
-			// Pop first element from pCalculatationTaskQueue(calculation is executed)
-			pCalculatationTaskQueue.pop_front();
+			// Pop first element from pCalculationTaskQueue(calculation is executed)
+			pCalculationTaskQueue.pop_front();
 		}
 	} //}
 

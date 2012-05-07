@@ -1,9 +1,6 @@
 auroSim is the result of the modelling and simulator written to better understant the neuron. One result is the novel spiking neuron model that utilize the algebraic solution to the LIF neuron's differential equations.
 
 Use:
-	The simulator can be executed by the command, "./auroSim.out [arguments]" or "sh kjør.sh [arguments]". 
-	The list of possible arguments is printed by the command "./auroSim.out -h"
+	The simulator can be executed by the command, "./auroSim.out [arguments]" or "sh kjør.sh [arguments]". The list of possible arguments is printed by the command "./auroSim.out -h"
 
-	A run of auroSim produces octave script files where the depolarization and spike times of the neuron are logged. 
-	These log files are placed in the directory ./datafiles_for_evaluation/, and are possible to execute in octave/matlab to produce a plot of the neuron's depolarization.
-	To assess other input functions, one can write the algebraic funtion in e.g. "./andreKildefiler/sensorFunk.h" and send a pointer to this funtion to the constructor of K__sensory_auron or s_sensory_auron class.
+	A run of auroSim produces octave script files where the depolarization and spike times of the neuron are logged. These log files are placed in the directory ./datafiles_for_evaluation/, and are possible to execute in octave/matlab to produce a plot of the neuron's depolarization. To assess other input functions, one can write the algebraic funtion in e.g. "./andreKildefiler/sensorFunk.h" and send a pointer to this funtion to the constructor of K__sensory_auron or s_sensory_auron class.

@@ -54,7 +54,7 @@ std::ostream & operator<<(std::ostream& ut, i_auron* pAuronArg );
 
 	/*** variable declarations ***/
 extern std::list<timeInterface*> 				time_class::pWorkTaskQueue;
-extern std::list<timeInterface*> 				time_class::pCalculatationTaskQueue;
+extern std::list<timeInterface*> 				time_class::pCalculationTaskQueue;
 extern std::list<timeInterface*> 				time_class::pPeriodicElements;
 
 extern std::list<i_auron*> i_auron::pAllAurons;
@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
 	#endif
 
 	// Experiment 2:
-	#if 0
+	#if 1
 		#if KANN
 		new K_sensory_auron("dKN", &dynamicSensoryFunc);
 		#endif
@@ -276,7 +276,7 @@ int main(int argc, char *argv[])
 
 
 
-	#if 1 //ANNA:
+	#if 0 //ANNA:
 	new s_sensory_auron("dSN", &dynamicSensoryFunc3);
 	new K_sensory_auron("dKN", &dynamicSensoryFunc3);
 	#endif
