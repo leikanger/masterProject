@@ -234,7 +234,6 @@ class K_auron : public i_auron
 		// Log firing time to log
 		actionPotential_logFile.precision(11);
 		actionPotential_logFile<<dLastFiringTime <<";\n";		
-//TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 		HER ER EG 	 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
 		#if LOG_DEPOL 
 			depol_logFile 	<<dLastFiringTime <<"\t" <<FIRING_THRESHOLD <<"; \t #Action potential - APAPAP\n" ;
 			depol_logFile 	<<dLastFiringTime <<"\t" <<0 <<"; \t #Action potential - APAPAP\n" ;
@@ -316,15 +315,6 @@ class K_auron : public i_auron
 	inline const double getCalculateDepol(const double& dForTimeInstant_arg) const
 	{
 
-	// TODO Hindre negative depol. før fyring. Dette kan brukes for å få rett depol. ved fyring (en metode)
-		#if 0 
-			// Sjekker om den har fyrt denne iter. Isåfall vil dStartOfTimeWindow > dForTimeInstant_arg
-			if( dLastFiringTime > dForTimeInstant_arg ){
-				cerr<<"\n\n\n\n\e[31mERROR asdf1352@auron.h\e[0m\tdLastFiringTime>dForTimeInstant_arg.\tgetCalculateDepol() returnerer 0\t(" <<dLastFiringTime <<">" <<dForTimeInstant_arg <<"\n";
-				exit(0);
-				//return 0; // Dette er litt feil, fordi nå vil den sei at v_0 var 0 for en tid som er litt siden.
-			}
-		#endif
 
 		// TODO PLAN: getCalculateDepol(*) skal ikkje skrive ut noke. Dette er dårlig stil(roter til utskrift)..
 			// Difor: fjærn dDepolStatic! TODO

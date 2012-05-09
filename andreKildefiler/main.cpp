@@ -77,15 +77,8 @@ bool bContinueExecution = true;
 /*** end: declarations ***/
 
 
-// TODO TODO TODO Skal eg heller bruke referanse-returnerende funksjon (inline)? (I samsvar med Stroustrup's bok) TODO TODO TODO
-//{ Alternativt med referanse-returnerende funk. : 
-/**********************************************************************************
-*** 	int& nAntallTidsiterasjoner()
-*** 		returnerer referanse til static int nTidsgrenseForSimulering 
-***					(som eksisterer heile kjøretida til programmet).
-*** 		Vil dermed være mulig å skrive nAntallTidsiterasjoner()=5;
-***
-**********************************************************************************/
+// TODO TODO TODO Stroustrup reccommends using reference-returning function instead of global variables. Can be done like this:
+//{ Alternativte with referense-returning function : 
 //int& nAntallTidsiterasjoner()
 // {
 //	static int nTidsgrenseForSimulering = DEFAULT_NUMBERofTIMESTEPS;
@@ -131,7 +124,6 @@ int main(int argc, char *argv[])
 						printArgumentConventions(argv[0]);
 						exit(EXIT_SUCCESS);
 						break;
-#if 1
 					case 't':
 						static bool bOK;
 						bOK = false;
@@ -150,7 +142,6 @@ int main(int argc, char *argv[])
 							//exit(EXIT_FAILURE);
 						}
 						break;
-#endif
 					case 'r':
 						// Check whether the number of iterations is written in the same argument( like: -r100 )
 						if( 		(ulTemporalAccuracyPerSensoryFunctionPeriod = atoi( &argv[nInputArgumentPos][2])) ) 	
@@ -236,7 +227,7 @@ int main(int argc, char *argv[])
 	}
 
 	cout<<"\n\n\n";
-	//}1 Finished reading in arguments.
+	//}1 Finished with reading arguments.
 	
 
 	// The return value from system calls is zero if successful. Important to check return, and print error message if unsuccessful:
@@ -282,7 +273,9 @@ int main(int argc, char *argv[])
 	#endif
 
 
-// Lage ANN fra ei kant-matrise, og evt. send inn en vektor med vilkårlig antall auron (mindre enn dim(matrisa)). Kan også sende inn null auron. Vektoren med auron-peikere brukes for å la nokre auron være sensor-auron!
+// Other: Make ANN from edge-matrix.  Possible to send in a vector with an arbitrary number of auron-pointers(less than dim of edge matrix)
+// 		This can be used to define sensory neurons in the ANN.
+// (Not used in this project)
 #if 0
 	cout<<"\n\n\n\tFORTSETTER\n\n";
 	cout<<"Try to construct ANN with K_auron-matrix:\n";
@@ -445,52 +438,17 @@ void* taskSchedulerFunction(void* )
 		// Execute Task:
 		pConsideredElementForThisIteration->doTask();
 
-// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO Fiks dårligere depol-kurve, eller skriv om rapport TODO TODO TODO TODO
-#if 0 //GAMMEL (til 10.02.1012) 
-
-		// Setter igang utføring av neste jobb i lista:
-		time_class::pWorkTaskQueue.front() ->doTask(); 		//Dette er i orden, siden pWorkTaskQueue er av type list<timeInterface*> og alle arvinger av timeInterface har overlagra funksjonen doTask().
-
-		// Tar vekk jobben fra pWorkTaskQueue:
-		time_class::pWorkTaskQueue.pop_front();
-			
-		//Evt annet som skal gjøres kvart timessteg. Type sjekke etter andre events, legge til fleire synapser, etc.
-#endif
 	}
 
 	return 0;
 } //}1
 
 
-// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO  Rydd opp! Fjærn alt som ikkje brukes! TODO TODO TODO TODO TODO  
 /*************************
 *** Print procedures:  ***
 *************************/
-std::ostream & operator<< (std::ostream & ut, i_auron* pAuronArg )
-{ //{
-	// For now: Print the adress in the i_auron pointer:
-	ut<<(void*)pAuronArg;
 
-//	ut<<"| " <<pAuronArg->getName() <<"  | verdi: " <<pAuronArg->getAktivityVar();// <<" \t|\tMed utsynapser:\n";
-	
-	// Innsynapser:
-	//for( std::vector<synapse*>::iterator iter = neuroArg.pInputSynapses.begin(); iter != neuroArg.pInputSynapses.end(); iter++ ){
-	// 	ut 	<<"\t" <<(*iter)->pPreNode->navn <<" -> " <<neuroArg.navn <<"\t|" <<endl;
-	// }
-
-	// Utsynapser:
-	//for( std::vector<synapse*>::iterator iter = neuroArg.pOutputSynapses.begin(); iter != neuroArg.pOutputSynapses.end(); iter++ ){
-	// 	ut 	<<"\t\t\t|\t" <<neuroArg.navn <<" -> " <<(*iter)->pPostNode->navn <<endl;
-	//		//<< (*iter)->ulAntallSynapticVesiclesAtt <<" antall syn.vesicles att.  TIL "
-	// }
-
-
-	return ut;
-} //}
-
-
-
-// TODO TODO  Ta vekk ?
+// Not in use:
 std::ostream & operator<< (std::ostream & ut, s_axon* pAxonArg ) //XXX Skal gjøres til i_axon* istaden for s_axon* som argument! XXX
 { //{
 	ut<<"Utsynapser fra axon tilhørende neuron " <<(pAxonArg->pElementOfAuron)->sName <<endl; 

@@ -1,4 +1,5 @@
 // It is reccomended to use vim when viewing/editing this file. Vim-folds makes it simpler to browse the document.
+
 //{ GNU GPL v.3
 /***************************************************************************
 *           auronNet - Implementation of event-driven spiking ANN          *
